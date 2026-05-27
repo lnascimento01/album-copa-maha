@@ -1,0 +1,167 @@
+import { Head, router } from '@inertiajs/react';
+
+type Role = {
+    id: number;
+    name: string;
+    slug: string;
+};
+
+type Permission = {
+    id: number;
+    name: string;
+    slug: string;
+    group: string;
+};
+
+type AuditLog = {
+    id: number;
+    action: string;
+    entity_type: string | null;
+    entity_id: number | null;
+    metadata: Record<string, unknown> | null;
+    created_at: string | null;
+    actor: { id: number; name: string; email: string } | null;
+    target: { id: number; name: string; email: string } | null;
+};
+
+type Props = {
+    userDetail: {
+        id: number;
+        name: string;
+        email: string;
+        approval_status: string;
+        approved_at: string | null;
+        approved_by: number | null;
+        rejected_at: string | null;
+        rejected_by: number | null;
+        rejection_reason: string | null;
+        roles: Role[];
+        permissions: Permission[];
+    };
+    auditLogs: AuditLog[];
+    canApprove: boolean;
+    canReject: boolean;
+    canSuspend: boolean;
+};
+
+export default function AdminUserShow({ userDetail, auditLogs, canApprove, canReject, canSuspend }: Props) {
+    const approve = () => {
+        router.patch(`/admin/users/${userDetail.id}/approve`);
+    };
+
+    const reject = () => {
+        const reason = window.prompt('Motivo da rejeição:');
+
+        if (!reason) {
+            return;
+        }
+
+        router.patch(`/admin/users/${userDetail.id}/reject`, { rejection_reason: reason });
+    };
+
+    const suspend = () => {
+        if (!window.confirm('Confirma suspender este usuário?')) {
+            return;
+        }
+
+        router.patch(`/admin/users/${userDetail.id}/suspend`);
+    };
+
+    return (
+        <>
+            <Head title={`Usuário: ${userDetail.name}`} />
+            <div className="space-y-4 p-4">
+                <h1 className="text-xl font-semibold tracking-tight">Detalhe de Usuário</h1>
+
+                <div className="rounded-sm border p-4">
+                    <div className="grid gap-2 text-sm md:grid-cols-2">
+                        <div>
+                            <div className="text-xs uppercase text-muted-foreground">Nome</div>
+                            <div>{userDetail.name}</div>
+                        </div>
+                        <div>
+                            <div className="text-xs uppercase text-muted-foreground">E-mail</div>
+                            <div className="font-mono text-xs">{userDetail.email}</div>
+                        </div>
+                        <div>
+                            <div className="text-xs uppercase text-muted-foreground">Status</div>
+                            <div>{userDetail.approval_status}</div>
+                        </div>
+                        <div>
+                            <div className="text-xs uppercase text-muted-foreground">Rejeição</div>
+                            <div>{userDetail.rejection_reason ?? '-'}</div>
+                        </div>
+                    </div>
+                    <div className="mt-4 flex gap-2">
+                        {canApprove ? (
+                            <button type="button" className="rounded-sm border px-2 py-1 text-xs" onClick={approve}>
+                                Aprovar
+                            </button>
+                        ) : null}
+                        {canReject ? (
+                            <button type="button" className="rounded-sm border px-2 py-1 text-xs" onClick={reject}>
+                                Rejeitar
+                            </button>
+                        ) : null}
+                        {canSuspend ? (
+                            <button type="button" className="rounded-sm border px-2 py-1 text-xs" onClick={suspend}>
+                                Suspender
+                            </button>
+                        ) : null}
+                    </div>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                    <div className="rounded-sm border p-4">
+                        <div className="text-xs uppercase text-muted-foreground">Roles</div>
+                        <ul className="mt-2 space-y-1 text-sm">
+                            {userDetail.roles.map((role) => (
+                                <li key={role.id}>{role.slug}</li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div className="rounded-sm border p-4">
+                        <div className="text-xs uppercase text-muted-foreground">Permissões efetivas</div>
+                        <ul className="mt-2 space-y-1 text-sm">
+                            {userDetail.permissions.map((permission) => (
+                                <li key={permission.id} className="font-mono text-xs">
+                                    {permission.slug}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+
+                <div className="rounded-sm border">
+                    <div className="border-b px-4 py-3 text-sm font-medium">Últimos audit logs relacionados</div>
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full text-sm">
+                            <thead>
+                                <tr className="border-b text-left">
+                                    <th className="px-4 py-2">Ação</th>
+                                    <th className="px-4 py-2">Ator</th>
+                                    <th className="px-4 py-2">Data</th>
+                                    <th className="px-4 py-2">Metadata</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {auditLogs.map((log) => (
+                                    <tr key={log.id} className="border-b align-top">
+                                        <td className="px-4 py-2 font-mono text-xs">{log.action}</td>
+                                        <td className="px-4 py-2">{log.actor?.email ?? '-'}</td>
+                                        <td className="px-4 py-2">{log.created_at ?? '-'}</td>
+                                        <td className="px-4 py-2">
+                                            <pre className="max-w-[360px] overflow-x-auto whitespace-pre-wrap text-xs">
+                                                {JSON.stringify(log.metadata ?? {}, null, 2)}
+                                            </pre>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+}
