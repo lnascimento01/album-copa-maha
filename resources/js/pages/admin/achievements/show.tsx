@@ -85,7 +85,7 @@ export default function AdminAchievementsShow({ achievement, users, auditLogs, c
                             <input value={grantForm.data.note} onChange={(event) => grantForm.setData('note', event.target.value)} className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" />
                         </div>
                         <div className="md:col-span-3 flex justify-end">
-                            <button type="submit" className="rounded-sm border bg-black px-3 py-2 text-sm text-white">Conceder</button>
+                            <button type="submit" className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground">Conceder</button>
                         </div>
                     </form>
                 ) : null}

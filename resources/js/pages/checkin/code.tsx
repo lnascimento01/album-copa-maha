@@ -31,7 +31,7 @@ export default function CheckinCodePage() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <button disabled={form.processing} className="rounded-sm border bg-black px-3 py-2 text-sm text-white" type="submit">Confirmar presença</button>
+                        <button disabled={form.processing} className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground" type="submit">Confirmar presença</button>
                         <Link href="/checkins" className="rounded-sm border px-3 py-2 text-sm">Meu histórico</Link>
                     </div>
                 </form>

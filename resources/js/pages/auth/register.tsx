@@ -18,7 +18,7 @@ export default function Register({ passwordRules }: Props) {
         <>
             <Head title="Cadastro" />
 
-            <div className="mb-4 border border-neutral-300 bg-neutral-100 p-3 text-sm text-neutral-700">
+            <div className="mb-4 rounded-sm border border-border bg-muted p-3 text-sm text-dim">
                 Seu cadastro precisa ser aprovado pela administração antes de participar da temporada.
             </div>
 
@@ -94,7 +94,7 @@ export default function Register({ passwordRules }: Props) {
 
                             <Button
                                 type="submit"
-                                className="mt-2 w-full rounded-sm border border-neutral-900 bg-neutral-900 text-white hover:bg-neutral-700"
+                                className="mt-2 w-full rounded-sm"
                                 tabIndex={5}
                                 data-test="register-user-button"
                             >
@@ -103,7 +103,7 @@ export default function Register({ passwordRules }: Props) {
                             </Button>
                         </div>
 
-                        <div className="border-t border-neutral-200 pt-4 text-center text-sm text-neutral-600">
+                        <div className="border-t border-border pt-4 text-center text-sm text-dim">
                             Já tem conta?{' '}
                             <TextLink href={login()} tabIndex={6}>
                                 Entrar

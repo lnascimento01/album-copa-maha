@@ -33,13 +33,13 @@ export default function CheckinsIndex({ checkins }: { checkins: { data: Checkin[
                 <PageHeader
                     title="Meus Check-ins"
                     subtitle="Histórico de presença confirmado pela administração ou por QR/código de atividade."
-                    actions={<Link href="/packs" className="rounded-sm border border-zinc-300 px-3 py-2 text-xs">Ver pacotes</Link>}
+                    actions={<Link href="/packs" className="rounded-sm border bg-card border-border px-3 py-2 text-xs">Ver pacotes</Link>}
                 />
 
                 <DataTableShell title="Histórico de presença" subtitle="Cada check-in confirmado pode gerar pacotes para sua coleção.">
                     <table className="min-w-full text-sm">
                         <thead>
-                            <tr className="border-b border-zinc-200 text-left">
+                            <tr className="border-b border-border text-left">
                                 <th className="px-4 py-2">Atividade</th>
                                 <th className="px-4 py-2">Tipo</th>
                                 <th className="px-4 py-2">Status</th>
@@ -58,9 +58,9 @@ export default function CheckinsIndex({ checkins }: { checkins: { data: Checkin[
                                 </tr>
                             ) : (
                                 checkins.data.map((checkin) => (
-                                    <tr key={checkin.id} className="border-b border-zinc-100">
-                                        <td className="px-4 py-2 text-zinc-800">{checkin.activity.title}</td>
-                                        <td className="px-4 py-2 text-zinc-700">{checkin.activity.type}</td>
+                                    <tr key={checkin.id} className="border-b border-border/60">
+                                        <td className="px-4 py-2 text-foreground">{checkin.activity.title}</td>
+                                        <td className="px-4 py-2 text-dim">{checkin.activity.type}</td>
                                         <td className="px-4 py-2"><StatusBadge value={checkin.status} /></td>
                                         <td className="px-4 py-2">
                                             {checkin.source === 'self' ? (
@@ -69,8 +69,8 @@ export default function CheckinsIndex({ checkins }: { checkins: { data: Checkin[
                                                 <OriginBadge source="admin" label="Administração" />
                                             )}
                                         </td>
-                                        <td className="px-4 py-2 text-zinc-600">{checkin.checked_at ?? '-'}</td>
-                                        <td className="px-4 py-2 text-zinc-700">{checkin.sticker_packs_count}</td>
+                                        <td className="px-4 py-2 text-dim">{checkin.checked_at ?? '-'}</td>
+                                        <td className="px-4 py-2 text-dim">{checkin.sticker_packs_count}</td>
                                         <td className="px-4 py-2">
                                             <Link href={`/checkins/${checkin.id}`} className="text-xs underline">Detalhes</Link>
                                         </td>
@@ -88,7 +88,7 @@ export default function CheckinsIndex({ checkins }: { checkins: { data: Checkin[
                             type="button"
                             onClick={() => link.url && router.visit(link.url)}
                             disabled={!link.url}
-                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-zinc-950 text-white' : 'bg-white text-zinc-700'}`}
+                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-primary text-primary-foreground' : 'bg-white text-dim'}`}
                         >
                             <span dangerouslySetInnerHTML={{ __html: link.label }} />
                         </button>

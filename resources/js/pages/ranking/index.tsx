@@ -46,15 +46,15 @@ export default function RankingIndex({ album, top, me, formula }: Props) {
                     </div>
                 ) : null}
 
-                <div className="rounded-md border border-zinc-200 bg-zinc-50 p-3 text-xs text-zinc-700">
-                    <span className="font-semibold text-zinc-900">Como o score é calculado:</span>{' '}
+                <div className="rounded-md border rounded-md border border-border bg-muted p-3 text-xs text-dim">
+                    <span className="font-semibold text-foreground">Como o score é calculado:</span>{' '}
                     <span className="font-mono">{formula}</span>
                 </div>
 
                 <DataTableShell title="Top participantes" subtitle="Ranking motivacional baseado em progresso e participação.">
                     <table className="min-w-full text-sm">
                         <thead>
-                            <tr className="border-b border-zinc-200 text-left">
+                            <tr className="border-b border-border text-left">
                                 <th className="px-4 py-2">Posição</th>
                                 <th className="px-4 py-2">Participante</th>
                                 <th className="px-4 py-2">Progresso</th>
@@ -71,12 +71,12 @@ export default function RankingIndex({ album, top, me, formula }: Props) {
                                 </tr>
                             ) : (
                                 top.map((row) => (
-                                    <tr key={row.user_id} className="border-b border-zinc-100">
-                                        <td className="px-4 py-2 font-semibold text-zinc-900">#{row.position}</td>
-                                        <td className="px-4 py-2 text-zinc-800">{row.user_name}</td>
-                                        <td className="px-4 py-2 text-zinc-700">{row.album_progress_percent}%</td>
-                                        <td className="px-4 py-2 text-zinc-700">{row.stickers_unlocked_count}/{row.total_stickers}</td>
-                                        <td className="px-4 py-2 font-semibold text-zinc-900">{row.score}</td>
+                                    <tr key={row.user_id} className="border-b border-border/60">
+                                        <td className="px-4 py-2 font-semibold text-foreground">#{row.position}</td>
+                                        <td className="px-4 py-2 text-foreground">{row.user_name}</td>
+                                        <td className="px-4 py-2 text-dim">{row.album_progress_percent}%</td>
+                                        <td className="px-4 py-2 text-dim">{row.stickers_unlocked_count}/{row.total_stickers}</td>
+                                        <td className="px-4 py-2 font-semibold text-foreground">{row.score}</td>
                                     </tr>
                                 ))
                             )}

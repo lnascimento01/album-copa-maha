@@ -83,13 +83,13 @@ export default function AdminStickerPacksIndex({ packs, filters, users, albums, 
                 <PageHeader
                     title="Pacotes"
                     subtitle="Concessão, rastreabilidade de origem e estado operacional dos pacotes."
-                    actions={<Link href="/admin/sticker-packs/create" className="rounded-sm border bg-zinc-950 px-3 py-2 text-xs text-white">Conceder pacotes</Link>}
+                    actions={<Link href="/admin/sticker-packs/create" className="rounded-sm border bg-primary px-3 py-2 text-xs text-primary-foreground">Conceder pacotes</Link>}
                 />
 
-                <form onSubmit={submit} className="grid gap-3 rounded-md border border-zinc-200 bg-white p-4 md:grid-cols-6">
+                <form onSubmit={submit} className="grid gap-3 rounded-md border border-border bg-card p-4 md:grid-cols-6">
                     <div>
-                        <label className="text-xs uppercase tracking-wide text-zinc-500">Usuário</label>
-                        <select className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm" value={userId} onChange={(event) => setUserId(event.target.value)}>
+                        <label className="text-xs uppercase tracking-wide text-dim">Usuário</label>
+                        <select className="mt-1 w-full rounded-sm border bg-card border-border px-2 py-2 text-sm" value={userId} onChange={(event) => setUserId(event.target.value)}>
                             <option value="">Todos</option>
                             {users.map((user) => (
                                 <option key={user.id} value={user.id}>{user.email}</option>
@@ -97,8 +97,8 @@ export default function AdminStickerPacksIndex({ packs, filters, users, albums, 
                         </select>
                     </div>
                     <div>
-                        <label className="text-xs uppercase tracking-wide text-zinc-500">Álbum</label>
-                        <select className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm" value={albumId} onChange={(event) => setAlbumId(event.target.value)}>
+                        <label className="text-xs uppercase tracking-wide text-dim">Álbum</label>
+                        <select className="mt-1 w-full rounded-sm border bg-card border-border px-2 py-2 text-sm" value={albumId} onChange={(event) => setAlbumId(event.target.value)}>
                             <option value="">Todos</option>
                             {albums.map((album) => (
                                 <option key={album.id} value={album.id}>{album.name}</option>
@@ -106,8 +106,8 @@ export default function AdminStickerPacksIndex({ packs, filters, users, albums, 
                         </select>
                     </div>
                     <div>
-                        <label className="text-xs uppercase tracking-wide text-zinc-500">Status</label>
-                        <select className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm" value={status} onChange={(event) => setStatus(event.target.value)}>
+                        <label className="text-xs uppercase tracking-wide text-dim">Status</label>
+                        <select className="mt-1 w-full rounded-sm border bg-card border-border px-2 py-2 text-sm" value={status} onChange={(event) => setStatus(event.target.value)}>
                             <option value="">Todos</option>
                             {statuses.map((item) => (
                                 <option key={item} value={item}>{item}</option>
@@ -115,8 +115,8 @@ export default function AdminStickerPacksIndex({ packs, filters, users, albums, 
                         </select>
                     </div>
                     <div>
-                        <label className="text-xs uppercase tracking-wide text-zinc-500">Origem</label>
-                        <select className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm" value={source} onChange={(event) => setSource(event.target.value)}>
+                        <label className="text-xs uppercase tracking-wide text-dim">Origem</label>
+                        <select className="mt-1 w-full rounded-sm border bg-card border-border px-2 py-2 text-sm" value={source} onChange={(event) => setSource(event.target.value)}>
                             <option value="">Todos</option>
                             {sources.map((item) => (
                                 <option key={item} value={item}>{item}</option>
@@ -124,22 +124,22 @@ export default function AdminStickerPacksIndex({ packs, filters, users, albums, 
                         </select>
                     </div>
                     <div>
-                        <label className="text-xs uppercase tracking-wide text-zinc-500">De</label>
-                        <input type="date" className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} />
+                        <label className="text-xs uppercase tracking-wide text-dim">De</label>
+                        <input type="date" className="mt-1 w-full rounded-sm border bg-card border-border px-2 py-2 text-sm" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} />
                     </div>
                     <div>
-                        <label className="text-xs uppercase tracking-wide text-zinc-500">Até</label>
-                        <input type="date" className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm" value={dateTo} onChange={(event) => setDateTo(event.target.value)} />
+                        <label className="text-xs uppercase tracking-wide text-dim">Até</label>
+                        <input type="date" className="mt-1 w-full rounded-sm border bg-card border-border px-2 py-2 text-sm" value={dateTo} onChange={(event) => setDateTo(event.target.value)} />
                     </div>
                     <div className="md:col-span-6 flex justify-end">
-                        <button className="rounded-sm border bg-zinc-950 px-3 py-2 text-sm text-white" type="submit">Filtrar</button>
+                        <button className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground" type="submit">Filtrar</button>
                     </div>
                 </form>
 
                 <DataTableShell title="Pacotes registrados" subtitle="Inclui pacotes manuais, check-in, código promocional e missão social.">
                     <table className="min-w-full text-sm">
                         <thead>
-                            <tr className="border-b border-zinc-200 text-left">
+                            <tr className="border-b border-border text-left">
                                 <th className="px-4 py-2">ID</th>
                                 <th className="px-4 py-2">Usuário</th>
                                 <th className="px-4 py-2">Álbum</th>
@@ -161,16 +161,16 @@ export default function AdminStickerPacksIndex({ packs, filters, users, albums, 
                                 </tr>
                             ) : (
                                 packs.data.map((pack) => (
-                                    <tr key={pack.id} className="border-b border-zinc-100">
-                                        <td className="px-4 py-2 font-mono text-xs text-zinc-700">#{pack.id}</td>
-                                        <td className="px-4 py-2 text-zinc-800">{pack.user.email}</td>
-                                        <td className="px-4 py-2 text-zinc-700">{pack.album.name}</td>
+                                    <tr key={pack.id} className="border-b border-border/60">
+                                        <td className="px-4 py-2 font-mono text-xs text-dim">#{pack.id}</td>
+                                        <td className="px-4 py-2 text-foreground">{pack.user.email}</td>
+                                        <td className="px-4 py-2 text-dim">{pack.album.name}</td>
                                         <td className="px-4 py-2"><StatusBadge value={pack.status} /></td>
-                                        <td className="px-4 py-2 text-zinc-700">{pack.size}</td>
+                                        <td className="px-4 py-2 text-dim">{pack.size}</td>
                                         <td className="px-4 py-2"><OriginBadge source={pack.source} label={sourceLabel(pack)} /></td>
-                                        <td className="px-4 py-2 text-zinc-700">{pack.granted_by_user?.email ?? '-'}</td>
-                                        <td className="px-4 py-2 text-zinc-600">{pack.created_at ?? '-'}</td>
-                                        <td className="px-4 py-2 text-zinc-600">{pack.opened_at ?? '-'}</td>
+                                        <td className="px-4 py-2 text-dim">{pack.granted_by_user?.email ?? '-'}</td>
+                                        <td className="px-4 py-2 text-dim">{pack.created_at ?? '-'}</td>
+                                        <td className="px-4 py-2 text-dim">{pack.opened_at ?? '-'}</td>
                                         <td className="px-4 py-2">
                                             <Link href={`/admin/sticker-packs/${pack.id}`} className="text-xs underline">Detalhes</Link>
                                         </td>
@@ -192,7 +192,7 @@ export default function AdminStickerPacksIndex({ packs, filters, users, albums, 
                                 }
                             }}
                             disabled={!link.url}
-                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-zinc-950 text-white' : 'bg-white text-zinc-700'}`}
+                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-primary text-primary-foreground' : 'bg-white text-dim'}`}
                         >
                             <span dangerouslySetInnerHTML={{ __html: link.label }} />
                         </button>

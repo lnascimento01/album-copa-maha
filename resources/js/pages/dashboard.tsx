@@ -77,13 +77,13 @@ function ParticipantQuickActions() {
     ];
 
     return (
-        <section className="rounded-md border border-zinc-200 bg-white p-4">
-            <h2 className="text-sm font-semibold text-zinc-900">Próximas ações da temporada</h2>
+        <section className="rounded-md border border-border bg-card p-4">
+            <h2 className="text-sm font-semibold text-foreground">Próximas ações da temporada</h2>
             <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {actions.map((action) => (
-                    <Link key={action.href} href={action.href} className="rounded-md border border-zinc-200 bg-zinc-50 p-3 transition hover:bg-zinc-100">
-                        <div className="text-sm font-medium text-zinc-900">{action.title}</div>
-                        <div className="mt-1 text-xs text-zinc-600">{action.hint}</div>
+                    <Link key={action.href} href={action.href} className="rounded-md border border-border bg-muted/60 p-3 transition hover:bg-muted">
+                        <div className="text-sm font-medium text-foreground">{action.title}</div>
+                        <div className="mt-1 text-xs text-dim">{action.hint}</div>
                     </Link>
                 ))}
             </div>
@@ -105,10 +105,10 @@ export default function Dashboard(props: DashboardProps) {
                             subtitle="Operação, controle de acesso e visão rápida da temporada."
                             actions={(
                                 <>
-                                    <Link className="rounded-sm border border-zinc-300 px-3 py-2 text-xs" href="/admin/users">Usuários</Link>
-                                    <Link className="rounded-sm border border-zinc-300 px-3 py-2 text-xs" href="/admin/activities">Atividades</Link>
-                                    <Link className="rounded-sm border border-zinc-300 px-3 py-2 text-xs" href="/admin/sticker-packs">Pacotes</Link>
-                                    <Link className="rounded-sm border border-zinc-300 px-3 py-2 text-xs" href="/admin/audit-logs">Auditoria</Link>
+                                    <Link className="rounded-sm border bg-card border-border px-3 py-2 text-xs" href="/admin/users">Usuários</Link>
+                                    <Link className="rounded-sm border bg-card border-border px-3 py-2 text-xs" href="/admin/activities">Atividades</Link>
+                                    <Link className="rounded-sm border bg-card border-border px-3 py-2 text-xs" href="/admin/sticker-packs">Pacotes</Link>
+                                    <Link className="rounded-sm border bg-card border-border px-3 py-2 text-xs" href="/admin/audit-logs">Auditoria</Link>
                                 </>
                             )}
                         />
@@ -121,8 +121,8 @@ export default function Dashboard(props: DashboardProps) {
                             <MetricCard label="Submissões sociais pendentes" value={props.stats?.pendingSocialSubmissions ?? 0} accent="warning" />
                         </div>
 
-                        <section className="rounded-md border border-zinc-200 bg-white">
-                            <div className="border-b border-zinc-200 px-4 py-3 text-sm font-semibold">Últimos eventos de auditoria</div>
+                        <section className="rounded-md border border-border bg-card">
+                            <div className="border-b border-border px-4 py-3 text-sm font-semibold">Últimos eventos de auditoria</div>
                             {(props.recentAuditLogs ?? []).length === 0 ? (
                                 <div className="p-4">
                                     <EmptyState title="Nenhum evento recente." description="Assim que ações operacionais ocorrerem, elas aparecerão aqui." />
@@ -131,7 +131,7 @@ export default function Dashboard(props: DashboardProps) {
                                 <div className="overflow-x-auto">
                                     <table className="min-w-full text-sm">
                                         <thead>
-                                            <tr className="border-b border-zinc-200 text-left">
+                                            <tr className="border-b border-border text-left">
                                                 <th className="px-4 py-2">Ação</th>
                                                 <th className="px-4 py-2">Ator</th>
                                                 <th className="px-4 py-2">Alvo</th>
@@ -140,11 +140,11 @@ export default function Dashboard(props: DashboardProps) {
                                         </thead>
                                         <tbody>
                                             {(props.recentAuditLogs ?? []).map((log) => (
-                                                <tr key={log.id} className="border-b border-zinc-100">
-                                                    <td className="px-4 py-2 font-mono text-xs text-zinc-800">{log.action}</td>
-                                                    <td className="px-4 py-2 text-zinc-700">{log.actor?.email ?? '-'}</td>
-                                                    <td className="px-4 py-2 text-zinc-700">{log.target?.email ?? '-'}</td>
-                                                    <td className="px-4 py-2 text-zinc-600">{log.created_at ?? '-'}</td>
+                                                <tr key={log.id} className="border-b border-border/60">
+                                                    <td className="px-4 py-2 font-mono text-xs text-foreground">{log.action}</td>
+                                                    <td className="px-4 py-2 text-dim">{log.actor?.email ?? '-'}</td>
+                                                    <td className="px-4 py-2 text-dim">{log.target?.email ?? '-'}</td>
+                                                    <td className="px-4 py-2 text-dim">{log.created_at ?? '-'}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -187,9 +187,9 @@ export default function Dashboard(props: DashboardProps) {
 
                         <ParticipantQuickActions />
 
-                        <section className="rounded-md border border-zinc-200 bg-white p-4">
+                        <section className="rounded-md border border-border bg-card p-4">
                             <div className="flex items-center justify-between gap-3">
-                                <h2 className="text-sm font-semibold text-zinc-900">Resumo de participação</h2>
+                                <h2 className="text-sm font-semibold text-foreground">Resumo de participação</h2>
                                 <Link className="text-xs underline" href="/checkins">Histórico de check-ins</Link>
                             </div>
                             <div className="mt-3 grid gap-3 sm:grid-cols-3">
@@ -203,14 +203,14 @@ export default function Dashboard(props: DashboardProps) {
                             </div>
                         </section>
 
-                        <section className="rounded-md border border-zinc-200 bg-white p-4">
-                            <h2 className="text-sm font-semibold text-zinc-900">Permissões efetivas (somente leitura)</h2>
+                        <section className="rounded-md border border-border bg-card p-4">
+                            <h2 className="text-sm font-semibold text-foreground">Permissões efetivas (somente leitura)</h2>
                             {(props.permissions ?? []).length === 0 ? (
-                                <div className="mt-2 text-sm text-zinc-600">Nenhuma permissão administrativa atribuída.</div>
+                                <div className="mt-2 text-sm text-dim">Nenhuma permissão administrativa atribuída.</div>
                             ) : (
                                 <div className="mt-2 flex flex-wrap gap-2">
                                     {(props.permissions ?? []).map((permission) => (
-                                        <code key={permission} className="rounded-sm border border-zinc-200 bg-zinc-50 px-2 py-1 text-[11px] text-zinc-700">
+                                        <code key={permission} className="rounded-sm border border-border bg-muted/60 px-2 py-1 text-[11px] text-dim">
                                             {permission}
                                         </code>
                                     ))}
@@ -218,9 +218,9 @@ export default function Dashboard(props: DashboardProps) {
                             )}
                         </section>
 
-                        <section className="rounded-md border border-zinc-200 bg-white p-4">
+                        <section className="rounded-md border border-border bg-card p-4">
                             <div className="flex items-center justify-between gap-3">
-                                <h2 className="text-sm font-semibold text-zinc-900">Cards recentes</h2>
+                                <h2 className="text-sm font-semibold text-foreground">Cards recentes</h2>
                                 <Link className="text-xs underline" href="/share-cards">Ver todos</Link>
                             </div>
                             {(props.recentShareCards ?? []).length === 0 ? (
@@ -230,12 +230,12 @@ export default function Dashboard(props: DashboardProps) {
                             ) : (
                                 <ul className="mt-3 space-y-2">
                                     {(props.recentShareCards ?? []).map((card) => (
-                                        <li key={card.id} className="flex items-center justify-between gap-3 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
+                                        <li key={card.id} className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted/60 px-3 py-2">
                                             <div>
-                                                <p className="text-sm font-medium text-zinc-900">{card.title}</p>
-                                                <p className="text-xs uppercase tracking-wide text-zinc-500">{card.type}</p>
+                                                <p className="text-sm font-medium text-foreground">{card.title}</p>
+                                                <p className="text-xs uppercase tracking-wide text-dim">{card.type}</p>
                                             </div>
-                                            <Link href={`/share-cards/${card.id}`} className="rounded-sm border border-zinc-300 px-2 py-1 text-xs">
+                                            <Link href={`/share-cards/${card.id}`} className="rounded-sm border bg-card border-border px-2 py-1 text-xs">
                                                 Abrir
                                             </Link>
                                         </li>

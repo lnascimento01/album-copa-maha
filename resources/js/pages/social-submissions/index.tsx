@@ -50,7 +50,7 @@ export default function SocialSubmissionsIndex({ submissions }: { submissions: {
 
                 <div className="flex flex-wrap gap-2">
                     {submissions.links.map((link, index) => (
-                        <button key={`${link.label}-${index}`} type="button" onClick={() => link.url && router.visit(link.url)} disabled={!link.url} className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-black text-white' : ''}`}>
+                        <button key={`${link.label}-${index}`} type="button" onClick={() => link.url && router.visit(link.url)} disabled={!link.url} className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-primary text-primary-foreground' : ''}`}>
                             <span dangerouslySetInnerHTML={{ __html: link.label }} />
                         </button>
                     ))}

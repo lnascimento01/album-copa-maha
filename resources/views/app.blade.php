@@ -4,29 +4,29 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        {{-- Inline script to detect system dark mode preference and apply it immediately --}}
         <script>
-            (function() {
-                const appearance = '{{ $appearance ?? "system" }}';
+            (function () {
+                const serverAppearance = '{{ $appearance ?? "system" }}';
+                const storedAppearance = window.localStorage.getItem('appearance') || serverAppearance;
+                const useDark = storedAppearance === 'dark' || (storedAppearance === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
-                if (appearance === 'system') {
-                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-                    if (prefersDark) {
-                        document.documentElement.classList.add('dark');
-                    }
+                if (useDark) {
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.style.colorScheme = 'dark';
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.style.colorScheme = 'light';
                 }
             })();
         </script>
 
-        {{-- Inline style to set the HTML background color based on our theme in app.css --}}
         <style>
             html {
-                background-color: oklch(1 0 0);
+                background-color: #f6f8f2;
             }
 
             html.dark {
-                background-color: oklch(0.145 0 0);
+                background-color: #07111f;
             }
         </style>
 

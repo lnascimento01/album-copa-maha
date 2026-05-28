@@ -65,7 +65,7 @@ export default function AdminAchievementsIndex({ achievements, filters, types, t
                 <PageHeader
                     title="Conquistas"
                     subtitle="Configuração de metas de engajamento e coleção da temporada."
-                    actions={<Link href="/admin/achievements/create" className="rounded-sm border bg-zinc-950 px-3 py-2 text-xs text-white">Nova conquista</Link>}
+                    actions={<Link href="/admin/achievements/create" className="rounded-sm border bg-primary px-3 py-2 text-xs text-primary-foreground">Nova conquista</Link>}
                 />
 
                 <form onSubmit={submit} className="grid gap-3 rounded-md border border-zinc-200 bg-white p-4 md:grid-cols-5">
@@ -103,7 +103,7 @@ export default function AdminAchievementsIndex({ achievements, filters, types, t
                         </select>
                     </div>
                     <div className="md:col-span-5 flex justify-end">
-                        <button type="submit" className="rounded-sm border bg-zinc-950 px-3 py-2 text-sm text-white">Filtrar</button>
+                        <button type="submit" className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground">Filtrar</button>
                     </div>
                 </form>
 
@@ -157,7 +157,7 @@ export default function AdminAchievementsIndex({ achievements, filters, types, t
                             type="button"
                             onClick={() => link.url && router.visit(link.url)}
                             disabled={!link.url}
-                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-zinc-950 text-white' : 'bg-white text-zinc-700'}`}
+                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-primary text-primary-foreground' : 'bg-white text-zinc-700'}`}
                         >
                             <span dangerouslySetInnerHTML={{ __html: link.label }} />
                         </button>

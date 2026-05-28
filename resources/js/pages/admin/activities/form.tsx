@@ -190,7 +190,7 @@ export default function ActivityForm({
             </div>
 
             <div className="flex justify-end">
-                <button disabled={form.processing} className="rounded-sm border bg-black px-3 py-2 text-sm text-white" type="submit">
+                <button disabled={form.processing} className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground" type="submit">
                     {submitLabel}
                 </button>
             </div>

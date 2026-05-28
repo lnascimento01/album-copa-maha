@@ -38,18 +38,18 @@ function resolveVariant(value: string): Variant {
 }
 
 const classes: Record<Variant, string> = {
-    pending: 'border-amber-300 bg-amber-50 text-amber-800',
-    approved: 'border-emerald-300 bg-emerald-50 text-emerald-800',
-    rejected: 'border-red-300 bg-red-50 text-red-800',
-    suspended: 'border-zinc-400 bg-zinc-100 text-zinc-700',
-    active: 'border-blue-300 bg-blue-50 text-blue-800',
-    opened: 'border-blue-300 bg-blue-50 text-blue-800',
-    cancelled: 'border-zinc-400 bg-zinc-100 text-zinc-700',
-    draft: 'border-zinc-400 bg-zinc-100 text-zinc-700',
-    closed: 'border-zinc-400 bg-zinc-100 text-zinc-700',
-    archived: 'border-zinc-400 bg-zinc-100 text-zinc-700',
-    revoked: 'border-red-300 bg-red-50 text-red-800',
-    default: 'border-zinc-300 bg-white text-zinc-700',
+    pending: 'border-amber-500/35 bg-amber-500/15 text-amber-700 dark:text-amber-300',
+    approved: 'border-emerald-500/35 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
+    rejected: 'border-red-500/35 bg-red-500/15 text-red-700 dark:text-red-300',
+    suspended: 'border-border bg-muted text-muted-foreground',
+    active: 'border-sky-500/35 bg-sky-500/15 text-sky-700 dark:text-sky-300',
+    opened: 'border-indigo-500/35 bg-indigo-500/15 text-indigo-700 dark:text-indigo-300',
+    cancelled: 'border-border bg-muted text-muted-foreground',
+    draft: 'border-border bg-muted text-muted-foreground',
+    closed: 'border-border bg-muted text-muted-foreground',
+    archived: 'border-border bg-muted text-muted-foreground',
+    revoked: 'border-red-500/35 bg-red-500/15 text-red-700 dark:text-red-300',
+    default: 'border-border bg-card text-foreground',
 };
 
 export function StatusBadge({ value, label }: Props) {

@@ -104,7 +104,7 @@ export default function AdminRolesIndex({ roles, allPermissions }: Props) {
                         ) : (
                             <button
                                 type="button"
-                                className="mt-3 rounded-sm border bg-black px-3 py-2 text-xs text-white"
+                                className="mt-3 rounded-sm border bg-primary px-3 py-2 text-xs text-primary-foreground"
                                 onClick={() => save(role.id)}
                             >
                                 Salvar permissões

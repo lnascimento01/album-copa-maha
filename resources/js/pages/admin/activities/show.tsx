@@ -251,7 +251,7 @@ export default function AdminActivityShow({ activity, checkins, checkinSessions,
                                 <input value={sessionNote} onChange={(event) => setSessionNote(event.target.value)} className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" />
                             </div>
                             <div className="md:col-span-4 flex justify-end">
-                                <button disabled={activity.status !== 'open'} type="submit" className="rounded-sm border bg-black px-3 py-2 text-sm text-white disabled:bg-zinc-400">
+                                <button disabled={activity.status !== 'open'} type="submit" className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground disabled:bg-zinc-400">
                                     Gerar sessão de check-in
                                 </button>
                             </div>
@@ -278,7 +278,7 @@ export default function AdminActivityShow({ activity, checkins, checkinSessions,
                             <input value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" />
                         </div>
                         <div className="flex items-end">
-                            <button type="submit" className="w-full rounded-sm border bg-black px-3 py-2 text-sm text-white">Marcar presença</button>
+                            <button type="submit" className="w-full rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground">Marcar presença</button>
                         </div>
                     </form>
                 ) : null}

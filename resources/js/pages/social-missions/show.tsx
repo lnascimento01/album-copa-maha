@@ -70,7 +70,7 @@ export default function SocialMissionShow({ mission, ownSubmissions }: { mission
                     </div>
                     {page.props.errors?.submission ? <div className="text-xs text-red-700">{page.props.errors.submission}</div> : null}
                     <div className="flex justify-end">
-                        <button type="submit" disabled={form.processing} className="rounded-sm border bg-black px-3 py-2 text-sm text-white">Enviar para análise</button>
+                        <button type="submit" disabled={form.processing} className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground">Enviar para análise</button>
                     </div>
                 </form>
 

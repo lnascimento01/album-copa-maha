@@ -133,7 +133,7 @@ export default function SocialMissionForm({ initialValues, teams, albums, status
             </div>
 
             <div className="flex justify-end">
-                <button type="submit" disabled={form.processing} className="rounded-sm border bg-black px-3 py-2 text-sm text-white">{submitLabel}</button>
+                <button type="submit" disabled={form.processing} className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground">{submitLabel}</button>
             </div>
         </form>
     );

@@ -25,7 +25,7 @@ export default function Login({ status, canResetPassword }: Props) {
             <PasskeyVerify />
 
             {status ? (
-                <div className="mb-4 border border-emerald-700 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                <div className="mb-4 rounded-sm border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-300">
                     {status}
                 </div>
             ) : null}
@@ -82,7 +82,7 @@ export default function Login({ status, canResetPassword }: Props) {
 
                             <Button
                                 type="submit"
-                                className="mt-2 w-full rounded-sm border border-neutral-900 bg-neutral-900 text-white hover:bg-neutral-700"
+                                className="mt-2 w-full rounded-sm"
                                 tabIndex={4}
                                 disabled={processing}
                                 data-test="login-button"
@@ -92,7 +92,7 @@ export default function Login({ status, canResetPassword }: Props) {
                             </Button>
                         </div>
 
-                        <div className="border-t border-neutral-200 pt-4 text-center text-sm text-neutral-600">
+                        <div className="border-t border-border pt-4 text-center text-sm text-dim">
                             Ainda não tem cadastro?{' '}
                             <TextLink href={register()} tabIndex={5}>
                                 Solicitar acesso

@@ -1,5 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { Sparkles } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { OriginBadge } from '@/components/ui/origin-badge';
 import { PageHeader } from '@/components/ui/page-header';
@@ -62,6 +63,11 @@ export default function PackShow({ pack }: { pack: Pack }) {
     const revealedIds = page.props.flash?.revealedStickerIds ?? [];
     const [isOpening, setIsOpening] = useState(false);
 
+    const reducedMotion = useMemo(
+        () => (typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false),
+        [],
+    );
+
     const openPack = () => {
         setIsOpening(true);
         router.post(`/packs/${pack.id}/open`, {}, {
@@ -77,30 +83,30 @@ export default function PackShow({ pack }: { pack: Pack }) {
                 <PageHeader
                     title={`Pacote #${pack.id}`}
                     subtitle="Detalhe do pacote recebido e histórico das figurinhas reveladas."
-                    actions={<Link href="/packs" className="rounded-sm border border-zinc-300 px-3 py-2 text-xs">Voltar para pacotes</Link>}
+                    actions={<Link href="/packs" className="rounded-sm border border-border bg-card px-3 py-2 text-xs">Voltar para pacotes</Link>}
                 />
 
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                    <div className="rounded-md border border-zinc-200 bg-white p-4 text-sm">
-                        <div className="text-xs uppercase tracking-wide text-zinc-500">Status</div>
+                    <div className="rounded-md border border-border bg-card p-4 text-sm">
+                        <div className="text-xs uppercase tracking-wide text-dim">Status</div>
                         <div className="mt-2"><StatusBadge value={pack.status} /></div>
                     </div>
-                    <div className="rounded-md border border-zinc-200 bg-white p-4 text-sm">
-                        <div className="text-xs uppercase tracking-wide text-zinc-500">Álbum</div>
-                        <div className="mt-2 font-medium text-zinc-900">{pack.album.name}</div>
+                    <div className="rounded-md border border-border bg-card p-4 text-sm">
+                        <div className="text-xs uppercase tracking-wide text-dim">Álbum</div>
+                        <div className="mt-2 font-medium text-foreground">{pack.album.name}</div>
                     </div>
-                    <div className="rounded-md border border-zinc-200 bg-white p-4 text-sm">
-                        <div className="text-xs uppercase tracking-wide text-zinc-500">Tamanho</div>
-                        <div className="mt-2 font-medium text-zinc-900">{pack.size} figurinhas</div>
+                    <div className="rounded-md border border-border bg-card p-4 text-sm">
+                        <div className="text-xs uppercase tracking-wide text-dim">Tamanho</div>
+                        <div className="mt-2 font-medium text-foreground">{pack.size} figurinhas</div>
                     </div>
-                    <div className="rounded-md border border-zinc-200 bg-white p-4 text-sm">
-                        <div className="text-xs uppercase tracking-wide text-zinc-500">Origem</div>
+                    <div className="rounded-md border border-border bg-card p-4 text-sm">
+                        <div className="text-xs uppercase tracking-wide text-dim">Origem</div>
                         <div className="mt-2"><OriginBadge source={pack.source} label={sourceLabel(pack)} /></div>
                     </div>
                 </div>
 
                 {pack.activity_checkin_id ? (
-                    <div className="rounded-md border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-700">
+                    <div className="rounded-md border border-border bg-muted p-3 text-sm text-foreground">
                         Check-in relacionado:{' '}
                         <Link className="underline" href={`/checkins/${pack.activity_checkin_id}`}>
                             #{pack.activity_checkin_id}
@@ -109,32 +115,36 @@ export default function PackShow({ pack }: { pack: Pack }) {
                 ) : null}
 
                 {pack.status === 'pending' ? (
-                    <section className="rounded-md border border-zinc-200 bg-white p-4">
-                        <p className="text-sm text-zinc-700">Pacote fechado pronto para abertura.</p>
-                        <div className={`mt-3 flex min-h-28 items-center justify-center rounded-md border border-zinc-300 bg-zinc-100 transition ${isOpening ? 'animate-pulse' : ''}`}>
-                            <div className="text-center">
-                                <div className="text-xs uppercase tracking-wide text-zinc-600">Pacote da temporada</div>
-                                <div className="mt-1 text-sm font-semibold text-zinc-900">{pack.size} figurinhas</div>
-                                <div className="mt-1 text-[11px] text-zinc-600">{isOpening ? 'Revelando figurinhas...' : 'Pronto para abrir'}</div>
+                    <section className="rounded-md border border-border bg-card p-4">
+                        <p className="text-sm text-dim">Pacote fechado pronto para abertura.</p>
+                        <div className="brand-hero mt-3 rounded-md border border-border p-4">
+                            <div className={`mx-auto flex min-h-32 max-w-md items-center justify-center rounded-md border border-primary/25 bg-card/70 px-4 transition ${isOpening ? 'animate-pulse' : ''}`}>
+                                <div className="text-center">
+                                    <div className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-1 text-[11px] uppercase tracking-wide text-primary">
+                                        <Sparkles className="size-3" /> Reveal MAHA
+                                    </div>
+                                    <div className="mt-2 text-lg font-semibold text-foreground">{pack.size} figurinhas da temporada</div>
+                                    <div className="mt-1 text-xs text-dim">{isOpening ? 'Abrindo pacote...' : 'Toque para revelar'}</div>
+                                </div>
                             </div>
                         </div>
-                        <button type="button" className="mt-3 rounded-sm border bg-zinc-950 px-3 py-2 text-sm text-white disabled:bg-zinc-500" onClick={openPack} disabled={isOpening}>
+                        <button type="button" className="mt-3 rounded-sm border border-primary bg-primary px-3 py-2 text-sm text-primary-foreground disabled:opacity-60" onClick={openPack} disabled={isOpening}>
                             {isOpening ? 'Abrindo...' : 'Abrir pacote'}
                         </button>
                     </section>
                 ) : null}
 
                 {pack.status === 'cancelled' ? (
-                    <section className="rounded-md border border-red-200 bg-red-50 p-4 text-sm">
-                        <div className="font-medium text-red-900">Pacote cancelado</div>
-                        <div className="text-red-800">Motivo: {pack.cancellation_reason ?? '-'}</div>
+                    <section className="rounded-md border border-red-500/35 bg-red-500/10 p-4 text-sm">
+                        <div className="font-medium text-red-700 dark:text-red-300">Pacote cancelado</div>
+                        <div className="text-red-700/90 dark:text-red-200">Motivo: {pack.cancellation_reason ?? '-'}</div>
                     </section>
                 ) : null}
 
                 {pack.status === 'opened' ? (
-                    <section className="rounded-md border border-zinc-200 bg-white p-4">
+                    <section className="rounded-md border border-border bg-card p-4">
                         <div className="flex items-center justify-between gap-3">
-                            <h2 className="text-sm font-semibold text-zinc-900">Figurinhas reveladas</h2>
+                            <h2 className="text-sm font-semibold text-foreground">Figurinhas reveladas</h2>
                             <Link href="/album" className="text-xs underline">Ver no álbum</Link>
                         </div>
                         {pack.items.length === 0 ? (
@@ -143,24 +153,32 @@ export default function PackShow({ pack }: { pack: Pack }) {
                             </div>
                         ) : (
                             <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                                {pack.items.map((item) => (
-                                    <div key={item.id} className="rounded-md border border-zinc-200 bg-zinc-50 p-3">
-                                        <div className="aspect-[3/4] overflow-hidden rounded-sm border border-zinc-300 bg-zinc-100">
-                                            <img src={item.sticker.image_url} alt={item.sticker.title} className="h-full w-full object-cover" />
+                                {pack.items.map((item, index) => {
+                                    const delay = reducedMotion ? '0ms' : `${index * 90}ms`;
+
+                                    return (
+                                        <div
+                                            key={item.id}
+                                            className="rounded-md border border-border bg-muted/60 p-3"
+                                            style={{ animationDelay: delay }}
+                                        >
+                                            <div className="aspect-[3/4] overflow-hidden rounded-sm border border-border bg-muted">
+                                                <img src={item.sticker.image_url} alt={item.sticker.title} className="h-full w-full object-cover" />
+                                            </div>
+                                            <div className="mt-2 font-mono text-xs text-dim">{item.sticker.code}</div>
+                                            <div className="mt-1 text-sm font-medium text-foreground">{item.sticker.title}</div>
+                                            <div className="text-xs text-dim">{item.sticker.type} • {item.sticker.rarity}</div>
+                                            <div className="mt-2 flex items-center justify-between gap-2">
+                                                <Link className="text-xs underline" href={`/album/stickers/${item.sticker.id}`}>
+                                                    Ver no álbum
+                                                </Link>
+                                                {revealedIds.includes(item.sticker.id) ? (
+                                                    <StatusBadge value="opened" label="Revelada agora" />
+                                                ) : null}
+                                            </div>
                                         </div>
-                                        <div className="font-mono text-xs text-zinc-700">{item.sticker.code}</div>
-                                        <div className="mt-1 text-sm font-medium text-zinc-900">{item.sticker.title}</div>
-                                        <div className="text-xs text-zinc-600">{item.sticker.type} • {item.sticker.rarity}</div>
-                                        <div className="mt-2 flex items-center justify-between gap-2">
-                                            <Link className="text-xs underline" href={`/album/stickers/${item.sticker.id}`}>
-                                                Ver no álbum
-                                            </Link>
-                                            {revealedIds.includes(item.sticker.id) ? (
-                                                <StatusBadge value="opened" label="Revelada agora" />
-                                            ) : null}
-                                        </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
                     </section>

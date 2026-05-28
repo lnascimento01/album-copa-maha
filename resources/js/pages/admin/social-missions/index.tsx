@@ -57,7 +57,7 @@ export default function AdminSocialMissionsIndex({ missions, filters, statuses, 
             <div className="space-y-4 p-4">
                 <div className="flex items-center justify-between gap-2">
                     <h1 className="text-xl font-semibold tracking-tight">Missões Sociais</h1>
-                    <Link href="/admin/social-missions/create" className="rounded-sm border bg-black px-3 py-2 text-xs text-white">Nova missão</Link>
+                    <Link href="/admin/social-missions/create" className="rounded-sm border bg-primary px-3 py-2 text-xs text-primary-foreground">Nova missão</Link>
                 </div>
 
                 <form onSubmit={submit} className="grid gap-3 rounded-sm border p-4 md:grid-cols-5">
@@ -94,7 +94,7 @@ export default function AdminSocialMissionsIndex({ missions, filters, statuses, 
                         </select>
                     </div>
                     <div className="md:col-span-5 flex justify-end">
-                        <button type="submit" className="rounded-sm border bg-black px-3 py-2 text-sm text-white">Filtrar</button>
+                        <button type="submit" className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground">Filtrar</button>
                     </div>
                 </form>
 
@@ -129,7 +129,7 @@ export default function AdminSocialMissionsIndex({ missions, filters, statuses, 
 
                 <div className="flex flex-wrap gap-2">
                     {missions.links.map((link, index) => (
-                        <button key={`${link.label}-${index}`} type="button" onClick={() => link.url && router.visit(link.url)} disabled={!link.url} className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-black text-white' : ''}`}>
+                        <button key={`${link.label}-${index}`} type="button" onClick={() => link.url && router.visit(link.url)} disabled={!link.url} className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-primary text-primary-foreground' : ''}`}>
                             <span dangerouslySetInnerHTML={{ __html: link.label }} />
                         </button>
                     ))}

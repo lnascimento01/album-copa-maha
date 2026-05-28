@@ -37,27 +37,27 @@ export default function RewardCodeRedeemPage({ recentRedemptions, activeAlbum }:
                 <PageHeader
                     title="Resgatar Código Promocional"
                     subtitle="Digite o código divulgado pelo time para receber novos pacotes."
-                    actions={<Link href="/reward-codes/history" className="rounded-sm border border-zinc-300 px-3 py-2 text-xs">Histórico completo</Link>}
+                    actions={<Link href="/reward-codes/history" className="rounded-sm border bg-card border-border px-3 py-2 text-xs">Histórico completo</Link>}
                 />
 
-                <form onSubmit={submit} className="space-y-3 rounded-md border border-zinc-200 bg-white p-4 md:max-w-xl">
-                    <div className="rounded-sm border border-zinc-300 bg-zinc-50 px-3 py-2 text-xs text-zinc-700">
+                <form onSubmit={submit} className="space-y-3 rounded-md border border-border bg-card p-4 md:max-w-xl">
+                    <div className="rounded-sm border bg-card border-border bg-muted/70 px-3 py-2 text-xs text-dim">
                         Escopo de resgate atual: {activeAlbum?.name ?? 'Nenhum álbum ativo'}
                     </div>
                     <div>
-                        <label htmlFor="code" className="text-xs uppercase tracking-wide text-zinc-500">Código</label>
+                        <label htmlFor="code" className="text-xs uppercase tracking-wide text-dim">Código</label>
                         <input
                             id="code"
                             value={form.data.code}
                             onChange={(event) => form.setData('code', event.target.value)}
-                            className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm font-mono"
+                            className="mt-1 w-full rounded-sm border bg-card border-border px-2 py-2 text-sm font-mono"
                             placeholder="Ex.: MAHA10"
                         />
                         {form.errors.code ? <div className="mt-1 text-xs text-red-700">{form.errors.code}</div> : null}
                     </div>
 
                     <div className="flex items-center justify-between gap-3">
-                        <button type="submit" disabled={form.processing} className="rounded-sm border bg-zinc-950 px-3 py-2 text-sm text-white">
+                        <button type="submit" disabled={form.processing} className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground">
                             Resgatar código
                         </button>
                         <Link href="/packs" className="text-xs underline">Meus pacotes</Link>
@@ -77,7 +77,7 @@ export default function RewardCodeRedeemPage({ recentRedemptions, activeAlbum }:
                 <DataTableShell title="Histórico recente" subtitle="Últimos códigos resgatados na sua conta.">
                     <table className="min-w-full text-sm">
                         <thead>
-                            <tr className="border-b border-zinc-200 text-left">
+                            <tr className="border-b border-border text-left">
                                 <th className="px-4 py-2">Código</th>
                                 <th className="px-4 py-2">Título</th>
                                 <th className="px-4 py-2">Canal</th>
@@ -93,11 +93,11 @@ export default function RewardCodeRedeemPage({ recentRedemptions, activeAlbum }:
                                 </tr>
                             ) : (
                                 recentRedemptions.map((item) => (
-                                    <tr key={item.id} className="border-b border-zinc-100">
-                                        <td className="px-4 py-2 font-mono text-xs text-zinc-700">{item.reward_code.code}</td>
-                                        <td className="px-4 py-2 text-zinc-800">{item.reward_code.title}</td>
-                                        <td className="px-4 py-2 text-zinc-700">{item.reward_code.source_channel}</td>
-                                        <td className="px-4 py-2 text-zinc-600">{item.redeemed_at ?? '-'}</td>
+                                    <tr key={item.id} className="border-b border-border/60">
+                                        <td className="px-4 py-2 font-mono text-xs text-dim">{item.reward_code.code}</td>
+                                        <td className="px-4 py-2 text-foreground">{item.reward_code.title}</td>
+                                        <td className="px-4 py-2 text-dim">{item.reward_code.source_channel}</td>
+                                        <td className="px-4 py-2 text-dim">{item.redeemed_at ?? '-'}</td>
                                     </tr>
                                 ))
                             )}

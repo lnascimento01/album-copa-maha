@@ -27,15 +27,7 @@ export default function ResetPassword({ token, email, passwordRules }: Props) {
                     <div className="grid gap-5">
                         <div className="grid gap-2">
                             <Label htmlFor="email">E-mail</Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                name="email"
-                                autoComplete="email"
-                                value={email}
-                                className="w-full rounded-sm"
-                                readOnly
-                            />
+                            <Input id="email" type="email" name="email" autoComplete="email" value={email} className="w-full rounded-sm" readOnly />
                             <InputError message={errors.email} className="mt-1" />
                         </div>
 
@@ -66,12 +58,7 @@ export default function ResetPassword({ token, email, passwordRules }: Props) {
                             <InputError message={errors.password_confirmation} className="mt-1" />
                         </div>
 
-                        <Button
-                            type="submit"
-                            className="mt-2 w-full rounded-sm border border-neutral-900 bg-neutral-900 text-white hover:bg-neutral-700"
-                            disabled={processing}
-                            data-test="reset-password-button"
-                        >
+                        <Button type="submit" className="mt-2 w-full rounded-sm" disabled={processing} data-test="reset-password-button">
                             {processing ? <Spinner /> : null}
                             Redefinir senha
                         </Button>

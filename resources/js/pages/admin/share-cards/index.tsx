@@ -70,7 +70,7 @@ export default function AdminShareCardsIndex({ cards, filters, types, users, alb
                         </select>
                     </div>
                     <div className="md:col-span-3 flex justify-end">
-                        <button type="submit" className="rounded-sm border bg-black px-3 py-2 text-sm text-white">Filtrar</button>
+                        <button type="submit" className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground">Filtrar</button>
                     </div>
                 </form>
 
@@ -110,7 +110,7 @@ export default function AdminShareCardsIndex({ cards, filters, types, users, alb
                             type="button"
                             onClick={() => link.url && router.visit(link.url)}
                             disabled={!link.url}
-                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-black text-white' : ''}`}
+                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-primary text-primary-foreground' : ''}`}
                         >
                             <span dangerouslySetInnerHTML={{ __html: link.label }} />
                         </button>

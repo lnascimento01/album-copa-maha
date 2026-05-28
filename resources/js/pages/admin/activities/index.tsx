@@ -75,7 +75,7 @@ export default function AdminActivitiesIndex({ activities, filters, statuses, ty
                 <PageHeader
                     title="Atividades"
                     subtitle="Operação de presença, recompensa e check-ins por atividade."
-                    actions={<Link href="/admin/activities/create" className="rounded-sm border bg-zinc-950 px-3 py-2 text-xs text-white">Nova atividade</Link>}
+                    actions={<Link href="/admin/activities/create" className="rounded-sm border bg-primary px-3 py-2 text-xs text-primary-foreground">Nova atividade</Link>}
                 />
 
                 <form onSubmit={submit} className="grid gap-3 rounded-md border border-zinc-200 bg-white p-4 md:grid-cols-7">
@@ -120,7 +120,7 @@ export default function AdminActivitiesIndex({ activities, filters, statuses, ty
                         <input type="date" value={dateTo} onChange={(event) => setDateTo(event.target.value)} className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm" />
                     </div>
                     <div className="md:col-span-7 flex justify-end">
-                        <button className="rounded-sm border bg-zinc-950 px-3 py-2 text-sm text-white" type="submit">Filtrar</button>
+                        <button className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground" type="submit">Filtrar</button>
                     </div>
                 </form>
 
@@ -179,7 +179,7 @@ export default function AdminActivitiesIndex({ activities, filters, statuses, ty
                             type="button"
                             onClick={() => link.url && router.visit(link.url)}
                             disabled={!link.url}
-                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-zinc-950 text-white' : 'bg-white text-zinc-700'}`}
+                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-primary text-primary-foreground' : 'bg-white text-zinc-700'}`}
                         >
                             <span dangerouslySetInnerHTML={{ __html: link.label }} />
                         </button>

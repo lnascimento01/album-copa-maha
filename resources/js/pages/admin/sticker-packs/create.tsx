@@ -73,7 +73,7 @@ export default function AdminStickerPackCreate({ users, albums }: Props) {
                         <textarea className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" rows={4} value={form.data.note} onChange={(event) => form.setData('note', event.target.value)} />
                     </div>
                     <div className="md:col-span-2">
-                        <button type="submit" className="rounded-sm border bg-black px-3 py-2 text-sm text-white" disabled={form.processing}>
+                        <button type="submit" className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground" disabled={form.processing}>
                             Conceder pacotes
                         </button>
                     </div>

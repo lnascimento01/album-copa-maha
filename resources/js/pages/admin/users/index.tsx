@@ -101,11 +101,11 @@ export default function AdminUsersIndex({ users, filters }: Props) {
             <div className="space-y-4 p-4 sm:p-5">
                 <PageHeader title="Usuários" subtitle="Aprovação de cadastro, papéis e acesso operacional." />
 
-                <form onSubmit={submitFilters} className="grid gap-3 rounded-md border border-zinc-200 bg-white p-4 md:grid-cols-4">
+                <form onSubmit={submitFilters} className="grid gap-3 rounded-md border border-border bg-card p-4 md:grid-cols-4">
                     <div>
-                        <label className="text-xs uppercase tracking-wide text-zinc-500">Status</label>
+                        <label className="text-xs uppercase tracking-wide text-dim">Status</label>
                         <select
-                            className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm"
+                            className="mt-1 w-full rounded-sm border bg-card border-border px-2 py-2 text-sm"
                             value={status}
                             onChange={(event) => setStatus(event.target.value)}
                         >
@@ -117,16 +117,16 @@ export default function AdminUsersIndex({ users, filters }: Props) {
                         </select>
                     </div>
                     <div className="md:col-span-2">
-                        <label className="text-xs uppercase tracking-wide text-zinc-500">Busca</label>
+                        <label className="text-xs uppercase tracking-wide text-dim">Busca</label>
                         <input
-                            className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm"
+                            className="mt-1 w-full rounded-sm border bg-card border-border px-2 py-2 text-sm"
                             value={search}
                             onChange={(event) => setSearch(event.target.value)}
                             placeholder="Nome ou e-mail"
                         />
                     </div>
                     <div className="flex items-end">
-                        <button className="w-full rounded-sm border bg-zinc-950 px-3 py-2 text-sm text-white" type="submit">
+                        <button className="w-full rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground" type="submit">
                             Filtrar
                         </button>
                     </div>
@@ -135,7 +135,7 @@ export default function AdminUsersIndex({ users, filters }: Props) {
                 <DataTableShell title="Lista de usuários" subtitle="Ações disponíveis conforme permissões do operador.">
                     <table className="min-w-full text-sm">
                         <thead>
-                            <tr className="border-b border-zinc-200 text-left">
+                            <tr className="border-b border-border text-left">
                                 <th className="px-4 py-2">Nome</th>
                                 <th className="px-4 py-2">E-mail</th>
                                 <th className="px-4 py-2">Status</th>
@@ -152,11 +152,11 @@ export default function AdminUsersIndex({ users, filters }: Props) {
                                 </tr>
                             ) : (
                                 users.data.map((user) => (
-                                    <tr key={user.id} className="border-b border-zinc-100 align-top">
-                                        <td className="px-4 py-2 text-zinc-900">{user.name}</td>
-                                        <td className="px-4 py-2 font-mono text-xs text-zinc-700">{user.email}</td>
+                                    <tr key={user.id} className="border-b border-border/60 align-top">
+                                        <td className="px-4 py-2 text-foreground">{user.name}</td>
+                                        <td className="px-4 py-2 font-mono text-xs text-dim">{user.email}</td>
                                         <td className="px-4 py-2"><StatusBadge value={user.approval_status} /></td>
-                                        <td className="px-4 py-2 text-zinc-700">
+                                        <td className="px-4 py-2 text-dim">
                                             {user.roles.map((role) => role.slug).join(', ') || '-'}
                                         </td>
                                         <td className="space-x-2 px-4 py-2">
@@ -212,7 +212,7 @@ export default function AdminUsersIndex({ users, filters }: Props) {
                                 }
                             }}
                             disabled={!link.url}
-                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-zinc-950 text-white' : 'bg-white text-zinc-700'}`}
+                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-primary text-primary-foreground' : 'bg-white text-dim'}`}
                         >
                             <span dangerouslySetInnerHTML={{ __html: link.label }} />
                         </button>

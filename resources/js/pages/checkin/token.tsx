@@ -77,7 +77,7 @@ export default function CheckinTokenPage({ session, activity, status, message, a
                         ) : null}
 
                         <div className="flex gap-3">
-                            <button type="button" disabled={!canConfirm} onClick={confirm} className="rounded-sm border bg-black px-4 py-2 text-sm text-white disabled:bg-zinc-400">
+                            <button type="button" disabled={!canConfirm} onClick={confirm} className="rounded-sm border bg-primary px-4 py-2 text-sm text-primary-foreground disabled:bg-zinc-400">
                                 Confirmar presença
                             </button>
                             <Link href="/checkin-code" className="rounded-sm border px-4 py-2 text-sm">Usar código manual</Link>

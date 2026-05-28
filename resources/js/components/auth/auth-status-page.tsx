@@ -11,31 +11,29 @@ type Props = {
 export default function AuthStatusPage({ description, badge, reason, extraInfo }: Props) {
     return (
         <div className="space-y-4">
-            <div className="inline-flex border border-neutral-900 px-2 py-1 text-xs font-semibold tracking-[0.12em] uppercase">
+            <div className="inline-flex rounded-sm border border-primary/40 bg-primary/10 px-2 py-1 text-xs font-semibold tracking-[0.12em] text-primary uppercase">
                 {badge}
             </div>
 
-            <p className="text-sm leading-relaxed text-neutral-700">{description}</p>
+            <p className="text-sm leading-relaxed text-dim">{description}</p>
 
             {reason ? (
-                <div className="border border-neutral-300 bg-neutral-100 p-3 text-sm text-neutral-700">
-                    <p className="text-xs font-semibold tracking-wide uppercase">Motivo informado</p>
+                <div className="rounded-md border border-border bg-muted p-3 text-sm text-foreground">
+                    <p className="text-xs font-semibold tracking-wide uppercase text-dim">Motivo informado</p>
                     <p className="mt-1">{reason}</p>
                 </div>
             ) : null}
 
-            <p className="text-sm text-neutral-700">
+            <p className="text-sm text-dim">
                 Caso precise de suporte, entre em contato com a administração.
             </p>
 
-            {extraInfo ? (
-                <p className="text-xs text-neutral-500">{extraInfo}</p>
-            ) : null}
+            {extraInfo ? <p className="text-xs text-dim">{extraInfo}</p> : null}
 
             <Link
                 href={logout()}
                 as="button"
-                className="inline-flex w-full justify-center border border-neutral-900 bg-neutral-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-700"
+                className="inline-flex w-full justify-center rounded-sm border border-primary bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:brightness-95"
             >
                 Sair da conta
             </Link>

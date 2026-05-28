@@ -71,7 +71,7 @@ export default function TeamForm({ initialValues, submitLabel, submitUrl, method
                 Time ativo
             </label>
             <div className="md:col-span-2">
-                <button type="submit" className="rounded-sm border bg-black px-3 py-2 text-sm text-white" disabled={form.processing}>
+                <button type="submit" className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground" disabled={form.processing}>
                     {submitLabel}
                 </button>
             </div>

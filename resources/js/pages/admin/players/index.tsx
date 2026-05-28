@@ -41,7 +41,7 @@ export default function PlayersIndex({ players, filters, teams, types }: Props) 
             <div className="space-y-4 p-4">
                 <div className="flex items-center justify-between gap-4">
                     <h1 className="text-xl font-semibold tracking-tight">Jogadores/Personagens</h1>
-                    <Link href="/admin/players/create" className="rounded-sm border bg-black px-3 py-2 text-xs text-white">Novo</Link>
+                    <Link href="/admin/players/create" className="rounded-sm border bg-primary px-3 py-2 text-xs text-primary-foreground">Novo</Link>
                 </div>
 
                 <form onSubmit={submit} className="grid gap-3 rounded-sm border p-4 md:grid-cols-5">
@@ -72,7 +72,7 @@ export default function PlayersIndex({ players, filters, teams, types }: Props) 
                         </select>
                     </div>
                     <div className="md:col-span-5 flex justify-end">
-                        <button className="rounded-sm border bg-black px-3 py-2 text-sm text-white" type="submit">Filtrar</button>
+                        <button className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground" type="submit">Filtrar</button>
                     </div>
                 </form>
 
@@ -112,7 +112,7 @@ export default function PlayersIndex({ players, filters, teams, types }: Props) 
 
                 <div className="flex flex-wrap gap-2">
                     {players.links.map((link, index) => (
-                        <button key={`${link.label}-${index}`} type="button" onClick={() => link.url && router.visit(link.url)} disabled={!link.url} className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-black text-white' : ''}`}>
+                        <button key={`${link.label}-${index}`} type="button" onClick={() => link.url && router.visit(link.url)} disabled={!link.url} className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-primary text-primary-foreground' : ''}`}>
                             <span dangerouslySetInnerHTML={{ __html: link.label }} />
                         </button>
                     ))}

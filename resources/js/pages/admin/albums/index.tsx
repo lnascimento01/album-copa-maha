@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { StatusBadge } from '@/components/ui/status-badge';
 
 type Team = { id: number; name: string; slug?: string };
 
@@ -39,36 +40,36 @@ export default function AlbumsIndex({ albums, filters, teams, statuses }: Props)
             <Head title="Álbuns" />
             <div className="space-y-4 p-4">
                 <div className="flex items-center justify-between gap-4">
-                    <h1 className="text-xl font-semibold tracking-tight">Álbuns</h1>
-                    <Link href="/admin/albums/create" className="rounded-sm border bg-black px-3 py-2 text-xs text-white">Novo álbum</Link>
+                    <h1 className="text-xl font-semibold tracking-tight text-foreground">Álbuns</h1>
+                    <Link href="/admin/albums/create" className="rounded-sm border border-primary bg-primary px-3 py-2 text-xs text-primary-foreground">Novo álbum</Link>
                 </div>
 
-                <form onSubmit={submit} className="grid gap-3 rounded-sm border p-4 md:grid-cols-5">
+                <form onSubmit={submit} className="grid gap-3 rounded-sm border border-border bg-card p-4 md:grid-cols-5">
                     <div className="md:col-span-2">
-                        <label className="text-xs uppercase text-muted-foreground">Busca</label>
-                        <input className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" value={search} onChange={(event) => setSearch(event.target.value)} />
+                        <label className="text-xs uppercase text-dim">Busca</label>
+                        <input className="mt-1 w-full rounded-sm border border-border bg-background px-2 py-2 text-sm" value={search} onChange={(event) => setSearch(event.target.value)} />
                     </div>
                     <div>
-                        <label className="text-xs uppercase text-muted-foreground">Time</label>
-                        <select className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" value={teamId} onChange={(event) => setTeamId(event.target.value)}>
+                        <label className="text-xs uppercase text-dim">Time</label>
+                        <select className="mt-1 w-full rounded-sm border border-border bg-background px-2 py-2 text-sm" value={teamId} onChange={(event) => setTeamId(event.target.value)}>
                             <option value="">Todos</option>
                             {teams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
                         </select>
                     </div>
                     <div>
-                        <label className="text-xs uppercase text-muted-foreground">Status</label>
-                        <select className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" value={status} onChange={(event) => setStatus(event.target.value)}>
+                        <label className="text-xs uppercase text-dim">Status</label>
+                        <select className="mt-1 w-full rounded-sm border border-border bg-background px-2 py-2 text-sm" value={status} onChange={(event) => setStatus(event.target.value)}>
                             <option value="">Todos</option>
                             {statuses.map((item) => <option key={item} value={item}>{item}</option>)}
                         </select>
                     </div>
-                    <div className="flex items-end"><button className="w-full rounded-sm border bg-black px-3 py-2 text-sm text-white" type="submit">Filtrar</button></div>
+                    <div className="flex items-end"><button className="w-full rounded-sm border border-primary bg-primary px-3 py-2 text-sm text-primary-foreground" type="submit">Filtrar</button></div>
                 </form>
 
-                <div className="overflow-x-auto rounded-sm border">
+                <div className="overflow-x-auto rounded-sm border border-border bg-card">
                     <table className="min-w-full text-sm">
                         <thead>
-                            <tr className="border-b text-left">
+                            <tr className="border-b border-border text-left">
                                 <th className="px-4 py-2">Nome</th>
                                 <th className="px-4 py-2">Time</th>
                                 <th className="px-4 py-2">Temporada</th>
@@ -80,17 +81,17 @@ export default function AlbumsIndex({ albums, filters, teams, statuses }: Props)
                         </thead>
                         <tbody>
                             {albums.data.map((album) => (
-                                <tr key={album.id} className="border-b">
-                                    <td className="px-4 py-2">{album.name}</td>
-                                    <td className="px-4 py-2">
+                                <tr key={album.id} className="border-b border-border/60">
+                                    <td className="px-4 py-2 text-foreground">{album.name}</td>
+                                    <td className="px-4 py-2 text-dim">
                                         {album.teams.length > 0
                                             ? album.teams.map((team) => team.name).join(', ')
                                             : (album.team?.name ?? '-')}
                                     </td>
-                                    <td className="px-4 py-2">{album.season ?? '-'}</td>
-                                    <td className="px-4 py-2">{album.status}</td>
-                                    <td className="px-4 py-2">{album.stickers_count}</td>
-                                    <td className="px-4 py-2">{album.published_at ?? '-'}</td>
+                                    <td className="px-4 py-2 text-dim">{album.season ?? '-'}</td>
+                                    <td className="px-4 py-2"><StatusBadge value={album.status} /></td>
+                                    <td className="px-4 py-2 text-dim">{album.stickers_count}</td>
+                                    <td className="px-4 py-2 text-dim">{album.published_at ?? '-'}</td>
                                     <td className="space-x-2 px-4 py-2">
                                         <Link href={`/admin/albums/${album.id}`} className="text-xs underline">Ver</Link>
                                         <Link href={`/admin/albums/${album.id}/edit`} className="text-xs underline">Editar</Link>
@@ -110,7 +111,7 @@ export default function AlbumsIndex({ albums, filters, teams, statuses }: Props)
                             type="button"
                             onClick={() => link.url && router.visit(link.url)}
                             disabled={!link.url}
-                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-black text-white' : ''}`}
+                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-foreground'}`}
                         >
                             <span dangerouslySetInnerHTML={{ __html: link.label }} />
                         </button>

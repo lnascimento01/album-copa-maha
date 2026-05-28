@@ -32,7 +32,7 @@ export default function TeamsIndex({ teams, filters }: Props) {
             <div className="space-y-4 p-4">
                 <div className="flex items-center justify-between gap-4">
                     <h1 className="text-xl font-semibold tracking-tight">Times</h1>
-                    <Link href="/admin/teams/create" className="rounded-sm border bg-black px-3 py-2 text-xs text-white">Novo time</Link>
+                    <Link href="/admin/teams/create" className="rounded-sm border bg-primary px-3 py-2 text-xs text-primary-foreground">Novo time</Link>
                 </div>
 
                 <form onSubmit={submit} className="grid gap-3 rounded-sm border p-4 md:grid-cols-4">
@@ -49,7 +49,7 @@ export default function TeamsIndex({ teams, filters }: Props) {
                         </select>
                     </div>
                     <div className="flex items-end">
-                        <button className="w-full rounded-sm border bg-black px-3 py-2 text-sm text-white" type="submit">Filtrar</button>
+                        <button className="w-full rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground" type="submit">Filtrar</button>
                     </div>
                 </form>
 
@@ -88,7 +88,7 @@ export default function TeamsIndex({ teams, filters }: Props) {
                             type="button"
                             onClick={() => link.url && router.visit(link.url)}
                             disabled={!link.url}
-                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-black text-white' : ''}`}
+                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-primary text-primary-foreground' : ''}`}
                         >
                             <span dangerouslySetInnerHTML={{ __html: link.label }} />
                         </button>

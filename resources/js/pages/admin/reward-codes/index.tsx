@@ -61,7 +61,7 @@ export default function AdminRewardCodesIndex({ rewardCodes, filters, statuses, 
                 <PageHeader
                     title="Códigos Promocionais"
                     subtitle="Operação de campanhas de resgate para Instagram, eventos e ativações do time."
-                    actions={<Link href="/admin/reward-codes/create" className="rounded-sm border bg-zinc-950 px-3 py-2 text-xs text-white">Novo código</Link>}
+                    actions={<Link href="/admin/reward-codes/create" className="rounded-sm border bg-primary px-3 py-2 text-xs text-primary-foreground">Novo código</Link>}
                 />
 
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -98,7 +98,7 @@ export default function AdminRewardCodesIndex({ rewardCodes, filters, statuses, 
                         </select>
                     </div>
                     <div className="md:col-span-4 flex justify-end">
-                        <button type="submit" className="rounded-sm border bg-zinc-950 px-3 py-2 text-sm text-white">Filtrar</button>
+                        <button type="submit" className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground">Filtrar</button>
                     </div>
                 </form>
 
@@ -150,7 +150,7 @@ export default function AdminRewardCodesIndex({ rewardCodes, filters, statuses, 
                             type="button"
                             onClick={() => link.url && router.visit(link.url)}
                             disabled={!link.url}
-                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-zinc-950 text-white' : 'bg-white text-zinc-700'}`}
+                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-primary text-primary-foreground' : 'bg-white text-zinc-700'}`}
                         >
                             <span dangerouslySetInnerHTML={{ __html: link.label }} />
                         </button>

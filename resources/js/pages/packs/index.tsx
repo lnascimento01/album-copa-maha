@@ -56,7 +56,7 @@ export default function PacksIndex({ pendingPacks, historyPacks, stats, can }: P
                 <PageHeader
                     title="Meus Pacotes"
                     subtitle="Abra seus pacotes pendentes e acompanhe sua evolução no álbum."
-                    actions={<Link href="/album" className="rounded-sm border border-zinc-300 px-3 py-2 text-xs">Ver álbum</Link>}
+                    actions={<Link href="/album" className="rounded-sm border border-border bg-card px-3 py-2 text-xs">Ver álbum</Link>}
                 />
 
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -66,8 +66,8 @@ export default function PacksIndex({ pendingPacks, historyPacks, stats, can }: P
                     <MetricCard label="Progresso do álbum" value={`${percentage}%`} hint={<ProgressBar value={percentage} />} accent="success" />
                 </div>
 
-                <section className="rounded-md border border-zinc-200 bg-white p-4">
-                    <h2 className="text-sm font-semibold text-zinc-900">Pacotes pendentes</h2>
+                <section className="rounded-md border border-border bg-card p-4">
+                    <h2 className="text-sm font-semibold text-foreground">Pacotes pendentes</h2>
                     {pendingPacks.length === 0 ? (
                         <div className="mt-3">
                             <EmptyState title="Nenhum pacote pendente." description="Participe de atividades, resgate códigos e conclua missões para receber novos pacotes." />
@@ -75,19 +75,19 @@ export default function PacksIndex({ pendingPacks, historyPacks, stats, can }: P
                     ) : (
                         <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                             {pendingPacks.map((pack) => (
-                                <Link key={pack.id} href={`/packs/${pack.id}`} className="rounded-md border border-zinc-200 bg-zinc-50 p-3 transition hover:bg-zinc-100">
+                                <Link key={pack.id} href={`/packs/${pack.id}`} className="rounded-md border border-border bg-muted/60 p-3 transition hover:bg-muted">
                                     <div className="flex items-start justify-between gap-3">
                                         <div>
-                                            <div className="text-xs uppercase tracking-wide text-zinc-500">Pacote #{pack.id}</div>
-                                            <div className="mt-1 text-lg font-semibold text-zinc-900">{pack.size} figurinhas</div>
+                                            <div className="text-xs uppercase tracking-wide text-dim">Pacote #{pack.id}</div>
+                                            <div className="mt-1 text-lg font-semibold text-foreground">{pack.size} figurinhas</div>
                                         </div>
                                         <StatusBadge value={pack.status} />
                                     </div>
-                                    <div className="mt-2 text-xs text-zinc-600">{pack.album.name}</div>
+                                    <div className="mt-2 text-xs text-dim">{pack.album.name}</div>
                                     <div className="mt-2">
                                         <OriginBadge source={pack.source} label={sourceLabel(pack)} />
                                     </div>
-                                    <div className="mt-3 inline-flex rounded-sm border border-zinc-300 bg-white px-2 py-1 text-[11px] font-medium text-zinc-800">
+                                    <div className="mt-3 inline-flex rounded-sm border border-primary/35 bg-primary/10 px-2 py-1 text-[11px] font-medium text-primary">
                                         Abrir pacote
                                     </div>
                                 </Link>
@@ -99,7 +99,7 @@ export default function PacksIndex({ pendingPacks, historyPacks, stats, can }: P
                 <DataTableShell title="Histórico de pacotes" subtitle="Origem, status e data de abertura para auditoria pessoal.">
                     <table className="min-w-full text-sm">
                         <thead>
-                            <tr className="border-b border-zinc-200 text-left">
+                            <tr className="border-b border-border text-left">
                                 <th className="px-4 py-2">Pacote</th>
                                 <th className="px-4 py-2">Álbum</th>
                                 <th className="px-4 py-2">Origem</th>
@@ -119,14 +119,14 @@ export default function PacksIndex({ pendingPacks, historyPacks, stats, can }: P
                                 </tr>
                             ) : (
                                 historyPacks.data.map((pack) => (
-                                    <tr key={pack.id} className="border-b border-zinc-100">
-                                        <td className="px-4 py-2 font-mono text-xs text-zinc-700">#{pack.id}</td>
-                                        <td className="px-4 py-2 text-zinc-800">{pack.album.name}</td>
+                                    <tr key={pack.id} className="border-b border-border/60">
+                                        <td className="px-4 py-2 font-mono text-xs text-dim">#{pack.id}</td>
+                                        <td className="px-4 py-2 text-foreground">{pack.album.name}</td>
                                         <td className="px-4 py-2"><OriginBadge source={pack.source} label={sourceLabel(pack)} /></td>
                                         <td className="px-4 py-2"><StatusBadge value={pack.status} /></td>
-                                        <td className="px-4 py-2 text-zinc-700">{pack.size}</td>
-                                        <td className="px-4 py-2 text-zinc-600">{pack.created_at ?? '-'}</td>
-                                        <td className="px-4 py-2 text-zinc-600">{pack.opened_at ?? '-'}</td>
+                                        <td className="px-4 py-2 text-dim">{pack.size}</td>
+                                        <td className="px-4 py-2 text-dim">{pack.created_at ?? '-'}</td>
+                                        <td className="px-4 py-2 text-dim">{pack.opened_at ?? '-'}</td>
                                         <td className="space-x-2 px-4 py-2">
                                             <Link href={`/packs/${pack.id}`} className="text-xs underline">Detalhes</Link>
                                             {can?.createShareCard && pack.status === 'opened' ? (

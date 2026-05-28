@@ -14,12 +14,12 @@ export default function ForgotPassword({ status }: { status?: string }) {
             <Head title="Recuperar Senha" />
 
             {status ? (
-                <div className="mb-4 border border-emerald-700 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                <div className="mb-4 rounded-sm border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-300">
                     {status}
                 </div>
             ) : null}
 
-            <p className="mb-4 text-sm text-neutral-600">
+            <p className="mb-4 text-sm text-dim">
                 Informe seu e-mail para receber as instruções de redefinição de senha.
             </p>
 
@@ -41,11 +41,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                         </div>
 
                         <div className="my-6">
-                            <Button
-                                className="w-full rounded-sm border border-neutral-900 bg-neutral-900 text-white hover:bg-neutral-700"
-                                disabled={processing}
-                                data-test="email-password-reset-link-button"
-                            >
+                            <Button className="w-full rounded-sm" disabled={processing} data-test="email-password-reset-link-button">
                                 {processing ? <LoaderCircle className="size-4 animate-spin" /> : null}
                                 Enviar link de recuperação
                             </Button>
@@ -54,9 +50,8 @@ export default function ForgotPassword({ status }: { status?: string }) {
                 )}
             </Form>
 
-            <div className="border-t border-neutral-200 pt-4 text-center text-sm text-neutral-600">
-                Voltar para{' '}
-                <TextLink href={login()}>login</TextLink>
+            <div className="border-t border-border pt-4 text-center text-sm text-dim">
+                Voltar para <TextLink href={login()}>login</TextLink>
             </div>
         </>
     );

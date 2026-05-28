@@ -82,7 +82,7 @@ export default function AdminSocialMissionSubmissionsIndex({ submissions, filter
                         <input value={search} onChange={(event) => setSearch(event.target.value)} className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm" placeholder="Texto/URL" />
                     </div>
                     <div className="md:col-span-4 flex justify-end">
-                        <button type="submit" className="rounded-sm border bg-zinc-950 px-3 py-2 text-sm text-white">Filtrar</button>
+                        <button type="submit" className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground">Filtrar</button>
                     </div>
                 </form>
 
@@ -123,7 +123,7 @@ export default function AdminSocialMissionSubmissionsIndex({ submissions, filter
 
                 <div className="flex flex-wrap gap-2">
                     {submissions.links.map((link, index) => (
-                        <button key={`${link.label}-${index}`} type="button" onClick={() => link.url && router.visit(link.url)} disabled={!link.url} className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-zinc-950 text-white' : 'bg-white text-zinc-700'}`}>
+                        <button key={`${link.label}-${index}`} type="button" onClick={() => link.url && router.visit(link.url)} disabled={!link.url} className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-primary text-primary-foreground' : 'bg-white text-zinc-700'}`}>
                             <span dangerouslySetInnerHTML={{ __html: link.label }} />
                         </button>
                     ))}
