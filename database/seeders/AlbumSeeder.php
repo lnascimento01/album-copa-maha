@@ -18,7 +18,7 @@ class AlbumSeeder extends Seeder
 
         $master = User::query()->where('email', (string) (env('MASTER_EMAIL') ?: env('ADMIN_EMAIL') ?: 'lfsnascimento84@gmail.com'))->first();
 
-        Album::query()->updateOrCreate(
+        $album = Album::query()->updateOrCreate(
             ['team_id' => $team->id, 'slug' => 'album-copa-maha-2026'],
             [
                 'name' => 'Álbum da Copa MAHA 2026',
@@ -30,5 +30,7 @@ class AlbumSeeder extends Seeder
                 'updated_by' => $master?->id,
             ],
         );
+
+        $album->teams()->syncWithoutDetaching([$team->id]);
     }
 }

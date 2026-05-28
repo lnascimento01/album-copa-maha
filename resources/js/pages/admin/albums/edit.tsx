@@ -6,6 +6,7 @@ type Team = { id: number; name: string };
 type Album = {
     id: number;
     team_id: number;
+    team_ids: number[];
     name: string;
     slug: string;
     season: string | null;
@@ -26,7 +27,7 @@ export default function AdminAlbumEdit({ album, teams }: { album: Album; teams: 
                 <AlbumForm
                     teams={teams}
                     initialValues={{
-                        team_id: album.team_id,
+                        team_ids: album.team_ids,
                         name: album.name,
                         slug: album.slug,
                         season: album.season ?? '',

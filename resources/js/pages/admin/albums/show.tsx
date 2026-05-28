@@ -10,7 +10,7 @@ type Album = {
     status: string;
     published_at: string | null;
     stickers_count: number;
-    team: { id: number; name: string; slug: string };
+    teams: Array<{ id: number; name: string; slug: string }>;
 };
 
 export default function AdminAlbumShow({ album }: { album: Album }) {
@@ -28,7 +28,7 @@ export default function AdminAlbumShow({ album }: { album: Album }) {
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-2">
-                    <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Time:</span> {album.team.name}</div>
+                    <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Equipes:</span> {album.teams.map((team) => team.name).join(', ') || '-'}</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Status:</span> {album.status}</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Slug:</span> {album.slug}</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Temporada:</span> {album.season ?? '-'}</div>

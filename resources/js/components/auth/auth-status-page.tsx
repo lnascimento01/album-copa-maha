@@ -5,9 +5,10 @@ type Props = {
     description: string;
     badge: string;
     reason?: string | null;
+    extraInfo?: string | null;
 };
 
-export default function AuthStatusPage({ description, badge, reason }: Props) {
+export default function AuthStatusPage({ description, badge, reason, extraInfo }: Props) {
     return (
         <div className="space-y-4">
             <div className="inline-flex border border-neutral-900 px-2 py-1 text-xs font-semibold tracking-[0.12em] uppercase">
@@ -26,6 +27,10 @@ export default function AuthStatusPage({ description, badge, reason }: Props) {
             <p className="text-sm text-neutral-700">
                 Caso precise de suporte, entre em contato com a administração.
             </p>
+
+            {extraInfo ? (
+                <p className="text-xs text-neutral-500">{extraInfo}</p>
+            ) : null}
 
             <Link
                 href={logout()}

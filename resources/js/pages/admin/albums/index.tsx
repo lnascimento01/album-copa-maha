@@ -11,7 +11,8 @@ type Album = {
     status: string;
     stickers_count: number;
     published_at: string | null;
-    team: Team;
+    team: Team | null;
+    teams: Team[];
 };
 
 type LinkItem = { url: string | null; label: string; active: boolean };
@@ -81,7 +82,11 @@ export default function AlbumsIndex({ albums, filters, teams, statuses }: Props)
                             {albums.data.map((album) => (
                                 <tr key={album.id} className="border-b">
                                     <td className="px-4 py-2">{album.name}</td>
-                                    <td className="px-4 py-2">{album.team.name}</td>
+                                    <td className="px-4 py-2">
+                                        {album.teams.length > 0
+                                            ? album.teams.map((team) => team.name).join(', ')
+                                            : (album.team?.name ?? '-')}
+                                    </td>
                                     <td className="px-4 py-2">{album.season ?? '-'}</td>
                                     <td className="px-4 py-2">{album.status}</td>
                                     <td className="px-4 py-2">{album.stickers_count}</td>

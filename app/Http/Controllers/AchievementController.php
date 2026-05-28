@@ -33,11 +33,13 @@ class AchievementController extends Controller
             ]);
         }
 
+        $albumTeamIds = $album->teams()->pluck('teams.id')->whenEmpty(fn ($collection) => $album->team_id ? $collection->push($album->team_id) : $collection);
+
         $achievements = Achievement::query()
             ->where('is_active', true)
-            ->where(function ($query) use ($album) {
+            ->where(function ($query) use ($albumTeamIds) {
                 $query->whereNull('team_id')
-                    ->orWhere('team_id', $album->team_id);
+                    ->orWhereIn('team_id', $albumTeamIds->all());
             })
             ->where(function ($query) use ($album) {
                 $query->whereNull('album_id')

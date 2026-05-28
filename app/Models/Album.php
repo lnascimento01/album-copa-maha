@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class Album extends Model
 {
@@ -50,6 +53,12 @@ class Album extends Model
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
+    }
+
+    public function teams(): BelongsToMany
+    {
+        return $this->belongsToMany(Team::class)
+            ->withTimestamps();
     }
 
     public function stickers(): HasMany
@@ -100,5 +109,33 @@ class Album extends Model
     public function shareCards(): HasMany
     {
         return $this->hasMany(ShareCard::class);
+    }
+
+    public function teamIds(): Collection
+    {
+        $teamIds = $this->teams()->pluck('teams.id');
+
+        if ($teamIds->isEmpty() && $this->team_id !== null) {
+            $teamIds->push($this->team_id);
+        }
+
+        return $teamIds->unique()->values();
+    }
+
+    public function collectibleStickersQuery(): Builder
+    {
+        $teamIds = $this->teamIds();
+
+        return Sticker::query()
+            ->where('album_id', $this->id)
+            ->where('is_active', true)
+            ->where(function (Builder $query) use ($teamIds): void {
+                if ($teamIds->isEmpty()) {
+                    return;
+                }
+
+                $query->whereNull('player_id')
+                    ->orWhereHas('player', fn (Builder $playerQuery) => $playerQuery->whereIn('team_id', $teamIds->all()));
+            });
     }
 }

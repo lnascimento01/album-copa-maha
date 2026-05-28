@@ -9,7 +9,6 @@ use App\Http\Requests\UpdateRewardCodeRequest;
 use App\Models\Album;
 use App\Models\AuditLog;
 use App\Models\RewardCode;
-use App\Models\Team;
 use App\Services\Audit\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -32,7 +31,7 @@ class RewardCodeController extends Controller
         ];
 
         $codes = RewardCode::query()
-            ->with(['album:id,name,slug', 'team:id,name,slug'])
+            ->with(['album:id,name,slug'])
             ->when($filters['search'] !== '', function ($query) use ($filters) {
                 $search = $filters['search'];
 
@@ -60,7 +59,6 @@ class RewardCodeController extends Controller
                 'redeemed_count' => $code->redeemed_count,
                 'max_total_redemptions' => $code->max_total_redemptions,
                 'album' => $code->album,
-                'team' => $code->team,
             ]);
 
         return Inertia::render('admin/reward-codes/index', [
@@ -78,7 +76,6 @@ class RewardCodeController extends Controller
 
         return Inertia::render('admin/reward-codes/create', [
             'albums' => Album::query()->where('status', Album::STATUS_ACTIVE)->orderBy('name')->get(['id', 'name', 'team_id']),
-            'teams' => Team::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
             'statuses' => RewardCode::STATUSES,
             'channels' => RewardCode::CHANNELS,
         ]);
@@ -88,8 +85,12 @@ class RewardCodeController extends Controller
     {
         $this->authorize('create', RewardCode::class);
 
+        $validated = $request->validated();
+        $album = Album::query()->findOrFail((int) $validated['album_id']);
+
         $rewardCode = RewardCode::query()->create([
-            ...$request->validated(),
+            ...$validated,
+            'team_id' => (int) ($validated['team_id'] ?? $album->team_id),
             'status' => RewardCode::STATUS_DRAFT,
             'created_by' => $request->user()?->id,
             'redeemed_count' => 0,
@@ -117,7 +118,6 @@ class RewardCodeController extends Controller
 
         $rewardCode->load([
             'album:id,name,slug,status',
-            'team:id,name,slug',
             'creator:id,name,email',
             'revokedBy:id,name,email',
             'redemptions' => fn ($query) => $query->with(['user:id,name,email'])->orderByDesc('id')->limit(50),
@@ -159,7 +159,6 @@ class RewardCodeController extends Controller
                 'revoked_at' => optional($rewardCode->revoked_at)?->toDateTimeString(),
                 'revoke_reason' => $rewardCode->revoke_reason,
                 'album' => $rewardCode->album,
-                'team' => $rewardCode->team,
                 'creator' => $rewardCode->creator,
                 'revoked_by' => $rewardCode->revokedBy,
                 'redemptions' => $rewardCode->redemptions->map(fn ($redemption): array => [
@@ -192,7 +191,6 @@ class RewardCodeController extends Controller
             'rewardCode' => [
                 'id' => $rewardCode->id,
                 'album_id' => $rewardCode->album_id,
-                'team_id' => $rewardCode->team_id,
                 'code' => $rewardCode->code,
                 'title' => $rewardCode->title,
                 'description' => $rewardCode->description,
@@ -206,7 +204,6 @@ class RewardCodeController extends Controller
                 'max_redemptions_per_user' => $rewardCode->max_redemptions_per_user,
             ],
             'albums' => Album::query()->orderBy('name')->get(['id', 'name', 'team_id']),
-            'teams' => Team::query()->orderBy('name')->get(['id', 'name']),
             'statuses' => RewardCode::STATUSES,
             'channels' => RewardCode::CHANNELS,
         ]);
@@ -216,7 +213,13 @@ class RewardCodeController extends Controller
     {
         $this->authorize('update', $rewardCode);
 
-        $rewardCode->fill($request->validated())->save();
+        $validated = $request->validated();
+        $album = Album::query()->findOrFail((int) $validated['album_id']);
+
+        $rewardCode->fill([
+            ...$validated,
+            'team_id' => (int) ($validated['team_id'] ?? $album->team_id),
+        ])->save();
 
         $this->auditLogger->log(
             action: 'reward_code.updated',

@@ -9,6 +9,7 @@ use App\Services\Achievements\EvaluateUserAchievementsService;
 use App\Services\ShareCards\CreateShareCardService;
 use App\Services\Stickers\Exceptions\StickerPackOpenException;
 use App\Services\Stickers\OpenStickerPackService;
+use App\Services\Stickers\StickerImageResolver;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -19,6 +20,7 @@ class StickerPackController extends Controller
         private readonly OpenStickerPackService $openStickerPackService,
         private readonly EvaluateUserAchievementsService $evaluateUserAchievementsService,
         private readonly CreateShareCardService $createShareCardService,
+        private readonly StickerImageResolver $stickerImageResolver,
     ) {}
 
     public function index(): Response
@@ -54,11 +56,14 @@ class StickerPackController extends Controller
         $activeAlbum = Album::query()->where('status', Album::STATUS_ACTIVE)->first();
 
         $albumStickerCount = $activeAlbum
-            ? $activeAlbum->stickers()->where('is_active', true)->count()
+            ? $activeAlbum->collectibleStickersQuery()->count()
             : 0;
 
         $unlockedCount = $activeAlbum
-            ? $user->userStickers()->whereIn('sticker_id', $activeAlbum->stickers()->where('is_active', true)->pluck('id'))->count()
+            ? (int) $user->userStickers()
+                ->whereIn('sticker_id', $activeAlbum->collectibleStickersQuery()->pluck('id'))
+                ->distinct('sticker_id')
+                ->count('sticker_id')
             : 0;
 
         return Inertia::render('packs/index', [
@@ -113,6 +118,8 @@ class StickerPackController extends Controller
             'rewardCode:id,code,title,status',
             'socialMission:id,title,slug,status',
             'items.sticker:id,code,title,subtitle,type,rarity,image_path',
+            'items.sticker.player:id,name,team_id',
+            'items.sticker.player.team:id,slug',
         ]);
 
         return Inertia::render('packs/show', [
@@ -133,7 +140,15 @@ class StickerPackController extends Controller
                 'activity_checkin_id' => $stickerPack->activity_checkin_id,
                 'items' => $stickerPack->items->map(fn ($item): array => [
                     'id' => $item->id,
-                    'sticker' => $item->sticker,
+                    'sticker' => [
+                        'id' => $item->sticker->id,
+                        'code' => $item->sticker->code,
+                        'title' => $item->sticker->title,
+                        'subtitle' => $item->sticker->subtitle,
+                        'type' => $item->sticker->type,
+                        'rarity' => $item->sticker->rarity,
+                        'image_url' => $this->stickerImageResolver->resolve($item->sticker),
+                    ],
                 ])->values()->all(),
             ],
         ]);

@@ -28,7 +28,7 @@ class AlbumController extends Controller
         ];
 
         $albums = Album::query()
-            ->with(['team:id,name,slug'])
+            ->with(['teams:id,name,slug'])
             ->withCount(['stickers'])
             ->when($filters['search'] !== '', function ($query) use ($filters) {
                 $search = $filters['search'];
@@ -38,7 +38,12 @@ class AlbumController extends Controller
                         ->orWhere('season', 'like', "%{$search}%");
                 });
             })
-            ->when($filters['team_id'] !== null, fn ($query) => $query->where('team_id', $filters['team_id']))
+            ->when($filters['team_id'] !== null, function ($query) use ($filters) {
+                $query->where(function ($inner) use ($filters): void {
+                    $inner->where('team_id', $filters['team_id'])
+                        ->orWhereHas('teams', fn ($teamQuery) => $teamQuery->where('teams.id', $filters['team_id']));
+                });
+            })
             ->when($filters['status'] !== '', fn ($query) => $query->where('status', $filters['status']))
             ->orderByDesc('created_at')
             ->paginate(20)
@@ -51,11 +56,16 @@ class AlbumController extends Controller
                 'status' => $album->status,
                 'published_at' => optional($album->published_at)?->toDateTimeString(),
                 'stickers_count' => $album->stickers_count,
-                'team' => [
+                'team' => $album->teams->first() ?? ($album->team ? [
                     'id' => $album->team->id,
                     'name' => $album->team->name,
                     'slug' => $album->team->slug,
-                ],
+                ] : null),
+                'teams' => $album->teams->map(fn (Team $team): array => [
+                    'id' => $team->id,
+                    'name' => $team->name,
+                    'slug' => $team->slug,
+                ])->values()->all(),
             ]);
 
         return Inertia::render('admin/albums/index', [
@@ -79,13 +89,18 @@ class AlbumController extends Controller
     {
         $this->authorize('create', Album::class);
 
+        $validated = $request->validated();
+        $teamIds = $validated['team_ids'];
+
         $album = Album::query()->create([
-            ...$request->validated(),
+            ...collect($validated)->except('team_ids')->all(),
+            'team_id' => $teamIds[0],
             'status' => Album::STATUS_DRAFT,
             'created_by' => $request->user()?->id,
             'updated_by' => $request->user()?->id,
             'published_at' => null,
         ]);
+        $album->teams()->sync($teamIds);
 
         $this->auditLogger->log(
             action: 'album.created',
@@ -95,6 +110,7 @@ class AlbumController extends Controller
             metadata: [
                 'album_id' => $album->id,
                 'team_id' => $album->team_id,
+                'team_ids' => $teamIds,
                 'status' => $album->status,
             ],
         );
@@ -106,13 +122,14 @@ class AlbumController extends Controller
     {
         $this->authorize('view', $album);
 
-        $album->load(['team:id,name,slug', 'creator:id,name,email', 'updater:id,name,email'])
+        $album->load(['team:id,name,slug', 'teams:id,name,slug', 'creator:id,name,email', 'updater:id,name,email'])
             ->loadCount(['stickers']);
 
         return Inertia::render('admin/albums/show', [
             'album' => [
                 'id' => $album->id,
                 'team_id' => $album->team_id,
+                'team_ids' => $album->teams->pluck('id')->whenEmpty(fn ($collection) => $album->team_id ? $collection->push($album->team_id) : $collection)->values()->all(),
                 'name' => $album->name,
                 'slug' => $album->slug,
                 'season' => $album->season,
@@ -124,6 +141,7 @@ class AlbumController extends Controller
                 'published_at' => optional($album->published_at)?->toDateTimeString(),
                 'stickers_count' => $album->stickers_count,
                 'team' => $album->team,
+                'teams' => $album->teams,
                 'creator' => $album->creator,
                 'updater' => $album->updater,
                 'created_at' => optional($album->created_at)?->toDateTimeString(),
@@ -140,6 +158,7 @@ class AlbumController extends Controller
             'album' => [
                 'id' => $album->id,
                 'team_id' => $album->team_id,
+                'team_ids' => $album->teams()->pluck('teams.id')->whenEmpty(fn ($collection) => $album->team_id ? $collection->push($album->team_id) : $collection)->values()->all(),
                 'name' => $album->name,
                 'slug' => $album->slug,
                 'season' => $album->season,
@@ -163,10 +182,15 @@ class AlbumController extends Controller
             ]);
         }
 
+        $validated = $request->validated();
+        $teamIds = $validated['team_ids'];
+
         $album->fill([
-            ...$request->validated(),
+            ...collect($validated)->except('team_ids')->all(),
+            'team_id' => $teamIds[0],
             'updated_by' => $request->user()?->id,
         ])->save();
+        $album->teams()->sync($teamIds);
 
         $this->auditLogger->log(
             action: 'album.updated',
@@ -176,6 +200,7 @@ class AlbumController extends Controller
             metadata: [
                 'album_id' => $album->id,
                 'team_id' => $album->team_id,
+                'team_ids' => $teamIds,
                 'status' => $album->status,
             ],
         );
@@ -199,15 +224,24 @@ class AlbumController extends Controller
             ]);
         }
 
+        $teamIds = $album->teams()->pluck('teams.id')->values();
+
+        if ($teamIds->isEmpty() && $album->team_id !== null) {
+            $teamIds = collect([$album->team_id]);
+        }
+
         $hasAnotherActive = Album::query()
-            ->where('team_id', $album->team_id)
             ->where('status', Album::STATUS_ACTIVE)
             ->where('id', '!=', $album->id)
+            ->where(function ($query) use ($teamIds): void {
+                $query->whereIn('team_id', $teamIds->all())
+                    ->orWhereHas('teams', fn ($teamQuery) => $teamQuery->whereIn('teams.id', $teamIds->all()));
+            })
             ->exists();
 
         if ($hasAnotherActive) {
             return back()->withErrors([
-                'album' => 'Já existe um álbum ativo para este time. Arquive o álbum ativo antes de publicar outro.',
+                'album' => 'Já existe um álbum ativo para uma das equipes vinculadas. Arquive o álbum ativo antes de publicar outro.',
             ]);
         }
 
@@ -225,6 +259,7 @@ class AlbumController extends Controller
             metadata: [
                 'album_id' => $album->id,
                 'team_id' => $album->team_id,
+                'team_ids' => $teamIds->all(),
             ],
         );
 
@@ -254,6 +289,7 @@ class AlbumController extends Controller
             metadata: [
                 'album_id' => $album->id,
                 'team_id' => $album->team_id,
+                'team_ids' => $album->teams()->pluck('teams.id')->values()->all(),
             ],
         );
 

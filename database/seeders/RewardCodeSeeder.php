@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Album;
 use App\Models\RewardCode;
-use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -15,7 +14,6 @@ class RewardCodeSeeder extends Seeder
      */
     public function run(): void
     {
-        $team = Team::query()->where('slug', 'maha')->firstOrFail();
         $album = Album::query()->where('slug', 'album-copa-maha-2026')->firstOrFail();
 
         $master = User::query()->where('email', (string) (env('MASTER_EMAIL') ?: env('ADMIN_EMAIL') ?: 'lfsnascimento84@gmail.com'))->first();
@@ -55,7 +53,7 @@ class RewardCodeSeeder extends Seeder
             RewardCode::query()->updateOrCreate(
                 ['code' => $item['code']],
                 [
-                    'team_id' => $team->id,
+                    'team_id' => $album->team_id,
                     'album_id' => $album->id,
                     'title' => $item['title'],
                     'description' => $item['description'],

@@ -65,7 +65,10 @@ export default function AdminUsersIndex({ users, filters }: Props) {
     };
 
     const approve = (id: number) => {
-        router.patch(`/admin/users/${id}/approve`);
+        router.patch(`/admin/users/${id}/approve`, {}, {
+            preserveScroll: true,
+            onSuccess: () => router.reload({ only: ['users'] }),
+        });
     };
 
     const reject = (id: number) => {
@@ -75,7 +78,10 @@ export default function AdminUsersIndex({ users, filters }: Props) {
             return;
         }
 
-        router.patch(`/admin/users/${id}/reject`, { rejection_reason: reason });
+        router.patch(`/admin/users/${id}/reject`, { rejection_reason: reason }, {
+            preserveScroll: true,
+            onSuccess: () => router.reload({ only: ['users'] }),
+        });
     };
 
     const suspend = (id: number) => {
@@ -83,7 +89,10 @@ export default function AdminUsersIndex({ users, filters }: Props) {
             return;
         }
 
-        router.patch(`/admin/users/${id}/suspend`);
+        router.patch(`/admin/users/${id}/suspend`, {}, {
+            preserveScroll: true,
+            onSuccess: () => router.reload({ only: ['users'] }),
+        });
     };
 
     return (
@@ -157,28 +166,31 @@ export default function AdminUsersIndex({ users, filters }: Props) {
                                             {canApprove ? (
                                                 <button
                                                     type="button"
-                                                    className="text-xs underline"
+                                                    className="text-xs underline disabled:cursor-not-allowed disabled:no-underline disabled:opacity-60"
                                                     onClick={() => approve(user.id)}
+                                                    disabled={user.approval_status === 'approved'}
                                                 >
-                                                    Aprovar
+                                                    {user.approval_status === 'approved' ? 'Aprovado' : 'Aprovar'}
                                                 </button>
                                             ) : null}
                                             {canReject ? (
                                                 <button
                                                     type="button"
-                                                    className="text-xs underline"
+                                                    className="text-xs underline disabled:cursor-not-allowed disabled:no-underline disabled:opacity-60"
                                                     onClick={() => reject(user.id)}
+                                                    disabled={user.approval_status === 'rejected'}
                                                 >
-                                                    Rejeitar
+                                                    {user.approval_status === 'rejected' ? 'Rejeitado' : 'Rejeitar'}
                                                 </button>
                                             ) : null}
                                             {canSuspend ? (
                                                 <button
                                                     type="button"
-                                                    className="text-xs underline"
+                                                    className="text-xs underline disabled:cursor-not-allowed disabled:no-underline disabled:opacity-60"
                                                     onClick={() => suspend(user.id)}
+                                                    disabled={user.approval_status === 'suspended'}
                                                 >
-                                                    Suspender
+                                                    {user.approval_status === 'suspended' ? 'Suspenso' : 'Suspender'}
                                                 </button>
                                             ) : null}
                                         </td>

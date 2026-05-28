@@ -17,7 +17,6 @@ type RewardCode = {
     revoked_at: string | null;
     revoke_reason: string | null;
     album: { id: number; name: string; status: string };
-    team: { id: number; name: string };
     redemptions: { id: number; redeemed_at: string | null; user: { id: number; email: string } }[];
     sticker_packs: { id: number; status: string; created_at: string | null; user: { id: number; email: string } }[];
 };

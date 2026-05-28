@@ -4,7 +4,7 @@ import type { FormEvent } from 'react';
 type Team = { id: number; name: string };
 
 type AlbumFormValues = {
-    team_id: number | '';
+    team_ids: number[];
     name: string;
     slug: string;
     season: string;
@@ -39,15 +39,32 @@ export default function AlbumForm({ teams, initialValues, submitLabel, submitUrl
 
     return (
         <form onSubmit={submit} className="grid gap-3 rounded-sm border p-4 md:grid-cols-2">
-            <div>
-                <label className="text-xs uppercase text-muted-foreground">Time</label>
-                <select className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" value={form.data.team_id} onChange={(event) => form.setData('team_id', Number(event.target.value) || '')}>
-                    <option value="">Selecione</option>
-                    {teams.map((team) => (
-                        <option key={team.id} value={team.id}>{team.name}</option>
-                    ))}
-                </select>
-                {form.errors.team_id ? <p className="mt-1 text-xs text-red-600">{form.errors.team_id}</p> : null}
+            <div className="md:col-span-2">
+                <label className="text-xs uppercase text-muted-foreground">Equipes do álbum</label>
+                <div className="mt-1 grid gap-2 rounded-sm border border-zinc-300 bg-white p-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {teams.map((team) => {
+                        const checked = form.data.team_ids.includes(team.id);
+
+                        return (
+                            <label key={team.id} className="flex items-center gap-2 text-sm text-zinc-800">
+                                <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={(event) => {
+                                        if (event.target.checked) {
+                                            form.setData('team_ids', [...form.data.team_ids, team.id]);
+                                        } else {
+                                            form.setData('team_ids', form.data.team_ids.filter((id) => id !== team.id));
+                                        }
+                                    }}
+                                />
+                                <span>{team.name}</span>
+                            </label>
+                        );
+                    })}
+                </div>
+                {form.errors.team_ids ? <p className="mt-1 text-xs text-red-600">{form.errors.team_ids}</p> : null}
+                {form.errors['team_ids.0'] ? <p className="mt-1 text-xs text-red-600">{form.errors['team_ids.0']}</p> : null}
             </div>
             <div>
                 <label className="text-xs uppercase text-muted-foreground">Nome</label>

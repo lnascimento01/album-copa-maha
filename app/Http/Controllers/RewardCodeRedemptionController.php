@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\RedeemRewardCodeRequest;
+use App\Models\Album;
 use App\Models\RewardCode;
 use App\Models\RewardCodeRedemption;
 use App\Models\User;
@@ -40,8 +41,14 @@ class RewardCodeRedemptionController extends Controller
             ])
             ->values();
 
+        $activeAlbum = Album::query()
+            ->where('status', Album::STATUS_ACTIVE)
+            ->orderBy('id')
+            ->first(['id', 'name']);
+
         return Inertia::render('reward-codes/redeem', [
             'recentRedemptions' => $recent,
+            'activeAlbum' => $activeAlbum,
         ]);
     }
 
@@ -53,7 +60,11 @@ class RewardCodeRedemptionController extends Controller
         $this->authorize('redeemOwn', RewardCode::class);
 
         try {
-            $result = $this->redeemRewardCodeService->redeem((string) $request->validated('code'), $user);
+            $result = $this->redeemRewardCodeService->redeem(
+                (string) $request->validated('code'),
+                $user,
+                $request->integer('album_id') ?: null,
+            );
 
             try {
                 $album = $result['redemption']->rewardCode?->album;
@@ -111,6 +122,7 @@ class RewardCodeRedemptionController extends Controller
             'expired' => 'Este código expirou.',
             'max_per_user_reached' => 'Você já atingiu o limite de resgates deste código.',
             'user_not_approved' => 'Sua conta ainda não está liberada para participar.',
+            'wrong_album' => 'Este código não está disponível para o álbum ativo.',
             default => 'Código inválido ou indisponível.',
         };
     }

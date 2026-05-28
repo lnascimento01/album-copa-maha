@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityCheckin;
+use App\Models\Album;
 use App\Models\AuditLog;
 use App\Models\RewardCode;
 use App\Models\RewardCodeRedemption;
@@ -11,6 +12,7 @@ use App\Models\SocialMissionSubmission;
 use App\Models\StickerPack;
 use App\Models\User;
 use App\Models\UserAchievement;
+use App\Models\UserSticker;
 use App\Services\Achievements\EvaluateUserAchievementsService;
 use App\Services\Rankings\BuildAlbumRankingService;
 use Illuminate\Http\Request;
@@ -73,6 +75,22 @@ class DashboardController extends Controller
 
         $ranking = $this->buildAlbumRankingService->build(includeAdmins: false);
         $myRank = $ranking['rows']->firstWhere('user_id', $user->id);
+        $activeAlbum = $ranking['album'] instanceof Album
+            ? $ranking['album']
+            : Album::query()->where('status', Album::STATUS_ACTIVE)->first();
+
+        $activeStickerIds = $activeAlbum
+            ? $activeAlbum->collectibleStickersQuery()->pluck('id')
+            : collect();
+
+        $albumTotal = $activeStickerIds->count();
+        $albumUnlocked = $albumTotal > 0
+            ? (int) UserSticker::query()
+                ->where('user_id', $user->id)
+                ->whereIn('sticker_id', $activeStickerIds)
+                ->distinct('sticker_id')
+                ->count('sticker_id')
+            : 0;
 
         $recentCards = ShareCard::query()
             ->where('user_id', $user->id)
@@ -94,14 +112,39 @@ class DashboardController extends Controller
             'approvalStatus' => $user->approval_status,
             'permissions' => $user->permissions()->pluck('slug')->values()->all(),
             'stats' => [
-                'checkins' => ActivityCheckin::query()->where('user_id', $user->id)->count(),
-                'pendingPacks' => StickerPack::query()->where('user_id', $user->id)->where('status', StickerPack::STATUS_PENDING)->count(),
-                'redeemedCodes' => RewardCodeRedemption::query()->where('user_id', $user->id)->count(),
-                'missionsPending' => SocialMissionSubmission::query()->where('user_id', $user->id)->where('status', SocialMissionSubmission::STATUS_PENDING)->count(),
-                'missionsApproved' => SocialMissionSubmission::query()->where('user_id', $user->id)->where('status', SocialMissionSubmission::STATUS_APPROVED)->count(),
-                'achievementsUnlocked' => UserAchievement::query()->where('user_id', $user->id)->count(),
+                'checkins' => ActivityCheckin::query()
+                    ->where('user_id', $user->id)
+                    ->when($activeAlbum, fn ($query) => $query->whereHas('activity', fn ($activityQuery) => $activityQuery->where('album_id', $activeAlbum->id)))
+                    ->count(),
+                'pendingPacks' => StickerPack::query()
+                    ->where('user_id', $user->id)
+                    ->where('status', StickerPack::STATUS_PENDING)
+                    ->when($activeAlbum, fn ($query) => $query->where('album_id', $activeAlbum->id))
+                    ->count(),
+                'redeemedCodes' => RewardCodeRedemption::query()
+                    ->where('user_id', $user->id)
+                    ->when($activeAlbum, fn ($query) => $query->whereHas('rewardCode', fn ($rewardCodeQuery) => $rewardCodeQuery->where('album_id', $activeAlbum->id)))
+                    ->count(),
+                'missionsPending' => SocialMissionSubmission::query()
+                    ->where('user_id', $user->id)
+                    ->where('status', SocialMissionSubmission::STATUS_PENDING)
+                    ->when($activeAlbum, fn ($query) => $query->whereHas('mission', fn ($missionQuery) => $missionQuery->where('album_id', $activeAlbum->id)))
+                    ->count(),
+                'missionsApproved' => SocialMissionSubmission::query()
+                    ->where('user_id', $user->id)
+                    ->where('status', SocialMissionSubmission::STATUS_APPROVED)
+                    ->when($activeAlbum, fn ($query) => $query->whereHas('mission', fn ($missionQuery) => $missionQuery->where('album_id', $activeAlbum->id)))
+                    ->count(),
+                'achievementsUnlocked' => UserAchievement::query()
+                    ->where('user_id', $user->id)
+                    ->when($activeAlbum, fn ($query) => $query->where(function ($inner) use ($activeAlbum): void {
+                        $inner->whereNull('album_id')->orWhere('album_id', $activeAlbum->id);
+                    }))
+                    ->count(),
                 'rankingPosition' => $myRank['position'] ?? null,
                 'rankingScore' => $myRank['score'] ?? null,
+                'albumUnlocked' => $albumUnlocked,
+                'albumTotal' => $albumTotal,
             ],
             'profile' => [
                 'id' => $user->id,

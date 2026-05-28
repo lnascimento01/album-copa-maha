@@ -72,8 +72,21 @@ class StickerController extends Controller
     {
         $this->authorize('create', Sticker::class);
 
+        $albums = Album::query()
+            ->with('teams:id')
+            ->orderBy('name')
+            ->get()
+            ->map(fn (Album $album): array => [
+                'id' => $album->id,
+                'name' => $album->name,
+                'team_id' => $album->team_id,
+                'team_ids' => $album->teams->pluck('id')->whenEmpty(fn ($collection) => $album->team_id ? $collection->push($album->team_id) : $collection)->values()->all(),
+            ])
+            ->values()
+            ->all();
+
         return Inertia::render('admin/stickers/create', [
-            'albums' => Album::query()->orderBy('name')->get(['id', 'name', 'team_id']),
+            'albums' => $albums,
             'players' => Player::query()->orderBy('name')->get(['id', 'name', 'team_id']),
             'types' => Sticker::TYPES,
             'rarities' => Sticker::RARITIES,
@@ -138,6 +151,19 @@ class StickerController extends Controller
     {
         $this->authorize('update', $sticker);
 
+        $albums = Album::query()
+            ->with('teams:id')
+            ->orderBy('name')
+            ->get()
+            ->map(fn (Album $album): array => [
+                'id' => $album->id,
+                'name' => $album->name,
+                'team_id' => $album->team_id,
+                'team_ids' => $album->teams->pluck('id')->whenEmpty(fn ($collection) => $album->team_id ? $collection->push($album->team_id) : $collection)->values()->all(),
+            ])
+            ->values()
+            ->all();
+
         return Inertia::render('admin/stickers/edit', [
             'sticker' => [
                 'id' => $sticker->id,
@@ -153,7 +179,7 @@ class StickerController extends Controller
                 'sort_order' => $sticker->sort_order,
                 'is_active' => $sticker->is_active,
             ],
-            'albums' => Album::query()->orderBy('name')->get(['id', 'name', 'team_id']),
+            'albums' => $albums,
             'players' => Player::query()->orderBy('name')->get(['id', 'name', 'team_id']),
             'types' => Sticker::TYPES,
             'rarities' => Sticker::RARITIES,

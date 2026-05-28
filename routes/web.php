@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\UserApprovalController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AlbumCollectionController;
+use App\Http\Controllers\ApprovalStatusController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RankingController;
 use App\Http\Controllers\RewardCodeRedemptionController;
@@ -54,6 +55,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/approval/pending', fn () => inertia('approval/pending'))->name('approval.pending');
     Route::get('/approval/rejected', fn () => inertia('approval/rejected'))->name('approval.rejected');
     Route::get('/approval/suspended', fn () => inertia('approval/suspended'))->name('approval.suspended');
+    Route::get('/approval/status', ApprovalStatusController::class)->name('approval.status');
 
     Route::get('/dashboard', DashboardController::class)
         ->middleware('approved')

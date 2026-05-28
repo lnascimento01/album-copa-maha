@@ -46,12 +46,13 @@ class EvaluateUserAchievementsService
         }
 
         $metrics = $this->buildMetrics($user, $album);
+        $albumTeamIds = $album->teams()->pluck('teams.id')->whenEmpty(fn ($collection) => $album->team_id ? $collection->push($album->team_id) : $collection);
 
         $achievements = Achievement::query()
             ->where('is_active', true)
-            ->where(function ($query) use ($album) {
+            ->where(function ($query) use ($albumTeamIds) {
                 $query->whereNull('team_id')
-                    ->orWhere('team_id', $album->team_id);
+                    ->orWhereIn('team_id', $albumTeamIds->all());
             })
             ->where(function ($query) use ($album) {
                 $query->whereNull('album_id')
@@ -135,13 +136,14 @@ class EvaluateUserAchievementsService
      */
     private function buildMetrics(User $user, Album $album): array
     {
-        $activeStickerIds = $album->stickers()->where('is_active', true)->pluck('id');
+        $activeStickerIds = $album->collectibleStickersQuery()->pluck('id');
         $totalStickers = $activeStickerIds->count();
 
         $stickersUnlocked = UserSticker::query()
             ->where('user_id', $user->id)
             ->whereIn('sticker_id', $activeStickerIds)
-            ->count();
+            ->distinct('sticker_id')
+            ->count('sticker_id');
 
         $progressPercent = $totalStickers > 0
             ? (int) floor(($stickersUnlocked / $totalStickers) * 100)

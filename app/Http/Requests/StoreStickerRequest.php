@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Album;
+use App\Models\Player;
 use App\Models\Sticker;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
@@ -48,9 +50,31 @@ class StoreStickerRequest extends FormRequest
         $validator->after(function ($validator): void {
             $albumId = $this->integer('album_id');
             $code = (string) $this->input('code');
+            $playerId = $this->integer('player_id');
 
             if (Sticker::query()->where('album_id', $albumId)->where('code', $code)->exists()) {
                 $validator->errors()->add('code', 'O código já existe neste álbum.');
+            }
+
+            if ($playerId <= 0) {
+                return;
+            }
+
+            $album = Album::query()->with('teams:id')->find($albumId);
+            $player = Player::query()->find($playerId);
+
+            if (! $album || ! $player) {
+                return;
+            }
+
+            $allowedTeamIds = $album->teams->pluck('id')->all();
+
+            if ($allowedTeamIds === [] && $album->team_id !== null) {
+                $allowedTeamIds = [$album->team_id];
+            }
+
+            if (! in_array($player->team_id, $allowedTeamIds, true)) {
+                $validator->errors()->add('player_id', 'O jogador precisa pertencer a uma equipe vinculada ao álbum.');
             }
         });
     }

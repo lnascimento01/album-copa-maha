@@ -1,10 +1,9 @@
 import { Head } from '@inertiajs/react';
 import RewardCodeForm from './form';
 
-type Team = { id: number; name: string };
 type Album = { id: number; name: string; team_id?: number };
 
-export default function AdminRewardCodeCreate({ teams, albums, statuses, channels }: { teams: Team[]; albums: Album[]; statuses: string[]; channels: string[] }) {
+export default function AdminRewardCodeCreate({ albums, statuses, channels }: { albums: Album[]; statuses: string[]; channels: string[] }) {
     return (
         <>
             <Head title="Novo Código" />
@@ -12,7 +11,6 @@ export default function AdminRewardCodeCreate({ teams, albums, statuses, channel
                 <h1 className="text-xl font-semibold tracking-tight">Novo Código Promocional</h1>
                 <RewardCodeForm
                     initialValues={{
-                        team_id: '',
                         album_id: '',
                         code: '',
                         title: '',
@@ -26,7 +24,6 @@ export default function AdminRewardCodeCreate({ teams, albums, statuses, channel
                         max_total_redemptions: '',
                         max_redemptions_per_user: 1,
                     }}
-                    teams={teams}
                     albums={albums}
                     statuses={statuses}
                     channels={channels}

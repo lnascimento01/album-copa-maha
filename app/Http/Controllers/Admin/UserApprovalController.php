@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\RejectUserRequest;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -13,7 +14,7 @@ class UserApprovalController extends Controller
 {
     public function __construct(private readonly AuditLogger $auditLogger) {}
 
-    public function approve(Request $request, User $user): RedirectResponse
+    public function approve(Request $request, User $user): RedirectResponse|JsonResponse
     {
         $this->authorize('approve', $user);
 
@@ -37,10 +38,18 @@ class UserApprovalController extends Controller
             entityId: $user->id,
         );
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'id' => $user->id,
+                'approval_status' => $user->approval_status,
+                'approved_at' => optional($user->approved_at)?->toDateTimeString(),
+            ]);
+        }
+
         return back()->with('success', 'Usuário aprovado com sucesso.');
     }
 
-    public function reject(RejectUserRequest $request, User $user): RedirectResponse
+    public function reject(RejectUserRequest $request, User $user): RedirectResponse|JsonResponse
     {
         /** @var User|null $actor */
         $actor = $request->user();
@@ -66,10 +75,19 @@ class UserApprovalController extends Controller
             entityId: $user->id,
         );
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'id' => $user->id,
+                'approval_status' => $user->approval_status,
+                'rejected_at' => optional($user->rejected_at)?->toDateTimeString(),
+                'rejection_reason' => $user->rejection_reason,
+            ]);
+        }
+
         return back()->with('success', 'Usuário rejeitado.');
     }
 
-    public function suspend(Request $request, User $user): RedirectResponse
+    public function suspend(Request $request, User $user): RedirectResponse|JsonResponse
     {
         $this->authorize('suspend', $user);
 
@@ -88,6 +106,13 @@ class UserApprovalController extends Controller
             entityType: User::class,
             entityId: $user->id,
         );
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'id' => $user->id,
+                'approval_status' => $user->approval_status,
+            ]);
+        }
 
         return back()->with('success', 'Usuário suspenso.');
     }

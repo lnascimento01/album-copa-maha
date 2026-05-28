@@ -3,7 +3,6 @@
 namespace App\Services\Stickers;
 
 use App\Models\Album;
-use App\Models\Sticker;
 use App\Models\StickerPack;
 use App\Models\StickerPackItem;
 use App\Models\User;
@@ -79,9 +78,7 @@ class OpenStickerPackService
                 ]);
             }
 
-            $activeStickerIds = Sticker::query()
-                ->where('album_id', $pack->album_id)
-                ->where('is_active', true)
+            $activeStickerIds = $pack->album->collectibleStickersQuery()
                 ->pluck('id')
                 ->all();
 

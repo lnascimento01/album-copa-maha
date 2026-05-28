@@ -29,7 +29,7 @@ class BuildAlbumRankingService
             ];
         }
 
-        $activeStickerIds = $album->stickers()->where('is_active', true)->pluck('id');
+        $activeStickerIds = $album->collectibleStickersQuery()->pluck('id');
         $totalStickers = $activeStickerIds->count();
 
         $users = User::query()
@@ -41,7 +41,8 @@ class BuildAlbumRankingService
             $stickersUnlockedCount = UserSticker::query()
                 ->where('user_id', $user->id)
                 ->whereIn('sticker_id', $activeStickerIds)
-                ->count();
+                ->distinct('sticker_id')
+                ->count('sticker_id');
 
             $packsOpenedCount = StickerPack::query()
                 ->where('user_id', $user->id)

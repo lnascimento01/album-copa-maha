@@ -18,10 +18,11 @@ type Flash = {
     };
 };
 
-export default function RewardCodeRedeemPage({ recentRedemptions }: { recentRedemptions: RedemptionRow[] }) {
+export default function RewardCodeRedeemPage({ recentRedemptions, activeAlbum }: { recentRedemptions: RedemptionRow[]; activeAlbum: { id: number; name: string } | null }) {
     const page = usePage<{ flash?: Flash }>();
     const form = useForm({
         code: '',
+        album_id: activeAlbum?.id ?? null,
     });
 
     const submit = (event: FormEvent<HTMLFormElement>) => {
@@ -40,6 +41,9 @@ export default function RewardCodeRedeemPage({ recentRedemptions }: { recentRede
                 />
 
                 <form onSubmit={submit} className="space-y-3 rounded-md border border-zinc-200 bg-white p-4 md:max-w-xl">
+                    <div className="rounded-sm border border-zinc-300 bg-zinc-50 px-3 py-2 text-xs text-zinc-700">
+                        Escopo de resgate atual: {activeAlbum?.name ?? 'Nenhum álbum ativo'}
+                    </div>
                     <div>
                         <label htmlFor="code" className="text-xs uppercase tracking-wide text-zinc-500">Código</label>
                         <input

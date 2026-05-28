@@ -26,6 +26,7 @@ class RedeemRewardCodeRequest extends FormRequest
     {
         return [
             'code' => ['required', 'string', 'max:80', 'regex:/^[A-Z0-9\-]+$/'],
+            'album_id' => ['nullable', 'integer', 'exists:albums,id'],
         ];
     }
 }

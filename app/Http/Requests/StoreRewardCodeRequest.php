@@ -32,7 +32,7 @@ class StoreRewardCodeRequest extends FormRequest
     {
         return [
             'album_id' => ['required', 'integer', 'exists:albums,id'],
-            'team_id' => ['required', 'integer', 'exists:teams,id'],
+            'team_id' => ['nullable', 'integer', 'exists:teams,id'],
             'code' => ['required', 'string', 'max:80', 'regex:/^[A-Z0-9\-]+$/', Rule::unique(RewardCode::class, 'code')],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],

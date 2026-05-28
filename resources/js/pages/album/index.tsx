@@ -14,7 +14,7 @@ type AlbumSticker = {
     description: string | null;
     type: string;
     rarity: string;
-    image_path: string | null;
+    image_url: string | null;
     is_unlocked: boolean;
 };
 
@@ -24,6 +24,7 @@ type AlbumPayload = {
     slug: string;
     season: string | null;
     team: { id: number; name: string; slug: string; short_name: string | null };
+    teams: Array<{ id: number; name: string; slug: string; short_name: string | null }>;
     stickers: AlbumSticker[];
 };
 
@@ -113,7 +114,11 @@ export default function AlbumIndex({ album, progress, packs, can, progressAchiev
                 ) : (
                     <>
                         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                            <MetricCard label="Álbum ativo" value={album.name} hint={album.team.name} />
+                            <MetricCard
+                                label="Álbum ativo"
+                                value={album.name}
+                                hint={album.teams.length > 0 ? album.teams.map((team) => team.short_name ?? team.name).join(' • ') : album.team.name}
+                            />
                             <MetricCard label="Figurinhas desbloqueadas" value={`${progress.unlocked}/${progress.total}`} accent="success" />
                             <MetricCard label="Progresso" value={`${progress.percent}%`} hint={<ProgressBar value={progress.percent} />} />
                             <MetricCard
@@ -171,8 +176,8 @@ export default function AlbumIndex({ album, progress, packs, can, progressAchiev
                                         className="block rounded-md border border-zinc-200 bg-white p-2 transition hover:bg-zinc-50"
                                     >
                                         <div className={`aspect-[3/4] overflow-hidden rounded-sm border ${sticker.is_unlocked ? 'border-zinc-300 bg-zinc-100' : 'border-zinc-300 bg-zinc-200/70'}`}>
-                                            {sticker.image_path && sticker.is_unlocked ? (
-                                                <img src={sticker.image_path} alt={sticker.title} className="h-full w-full object-cover" />
+                                            {sticker.image_url && sticker.is_unlocked ? (
+                                                <img src={sticker.image_url} alt={sticker.title} className="h-full w-full object-cover" />
                                             ) : (
                                                 <div className="flex h-full flex-col items-center justify-center gap-1 px-2 text-center">
                                                     <div className="text-[11px] font-mono text-zinc-700">{sticker.code}</div>

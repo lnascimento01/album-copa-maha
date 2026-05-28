@@ -16,7 +16,8 @@ class StickerCatalogSeeder extends Seeder
     public function run(): void
     {
         $team = Team::query()->where('slug', 'maha')->firstOrFail();
-        $album = Album::query()->where('team_id', $team->id)->where('slug', 'album-copa-maha-2026')->firstOrFail();
+        $album = Album::query()->where('slug', 'album-copa-maha-2026')->firstOrFail();
+        $album->teams()->syncWithoutDetaching([$team->id]);
 
         $sortOrder = 1;
 

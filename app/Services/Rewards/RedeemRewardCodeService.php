@@ -20,7 +20,7 @@ class RedeemRewardCodeService
     /**
      * @return array{redemption: RewardCodeRedemption, pack_ids: int[]}
      */
-    public function redeem(string $rawCode, User $actor): array
+    public function redeem(string $rawCode, User $actor, ?int $albumId = null): array
     {
         $code = Str::upper(trim($rawCode));
 
@@ -39,7 +39,7 @@ class RedeemRewardCodeService
                 ]);
             }
 
-            $this->assertCanRedeem($rewardCode, $actor);
+            $this->assertCanRedeem($rewardCode, $actor, $albumId);
 
             $userRedemptionsCount = RewardCodeRedemption::query()
                 ->where('reward_code_id', $rewardCode->id)
@@ -148,7 +148,7 @@ class RedeemRewardCodeService
         }
     }
 
-    private function assertCanRedeem(RewardCode $rewardCode, User $actor): void
+    private function assertCanRedeem(RewardCode $rewardCode, User $actor, ?int $albumId): void
     {
         if (! $actor->isApproved()) {
             throw new RewardCodeRedeemException('Sua conta ainda não está liberada para participar.', 'user_not_approved', [
@@ -180,6 +180,15 @@ class RedeemRewardCodeService
                 'reward_code_id' => $rewardCode->id,
                 'code' => $rewardCode->code,
                 'user_id' => $actor->id,
+            ]);
+        }
+
+        if ($albumId !== null && $rewardCode->album_id !== $albumId) {
+            throw new RewardCodeRedeemException('Código inválido ou indisponível.', 'wrong_album', [
+                'reward_code_id' => $rewardCode->id,
+                'code' => $rewardCode->code,
+                'user_id' => $actor->id,
+                'album_id' => $albumId,
             ]);
         }
 

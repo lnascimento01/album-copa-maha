@@ -1,0 +1,40 @@
+FROM php:8.3-fpm-bookworm
+
+ARG WWWUSER=1000
+ARG WWWGROUP=1000
+
+WORKDIR /var/www/html
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        curl \
+        git \
+        unzip \
+        libicu-dev \
+        libonig-dev \
+        libpng-dev \
+        libxml2-dev \
+        libzip-dev \
+    && docker-php-ext-install \
+        bcmath \
+        exif \
+        intl \
+        mbstring \
+        pcntl \
+        pdo_mysql \
+        zip \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+
+RUN groupadd --force -g "${WWWGROUP}" maha \
+    && useradd -ms /bin/bash --no-user-group -g "${WWWGROUP}" -u "${WWWUSER}" maha || true
+
+COPY deploy/php/custom.ini /usr/local/etc/php/conf.d/99-custom.ini
+
+EXPOSE 9000
+
+CMD ["php-fpm", "-F"]

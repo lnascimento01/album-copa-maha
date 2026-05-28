@@ -12,7 +12,7 @@ export default function AdminAlbumCreate({ teams }: { teams: Team[] }) {
                 <AlbumForm
                     teams={teams}
                     initialValues={{
-                        team_id: '',
+                        team_ids: [],
                         name: '',
                         slug: '',
                         season: '',

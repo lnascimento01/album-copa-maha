@@ -1,4 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { OriginBadge } from '@/components/ui/origin-badge';
 import { PageHeader } from '@/components/ui/page-header';
@@ -11,6 +12,7 @@ type Sticker = {
     subtitle: string | null;
     type: string;
     rarity: string;
+    image_url: string;
 };
 
 type PackItem = { id: number; sticker: Sticker };
@@ -58,9 +60,14 @@ function sourceLabel(pack: Pack): string {
 export default function PackShow({ pack }: { pack: Pack }) {
     const page = usePage<{ flash?: Flash }>();
     const revealedIds = page.props.flash?.revealedStickerIds ?? [];
+    const [isOpening, setIsOpening] = useState(false);
 
     const openPack = () => {
-        router.post(`/packs/${pack.id}/open`);
+        setIsOpening(true);
+        router.post(`/packs/${pack.id}/open`, {}, {
+            preserveScroll: true,
+            onFinish: () => setIsOpening(false),
+        });
     };
 
     return (
@@ -104,8 +111,15 @@ export default function PackShow({ pack }: { pack: Pack }) {
                 {pack.status === 'pending' ? (
                     <section className="rounded-md border border-zinc-200 bg-white p-4">
                         <p className="text-sm text-zinc-700">Pacote fechado pronto para abertura.</p>
-                        <button type="button" className="mt-3 rounded-sm border bg-zinc-950 px-3 py-2 text-sm text-white" onClick={openPack}>
-                            Abrir pacote
+                        <div className={`mt-3 flex min-h-28 items-center justify-center rounded-md border border-zinc-300 bg-zinc-100 transition ${isOpening ? 'animate-pulse' : ''}`}>
+                            <div className="text-center">
+                                <div className="text-xs uppercase tracking-wide text-zinc-600">Pacote da temporada</div>
+                                <div className="mt-1 text-sm font-semibold text-zinc-900">{pack.size} figurinhas</div>
+                                <div className="mt-1 text-[11px] text-zinc-600">{isOpening ? 'Revelando figurinhas...' : 'Pronto para abrir'}</div>
+                            </div>
+                        </div>
+                        <button type="button" className="mt-3 rounded-sm border bg-zinc-950 px-3 py-2 text-sm text-white disabled:bg-zinc-500" onClick={openPack} disabled={isOpening}>
+                            {isOpening ? 'Abrindo...' : 'Abrir pacote'}
                         </button>
                     </section>
                 ) : null}
@@ -131,6 +145,9 @@ export default function PackShow({ pack }: { pack: Pack }) {
                             <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                                 {pack.items.map((item) => (
                                     <div key={item.id} className="rounded-md border border-zinc-200 bg-zinc-50 p-3">
+                                        <div className="aspect-[3/4] overflow-hidden rounded-sm border border-zinc-300 bg-zinc-100">
+                                            <img src={item.sticker.image_url} alt={item.sticker.title} className="h-full w-full object-cover" />
+                                        </div>
                                         <div className="font-mono text-xs text-zinc-700">{item.sticker.code}</div>
                                         <div className="mt-1 text-sm font-medium text-zinc-900">{item.sticker.title}</div>
                                         <div className="text-xs text-zinc-600">{item.sticker.type} • {item.sticker.rarity}</div>

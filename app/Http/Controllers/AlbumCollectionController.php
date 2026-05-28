@@ -6,11 +6,14 @@ use App\Models\Achievement;
 use App\Models\Album;
 use App\Models\Sticker;
 use App\Models\User;
+use App\Services\Stickers\StickerImageResolver;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class AlbumCollectionController extends Controller
 {
+    public function __construct(private readonly StickerImageResolver $stickerImageResolver) {}
+
     public function index(): Response
     {
         /** @var User $user */
@@ -18,8 +21,8 @@ class AlbumCollectionController extends Controller
 
         $album = Album::query()
             ->with([
+                'teams:id,name,slug,short_name',
                 'team:id,name,slug,short_name',
-                'stickers' => fn ($query) => $query->where('is_active', true)->orderBy('sort_order')->orderBy('code'),
             ])
             ->where('status', Album::STATUS_ACTIVE)
             ->first();
@@ -37,12 +40,18 @@ class AlbumCollectionController extends Controller
             ]);
         }
 
+        $albumStickers = $album->collectibleStickersQuery()
+            ->with(['player:id,name,team_id', 'player.team:id,slug'])
+            ->orderBy('sort_order')
+            ->orderBy('code')
+            ->get();
+
         $unlockedIds = $user->userStickers()
-            ->whereIn('sticker_id', $album->stickers->pluck('id'))
+            ->whereIn('sticker_id', $albumStickers->pluck('id'))
             ->pluck('sticker_id')
             ->all();
 
-        $stickers = $album->stickers->map(function (Sticker $sticker) use ($unlockedIds): array {
+        $stickers = $albumStickers->map(function (Sticker $sticker) use ($unlockedIds): array {
             $unlocked = in_array($sticker->id, $unlockedIds, true);
 
             return [
@@ -53,7 +62,7 @@ class AlbumCollectionController extends Controller
                 'description' => $unlocked ? $sticker->description : null,
                 'type' => $sticker->type,
                 'rarity' => $sticker->rarity,
-                'image_path' => $unlocked ? $sticker->image_path : null,
+                'image_url' => $unlocked ? $this->stickerImageResolver->resolve($sticker) : null,
                 'is_unlocked' => $unlocked,
             ];
         })->values();
@@ -87,7 +96,13 @@ class AlbumCollectionController extends Controller
                 'name' => $album->name,
                 'slug' => $album->slug,
                 'season' => $album->season,
-                'team' => $album->team,
+                'team' => $album->teams->first() ?? $album->team,
+                'teams' => $album->teams->map(fn ($team): array => [
+                    'id' => $team->id,
+                    'name' => $team->name,
+                    'slug' => $team->slug,
+                    'short_name' => $team->short_name,
+                ])->values()->all(),
                 'stickers' => $stickers,
             ],
             'progress' => [
@@ -120,7 +135,7 @@ class AlbumCollectionController extends Controller
         /** @var User $user */
         $user = request()->user();
 
-        $sticker->load(['album.team:id,name,slug,short_name', 'player:id,name,nickname,position,type']);
+        $sticker->load(['album.teams:id,name,slug,short_name', 'player:id,name,nickname,position,type,team_id', 'player.team:id,slug']);
 
         if ($sticker->album->status !== Album::STATUS_ACTIVE) {
             abort(404);
@@ -138,14 +153,17 @@ class AlbumCollectionController extends Controller
                 'description' => $canSeeFull ? $sticker->description : null,
                 'type' => $sticker->type,
                 'rarity' => $sticker->rarity,
-                'image_path' => $canSeeFull ? $sticker->image_path : null,
+                'image_url' => $canSeeFull ? $this->stickerImageResolver->resolve($sticker) : null,
                 'is_unlocked' => $hasUnlocked,
                 'is_full_visible' => $canSeeFull,
                 'album' => [
                     'id' => $sticker->album->id,
                     'name' => $sticker->album->name,
                     'slug' => $sticker->album->slug,
-                    'team' => $sticker->album->team,
+                    'teams' => $sticker->album->teams->map(fn ($team): array => [
+                        'id' => $team->id,
+                        'name' => $team->name,
+                    ])->values()->all(),
                 ],
                 'player' => $canSeeFull ? $sticker->player : null,
             ],

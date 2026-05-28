@@ -1,11 +1,9 @@
 import { useForm } from '@inertiajs/react';
 import type { FormEvent } from 'react';
 
-type Team = { id: number; name: string };
 type Album = { id: number; name: string; team_id?: number };
 
 type FormValues = {
-    team_id: number | '';
     album_id: number | '';
     code: string;
     title: string;
@@ -22,7 +20,6 @@ type FormValues = {
 
 type Props = {
     initialValues: FormValues;
-    teams: Team[];
     albums: Album[];
     statuses: string[];
     channels: string[];
@@ -33,7 +30,6 @@ type Props = {
 
 export default function RewardCodeForm({
     initialValues,
-    teams,
     albums,
     statuses,
     channels,
@@ -60,17 +56,6 @@ export default function RewardCodeForm({
     return (
         <form onSubmit={submit} className="space-y-4 rounded-sm border p-4">
             <div className="grid gap-3 md:grid-cols-2">
-                <div>
-                    <label className="text-xs uppercase text-muted-foreground">Time</label>
-                    <select className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" value={form.data.team_id} onChange={(event) => form.setData('team_id', Number(event.target.value))}>
-                        <option value="">Selecione</option>
-                        {teams.map((team) => (
-                            <option key={team.id} value={team.id}>{team.name}</option>
-                        ))}
-                    </select>
-                    {form.errors.team_id ? <div className="mt-1 text-xs text-red-700">{form.errors.team_id}</div> : null}
-                </div>
-
                 <div>
                     <label className="text-xs uppercase text-muted-foreground">Álbum</label>
                     <select className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" value={form.data.album_id} onChange={(event) => form.setData('album_id', Number(event.target.value))}>

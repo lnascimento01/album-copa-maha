@@ -149,6 +149,20 @@ Observação sobre imagens na Etapa 9:
 - os campos `*_path` seguem textuais com preview (URL/caminho);
 - upload completo via storage público pode entrar numa etapa dedicada de hardening.
 
+## Etapa 11 (preparação de staging/deploy controlado)
+
+Esta etapa adiciona infraestrutura e documentação de deploy para staging sem alterar regras de domínio:
+
+- `.env.staging.example` com defaults seguros para staging;
+- compose de staging separado (`deploy/docker-compose.staging.yml`);
+- Dockerfile de staging (`deploy/Dockerfile.staging`);
+- configuração de Nginx de exemplo (`deploy/nginx/app.conf.example`);
+- script de build/deploy (`deploy/staging-build.sh`);
+- script de backup de banco (`deploy/backup-db-example.sh`);
+- documentação operacional (`deploy/README-staging.md` e `deploy/checklist-staging.md`).
+
+Objetivo: execução previsível, segura e reproduzível para piloto controlado.
+
 ## Requisitos
 
 - Docker + Docker Compose
@@ -168,6 +182,12 @@ Observação sobre imagens na Etapa 9:
 
 ```bash
 cp .env.example .env
+```
+
+Para staging:
+
+```bash
+cp .env.staging.example .env
 ```
 
 Principais variáveis:
@@ -193,6 +213,20 @@ Hardening para piloto:
 - definir `APP_DEBUG=false` fora de desenvolvimento;
 - ajustar `APP_URL` real do ambiente;
 - manter `APP_SEED_DEMO_DATA=false` em piloto quando não quiser dados de demonstração.
+- se `APP_KEY` estiver vazio, gerar antes de subir: `php artisan key:generate --show`.
+
+## Diagnóstico de raiz Git
+
+Estado atual do projeto:
+
+- raiz do repositório Git: `/Users/leandro/Documents/Álbum da Copa MAHA/maha-copa-album`;
+- branch principal: `main`;
+- remote SSH: `git@github-contaB:lnascimento01/album-copa-maha.git`.
+
+Orientação segura:
+
+- executar commits/PR sempre dentro do diretório `maha-copa-album`;
+- em automações/scripts, usar `git rev-parse --show-toplevel` para validar contexto antes de operações Git.
 
 ## Subir com Sail
 
@@ -201,6 +235,28 @@ Hardening para piloto:
 ```
 
 Aplicação local: `http://localhost:38080`
+
+> O fluxo com Sail (local/dev) continua preservado. A configuração de staging fica isolada em `deploy/`.
+
+## Acesso via ngrok (HTTPS sem mixed content)
+
+Quando expor o app local por ngrok, não é necessário criar certificado SSL dentro do Laravel.
+O túnel ngrok já entrega HTTPS e o app precisa apenas gerar URLs com esquema correto.
+
+No `.env` local, ajuste:
+
+```bash
+APP_URL=https://SEU-SUBDOMINIO.ngrok-free.app
+ASSET_URL=https://SEU-SUBDOMINIO.ngrok-free.app
+FORCE_HTTPS=true
+SESSION_SECURE_COOKIE=true
+```
+
+Depois recarregue config:
+
+```bash
+./vendor/bin/sail artisan config:clear
+```
 
 ## Migrations e seed
 
@@ -616,4 +672,4 @@ Não faz parte desta etapa:
 - automação de publicação social;
 - QR avançado com geolocalização.
 
-Próxima prevista: **Etapa 11** (deploy/staging real com Docker/env de homologação, domínio, HTTPS, backup, logs e storage persistente).
+Próxima prevista: **Etapa 12** (execução/ajuste de deploy em ambiente real específico com domínio, HTTPS, banco persistente, backup real e validação ponta a ponta no servidor).

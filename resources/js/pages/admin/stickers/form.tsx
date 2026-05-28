@@ -2,7 +2,7 @@ import { useForm } from '@inertiajs/react';
 import { useMemo } from 'react';
 import type { FormEvent } from 'react';
 
-type Album = { id: number; name: string; team_id: number };
+type Album = { id: number; name: string; team_id: number | null; team_ids?: number[] };
 type Player = { id: number; name: string; team_id: number };
 
 type StickerFormValues = {
@@ -55,7 +55,13 @@ export default function StickerForm({ albums, players, types, rarities, initialV
             return players;
         }
 
-        return players.filter((player) => player.team_id === selectedAlbum.team_id);
+        const teamIds = selectedAlbum.team_ids ?? (selectedAlbum.team_id ? [selectedAlbum.team_id] : []);
+
+        if (teamIds.length === 0) {
+            return players;
+        }
+
+        return players.filter((player) => teamIds.includes(player.team_id));
     }, [albums, players, form.data.album_id]);
 
     const selectedPlayer = useMemo(() => {
