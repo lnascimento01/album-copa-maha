@@ -201,8 +201,14 @@ class ActivityController extends Controller
                 'event_timezone' => $activity->event_timezone,
                 'event_token' => $activity->event_token,
                 'event_url' => $activity->event_token ? url('/checkin/event/'.$activity->event_token) : null,
-                'starts_at' => optional($activity->starts_at)?->toDateTimeString(),
-                'ends_at' => optional($activity->ends_at)?->toDateTimeString(),
+                'starts_at' => $this->formatActivityDateForDisplay(
+                    value: $activity->starts_at,
+                    timezone: $activity->type === Activity::TYPE_EVENT ? $activity->event_timezone : null,
+                ),
+                'ends_at' => $this->formatActivityDateForDisplay(
+                    value: $activity->ends_at,
+                    timezone: $activity->type === Activity::TYPE_EVENT ? $activity->event_timezone : null,
+                ),
                 'starts_at_display' => $this->formatActivityDateForDisplay(
                     value: $activity->starts_at,
                     timezone: $activity->type === Activity::TYPE_EVENT ? $activity->event_timezone : null,
