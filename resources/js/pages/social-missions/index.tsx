@@ -44,33 +44,57 @@ export default function SocialMissionsIndex({ missions }: { missions: Mission[] 
     return (
         <>
             <Head title="Missões Sociais" />
-            <div className="space-y-4 p-4 sm:p-5">
+            <div className="brand-app-bg space-y-4 p-4 sm:p-5">
                 <PageHeader
-                    title="Missões Sociais Ativas"
-                    subtitle="Participe das ações da temporada e receba pacotes após validação."
-                    actions={<Link href="/social-submissions" className="rounded-sm border border-zinc-300 px-3 py-2 text-xs">Minhas submissões</Link>}
+                    title="Desafios da Temporada"
+                    subtitle="Cumpra missões oficiais, envie sua prova e receba pacotes após validação."
+                    actions={<Link href="/social-submissions" className="rounded-sm border border-border bg-card px-3 py-2 text-xs font-semibold">Minhas submissões</Link>}
                 />
+
+                <section className="season-hero">
+                    <div className="relative z-10">
+                        <p className="season-kicker">Circuito social AAPH</p>
+                        <h2 className="mt-2 text-2xl font-semibold text-primary-foreground">Missões valendo figurinhas</h2>
+                        <p className="mt-1 max-w-2xl text-sm text-primary-foreground/85">
+                            Cada missão aprovada rende pacotes e acelera seu progresso no álbum da temporada.
+                        </p>
+                    </div>
+                </section>
 
                 {missions.length === 0 ? (
                     <EmptyState title="Nenhuma missão ativa no momento." description="Quando o time publicar novas missões, elas aparecerão aqui." />
                 ) : (
                     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                         {missions.map((mission) => (
-                            <article key={mission.id} className="rounded-md border border-zinc-200 bg-white p-4">
+                            <article key={mission.id} className="mission-ticket">
                                 <div className="flex items-start justify-between gap-3">
                                     <div>
-                                        <h2 className="text-sm font-semibold text-zinc-900">{mission.title}</h2>
-                                        <p className="text-xs text-zinc-500">{mission.type}</p>
+                                        <p className="text-[10px] font-semibold tracking-[0.12em] text-dim uppercase">
+                                            {mission.team.name} · {mission.album.name}
+                                        </p>
+                                        <h2 className="mt-1 text-sm font-semibold text-foreground">{mission.title}</h2>
+                                        <p className="text-xs text-dim">{mission.type}</p>
                                     </div>
                                     <StatusBadge value={mission.user_submission_status ?? 'draft'} label={statusLabel(mission.user_submission_status)} />
                                 </div>
-                                <div className="mt-3 flex flex-wrap gap-2">
-                                    <OriginBadge source="social_mission" label={`${mission.reward_pack_quantity} pacote(s)`} />
-                                    <OriginBadge source="social_mission" label={`${mission.reward_pack_size} figurinhas/pacote`} />
+                                <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                                    <div className="rounded-sm border border-border bg-card/60 px-2 py-1.5">
+                                        <p className="text-[10px] uppercase tracking-[0.1em] text-dim">Recompensa</p>
+                                        <p className="mt-1 font-semibold text-foreground">{mission.reward_pack_quantity} pacote(s)</p>
+                                    </div>
+                                    <div className="rounded-sm border border-border bg-card/60 px-2 py-1.5">
+                                        <p className="text-[10px] uppercase tracking-[0.1em] text-dim">Conteúdo</p>
+                                        <p className="mt-1 font-semibold text-foreground">{mission.reward_pack_size} fig./pacote</p>
+                                    </div>
                                 </div>
-                                <p className="mt-3 text-xs text-zinc-600">Prazo: {mission.ends_at ?? 'indefinido'}</p>
-                                <div className="mt-3">
-                                    <Link href={`/social-missions/${mission.id}`} className="text-xs underline">Ver missão</Link>
+                                <div className="mt-3 flex items-center justify-between gap-2 text-xs">
+                                    <span className="rounded-sm border border-border bg-card/65 px-2 py-1 text-dim">
+                                        Prazo: {mission.ends_at ?? 'indefinido'}
+                                    </span>
+                                    <OriginBadge source="social_mission" label="Missão oficial" />
+                                </div>
+                                <div className="mt-3 flex justify-end">
+                                    <Link href={`/social-missions/${mission.id}`} className="app-link-chip">Abrir missão</Link>
                                 </div>
                             </article>
                         ))}

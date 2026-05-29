@@ -7,14 +7,14 @@ export default function AuthCardPreview() {
                 return (
                     <div
                         key={`slot-${index}`}
-                        className={`aspect-[3/4] rounded-sm border p-1 ${
+                        className={`aspect-[3/4] rounded-md border p-1 ${
                             isUnlocked
-                                ? 'border-primary/30 bg-accent/45'
-                                : 'border-border bg-muted'
+                                ? 'border-primary/45 bg-accent/65'
+                                : 'border-border bg-muted/80'
                         }`}
                     >
-                        <div className="flex h-full items-center justify-center rounded-[4px] border border-dashed border-border text-[10px] font-medium tracking-wide text-dim uppercase">
-                            {isUnlocked ? `M${index + 1}` : 'LOCK'}
+                        <div className="flex h-full items-center justify-center rounded-[6px] border border-dashed border-border text-[10px] font-semibold tracking-[0.08em] text-dim uppercase">
+                            {isUnlocked ? `AAPH-${index + 1}` : 'LOCK'}
                         </div>
                     </div>
                 );

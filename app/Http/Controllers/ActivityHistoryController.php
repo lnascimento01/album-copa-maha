@@ -32,7 +32,7 @@ class ActivityHistoryController extends Controller
                 'revoked_at' => optional($checkin->revoked_at)?->toDateTimeString(),
                 'revoke_reason' => $checkin->revoke_reason,
                 'sticker_packs_count' => $checkin->sticker_packs_count,
-                'source' => ($checkin->metadata['self_checkin'] ?? false) ? 'self' : 'admin',
+                'source' => $this->resolveCheckinSource($checkin),
                 'activity' => [
                     'id' => $checkin->activity->id,
                     'title' => $checkin->activity->title,
@@ -74,7 +74,11 @@ class ActivityHistoryController extends Controller
                 'revoked_at' => optional($activityCheckin->revoked_at)?->toDateTimeString(),
                 'revoke_reason' => $activityCheckin->revoke_reason,
                 'notes' => $activityCheckin->notes,
-                'source' => ($activityCheckin->metadata['self_checkin'] ?? false) ? 'self' : 'admin',
+                'source' => $this->resolveCheckinSource($activityCheckin),
+                'latitude' => $activityCheckin->latitude,
+                'longitude' => $activityCheckin->longitude,
+                'accuracy_meters' => $activityCheckin->accuracy_meters,
+                'distance_meters' => $activityCheckin->distance_meters,
                 'checked_by' => $activityCheckin->checkedBy,
                 'activity' => [
                     'id' => $activityCheckin->activity->id,
@@ -98,5 +102,20 @@ class ActivityHistoryController extends Controller
                 ])->values()->all(),
             ],
         ]);
+    }
+
+    private function resolveCheckinSource(ActivityCheckin $checkin): string
+    {
+        $metadata = is_array($checkin->metadata) ? $checkin->metadata : [];
+
+        if ($metadata['event_checkin'] ?? false) {
+            return 'event';
+        }
+
+        if ($metadata['self_checkin'] ?? false) {
+            return 'self';
+        }
+
+        return 'admin';
     }
 }

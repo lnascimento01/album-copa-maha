@@ -78,46 +78,46 @@ export default function AdminActivitiesIndex({ activities, filters, statuses, ty
                     actions={<Link href="/admin/activities/create" className="rounded-sm border bg-primary px-3 py-2 text-xs text-primary-foreground">Nova atividade</Link>}
                 />
 
-                <form onSubmit={submit} className="grid gap-3 rounded-md border border-zinc-200 bg-white p-4 md:grid-cols-7">
+                <form onSubmit={submit} className="grid gap-3 rounded-md border border-border bg-card p-4 md:grid-cols-7">
                     <div className="md:col-span-2">
-                        <label className="text-xs uppercase tracking-wide text-zinc-500">Busca</label>
-                        <input value={search} onChange={(event) => setSearch(event.target.value)} className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm" />
+                        <label className="text-xs uppercase tracking-wide text-dim">Busca</label>
+                        <input value={search} onChange={(event) => setSearch(event.target.value)} className="mt-1 w-full rounded-sm border border-input px-2 py-2 text-sm" />
                     </div>
                     <div>
-                        <label className="text-xs uppercase tracking-wide text-zinc-500">Status</label>
-                        <select value={status} onChange={(event) => setStatus(event.target.value)} className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm">
+                        <label className="text-xs uppercase tracking-wide text-dim">Status</label>
+                        <select value={status} onChange={(event) => setStatus(event.target.value)} className="mt-1 w-full rounded-sm border border-input px-2 py-2 text-sm">
                             <option value="">Todos</option>
                             {statuses.map((item) => <option key={item} value={item}>{item}</option>)}
                         </select>
                     </div>
                     <div>
-                        <label className="text-xs uppercase tracking-wide text-zinc-500">Tipo</label>
-                        <select value={type} onChange={(event) => setType(event.target.value)} className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm">
+                        <label className="text-xs uppercase tracking-wide text-dim">Tipo</label>
+                        <select value={type} onChange={(event) => setType(event.target.value)} className="mt-1 w-full rounded-sm border border-input px-2 py-2 text-sm">
                             <option value="">Todos</option>
                             {types.map((item) => <option key={item} value={item}>{item}</option>)}
                         </select>
                     </div>
                     <div>
-                        <label className="text-xs uppercase tracking-wide text-zinc-500">Time</label>
-                        <select value={teamId} onChange={(event) => setTeamId(event.target.value)} className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm">
+                        <label className="text-xs uppercase tracking-wide text-dim">Time</label>
+                        <select value={teamId} onChange={(event) => setTeamId(event.target.value)} className="mt-1 w-full rounded-sm border border-input px-2 py-2 text-sm">
                             <option value="">Todos</option>
                             {teams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
                         </select>
                     </div>
                     <div>
-                        <label className="text-xs uppercase tracking-wide text-zinc-500">Álbum</label>
-                        <select value={albumId} onChange={(event) => setAlbumId(event.target.value)} className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm">
+                        <label className="text-xs uppercase tracking-wide text-dim">Álbum</label>
+                        <select value={albumId} onChange={(event) => setAlbumId(event.target.value)} className="mt-1 w-full rounded-sm border border-input px-2 py-2 text-sm">
                             <option value="">Todos</option>
                             {albums.map((album) => <option key={album.id} value={album.id}>{album.name}</option>)}
                         </select>
                     </div>
                     <div>
-                        <label className="text-xs uppercase tracking-wide text-zinc-500">Início (de)</label>
-                        <input type="date" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm" />
+                        <label className="text-xs uppercase tracking-wide text-dim">Início (de)</label>
+                        <input type="date" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} className="mt-1 w-full rounded-sm border border-input px-2 py-2 text-sm" />
                     </div>
                     <div>
-                        <label className="text-xs uppercase tracking-wide text-zinc-500">Início (até)</label>
-                        <input type="date" value={dateTo} onChange={(event) => setDateTo(event.target.value)} className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm" />
+                        <label className="text-xs uppercase tracking-wide text-dim">Início (até)</label>
+                        <input type="date" value={dateTo} onChange={(event) => setDateTo(event.target.value)} className="mt-1 w-full rounded-sm border border-input px-2 py-2 text-sm" />
                     </div>
                     <div className="md:col-span-7 flex justify-end">
                         <button className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground" type="submit">Filtrar</button>
@@ -127,7 +127,7 @@ export default function AdminActivitiesIndex({ activities, filters, statuses, ty
                 <DataTableShell title="Atividades cadastradas" subtitle="Acompanhe status operacional, check-ins e pacotes gerados.">
                     <table className="min-w-full text-sm">
                         <thead>
-                            <tr className="border-b border-zinc-200 text-left">
+                            <tr className="border-b border-border text-left">
                                 <th className="px-4 py-2">Título</th>
                                 <th className="px-4 py-2">Time</th>
                                 <th className="px-4 py-2">Álbum</th>
@@ -149,16 +149,16 @@ export default function AdminActivitiesIndex({ activities, filters, statuses, ty
                                 </tr>
                             ) : (
                                 activities.data.map((activity) => (
-                                    <tr key={activity.id} className="border-b border-zinc-100">
-                                        <td className="px-4 py-2 text-zinc-900">{activity.title}</td>
-                                        <td className="px-4 py-2 text-zinc-700">{activity.team.name}</td>
-                                        <td className="px-4 py-2 text-zinc-700">{activity.album.name}</td>
-                                        <td className="px-4 py-2 text-zinc-700">{activity.type}</td>
+                                    <tr key={activity.id} className="border-b border-border/70">
+                                        <td className="px-4 py-2 text-foreground">{activity.title}</td>
+                                        <td className="px-4 py-2 text-dim">{activity.team.name}</td>
+                                        <td className="px-4 py-2 text-dim">{activity.album.name}</td>
+                                        <td className="px-4 py-2 text-dim">{activity.type}</td>
                                         <td className="px-4 py-2"><StatusBadge value={activity.status} /></td>
-                                        <td className="px-4 py-2 text-zinc-600">{activity.starts_at ?? '-'}</td>
-                                        <td className="px-4 py-2 text-zinc-700">{activity.reward_pack_quantity}x{activity.reward_pack_size}</td>
-                                        <td className="px-4 py-2 text-zinc-700">{activity.checkins_count}</td>
-                                        <td className="px-4 py-2 text-zinc-700">{activity.sticker_packs_count}</td>
+                                        <td className="px-4 py-2 text-dim">{activity.starts_at ?? '-'}</td>
+                                        <td className="px-4 py-2 text-dim">{activity.reward_pack_quantity}x{activity.reward_pack_size}</td>
+                                        <td className="px-4 py-2 text-dim">{activity.checkins_count}</td>
+                                        <td className="px-4 py-2 text-dim">{activity.sticker_packs_count}</td>
                                         <td className="space-x-2 px-4 py-2">
                                             <Link href={`/admin/activities/${activity.id}`} className="text-xs underline">Ver</Link>
                                             <Link href={`/admin/activities/${activity.id}/edit`} className="text-xs underline">Editar</Link>
@@ -179,7 +179,7 @@ export default function AdminActivitiesIndex({ activities, filters, statuses, ty
                             type="button"
                             onClick={() => link.url && router.visit(link.url)}
                             disabled={!link.url}
-                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-primary text-primary-foreground' : 'bg-white text-zinc-700'}`}
+                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-primary text-primary-foreground' : 'bg-card text-dim'}`}
                         >
                             <span dangerouslySetInnerHTML={{ __html: link.label }} />
                         </button>

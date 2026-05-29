@@ -9,15 +9,15 @@ type Props = {
 
 const accentStyles: Record<NonNullable<Props['accent']>, string> = {
     default: 'border-border bg-card',
-    success: 'border-emerald-500/30 bg-emerald-500/10',
-    warning: 'border-amber-500/30 bg-amber-500/10',
+    success: 'border-[color:var(--secondary-200)] bg-[color:var(--surface-success)]',
+    warning: 'border-[color:var(--warning)]/35 bg-[color:var(--surface-warning)]',
 };
 
 export function MetricCard({ label, value, hint, accent = 'default' }: Props) {
     return (
-        <section className={`rounded-md border p-4 ${accentStyles[accent]}`}>
-            <p className="text-[11px] uppercase tracking-wide text-dim">{label}</p>
-            <p className="mt-2 text-2xl font-semibold leading-none text-foreground">{value}</p>
+        <section className={`rounded-md border p-4 shadow-[var(--shadow-sm)] ${accentStyles[accent]}`}>
+            <p className="text-[11px] font-semibold tracking-[0.12em] text-dim uppercase">{label}</p>
+            <p className="mt-2 text-2xl font-semibold leading-none text-foreground sm:text-[1.7rem]">{value}</p>
             {hint ? <div className="mt-2 text-xs text-dim">{hint}</div> : null}
         </section>
     );

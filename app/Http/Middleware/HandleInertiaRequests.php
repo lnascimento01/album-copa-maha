@@ -54,6 +54,7 @@ class HandleInertiaRequests extends Middleware
                 'error' => $request->session()->get('error'),
                 'selfCheckin' => $request->session()->get('selfCheckin'),
                 'selfCheckinResult' => $request->session()->get('selfCheckinResult'),
+                'eventCheckinResult' => $request->session()->get('eventCheckinResult'),
                 'redeemResult' => $request->session()->get('redeemResult'),
                 'revealedStickerIds' => $request->session()->get('revealedStickerIds'),
             ],

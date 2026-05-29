@@ -12,6 +12,7 @@ type Variant =
     | 'closed'
     | 'archived'
     | 'revoked'
+    | 'inactive'
     | 'default';
 
 type Props = {
@@ -33,22 +34,24 @@ function resolveVariant(value: string): Variant {
     if (['closed'].includes(normalized)) return 'closed';
     if (['archived'].includes(normalized)) return 'archived';
     if (['revoked', 'expired'].includes(normalized)) return 'revoked';
+    if (['inactive', 'disabled'].includes(normalized)) return 'inactive';
 
     return 'default';
 }
 
 const classes: Record<Variant, string> = {
-    pending: 'border-amber-500/35 bg-amber-500/15 text-amber-700 dark:text-amber-300',
-    approved: 'border-emerald-500/35 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
-    rejected: 'border-red-500/35 bg-red-500/15 text-red-700 dark:text-red-300',
+    pending: 'border-[color:var(--warning)]/35 bg-[color:var(--warning-bg)] text-[color:#92400e]',
+    approved: 'border-[color:var(--secondary-200)] bg-[color:var(--secondary-100)] text-[color:var(--secondary-900)]',
+    rejected: 'border-[color:#f9c7c2] bg-[color:var(--danger-bg)] text-[color:var(--danger)]',
     suspended: 'border-border bg-muted text-muted-foreground',
-    active: 'border-sky-500/35 bg-sky-500/15 text-sky-700 dark:text-sky-300',
-    opened: 'border-indigo-500/35 bg-indigo-500/15 text-indigo-700 dark:text-indigo-300',
+    active: 'border-[color:var(--primary-200)] bg-[color:var(--primary-50)] text-[color:var(--primary-700)]',
+    opened: 'border-[color:var(--secondary-200)] bg-[color:var(--secondary-100)] text-[color:var(--secondary-900)]',
     cancelled: 'border-border bg-muted text-muted-foreground',
     draft: 'border-border bg-muted text-muted-foreground',
     closed: 'border-border bg-muted text-muted-foreground',
     archived: 'border-border bg-muted text-muted-foreground',
-    revoked: 'border-red-500/35 bg-red-500/15 text-red-700 dark:text-red-300',
+    revoked: 'border-[color:#f9c7c2] bg-[color:var(--danger-bg)] text-[color:var(--danger)]',
+    inactive: 'border-border bg-muted text-muted-foreground',
     default: 'border-border bg-card text-foreground',
 };
 
@@ -56,7 +59,7 @@ export function StatusBadge({ value, label }: Props) {
     const variant = resolveVariant(value);
 
     return (
-        <Badge variant="outline" className={`rounded-sm text-[11px] uppercase tracking-wide ${classes[variant]}`}>
+        <Badge variant="outline" className={`rounded-sm px-2 py-0.5 text-[11px] font-semibold tracking-[0.1em] uppercase ${classes[variant]}`}>
             {label ?? value}
         </Badge>
     );

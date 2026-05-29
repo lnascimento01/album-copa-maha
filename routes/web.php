@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AlbumCollectionController;
 use App\Http\Controllers\ApprovalStatusController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EventCheckinController;
 use App\Http\Controllers\RankingController;
 use App\Http\Controllers\RewardCodeRedemptionController;
 use App\Http\Controllers\SelfCheckinController;
@@ -94,6 +95,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/checkins/{activityCheckin}', [ActivityHistoryController::class, 'show'])
         ->middleware(['approved', 'permission:activityCheckins.viewOwn'])
         ->name('checkins.show');
+
+    Route::get('/checkin/event/{token}', [EventCheckinController::class, 'showByToken'])
+        ->middleware(['approved', 'permission:activityCheckins.selfCreate'])
+        ->name('checkin.event.show');
+
+    Route::post('/checkin/event/{token}/confirm', [EventCheckinController::class, 'confirmByToken'])
+        ->middleware(['approved', 'permission:activityCheckins.selfCreate', 'throttle:event-checkin-confirm'])
+        ->name('checkin.event.confirm');
 
     Route::get('/checkin/{token}', [SelfCheckinController::class, 'showByToken'])
         ->middleware(['approved', 'permission:activityCheckins.selfCreate'])

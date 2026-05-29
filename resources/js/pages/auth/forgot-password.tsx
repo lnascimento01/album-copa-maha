@@ -19,9 +19,10 @@ export default function ForgotPassword({ status }: { status?: string }) {
                 </div>
             ) : null}
 
-            <p className="mb-4 text-sm text-dim">
-                Informe seu e-mail para receber as instruções de redefinição de senha.
-            </p>
+            <div className="campaign-panel mb-4 text-sm text-foreground">
+                <p className="text-[10px] font-semibold tracking-[0.14em] text-dim uppercase">Segurança da conta</p>
+                <p className="mt-1">Informe seu e-mail para receber as instruções de redefinição e voltar para a temporada AAPH.</p>
+            </div>
 
             <Form {...email.form()}>
                 {({ processing, errors }) => (

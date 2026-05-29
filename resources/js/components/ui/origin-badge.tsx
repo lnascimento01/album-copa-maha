@@ -9,6 +9,8 @@ function sourceStyle(source: string): string {
     switch (source) {
         case 'checkin':
             return 'border-sky-500/35 bg-sky-500/15 text-sky-700 dark:text-sky-300';
+        case 'event_geolocation':
+            return 'border-emerald-500/35 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300';
         case 'reward_code':
             return 'border-violet-500/35 bg-violet-500/15 text-violet-700 dark:text-violet-300';
         case 'social_mission':

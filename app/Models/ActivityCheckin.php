@@ -30,6 +30,10 @@ class ActivityCheckin extends Model
         'revoked_by',
         'revoke_reason',
         'notes',
+        'latitude',
+        'longitude',
+        'accuracy_meters',
+        'distance_meters',
         'metadata',
     ];
 
@@ -38,6 +42,10 @@ class ActivityCheckin extends Model
         return [
             'checked_at' => 'datetime',
             'revoked_at' => 'datetime',
+            'latitude' => 'float',
+            'longitude' => 'float',
+            'accuracy_meters' => 'integer',
+            'distance_meters' => 'integer',
             'metadata' => 'array',
         ];
     }

@@ -1,6 +1,12 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
+import { DataTableShell } from '@/components/ui/data-table-shell';
+import { EmptyState } from '@/components/ui/empty-state';
+import { MetricCard } from '@/components/ui/metric-card';
+import { PageHeader } from '@/components/ui/page-header';
+import { ResponsiveDataList } from '@/components/ui/responsive-data-list';
+import { StatusBadge } from '@/components/ui/status-badge';
 
 type Team = { id: number; name: string };
 
@@ -30,6 +36,8 @@ export default function PlayersIndex({ players, filters, teams, types }: Props) 
     const [type, setType] = useState(filters.type ?? '');
     const [isActive, setIsActive] = useState(filters.is_active ?? '');
 
+    const activeCount = useMemo(() => players.data.filter((player) => player.is_active).length, [players.data]);
+
     const submit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         router.get('/admin/players', { search, team_id: teamId, type, is_active: isActive }, { preserveState: true, replace: true });
@@ -38,81 +46,145 @@ export default function PlayersIndex({ players, filters, teams, types }: Props) 
     return (
         <>
             <Head title="Jogadores" />
-            <div className="space-y-4 p-4">
-                <div className="flex items-center justify-between gap-4">
-                    <h1 className="text-xl font-semibold tracking-tight">Jogadores/Personagens</h1>
-                    <Link href="/admin/players/create" className="rounded-sm border bg-primary px-3 py-2 text-xs text-primary-foreground">Novo</Link>
+            <div className="brand-app-bg space-y-4 p-4 sm:p-5">
+                <PageHeader
+                    title="Jogadores e personagens"
+                    subtitle="Gestão operacional do elenco e cards que compõem as páginas do álbum AAPH."
+                    actions={<Link href="/admin/players/create" className="rounded-sm border border-primary bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground">Novo registro</Link>}
+                />
+
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <MetricCard label="Registros na listagem" value={players.data.length} />
+                    <MetricCard label="Ativos" value={activeCount} accent={activeCount > 0 ? 'success' : 'default'} />
+                    <MetricCard label="Inativos" value={Math.max(players.data.length - activeCount, 0)} accent={players.data.length - activeCount > 0 ? 'warning' : 'default'} />
+                    <MetricCard label="Times com atletas" value={new Set(players.data.map((item) => item.team.id)).size} />
                 </div>
 
-                <form onSubmit={submit} className="grid gap-3 rounded-sm border p-4 md:grid-cols-5">
+                <section className="admin-strip">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <p className="text-[10px] font-semibold tracking-[0.14em] text-dim uppercase">Curadoria de temporada</p>
+                            <p className="mt-1 text-sm text-foreground">Ajuste posição, tipo e status dos atletas para refletir a composição oficial da Copa AAPH.</p>
+                        </div>
+                        <span className="brand-pill">Catálogo de elenco</span>
+                    </div>
+                </section>
+
+                <form onSubmit={submit} className="admin-filter-grid md:grid-cols-5">
                     <div className="md:col-span-2">
-                        <label className="text-xs uppercase text-muted-foreground">Busca</label>
-                        <input className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" value={search} onChange={(event) => setSearch(event.target.value)} />
+                        <label className="admin-filter-label">Busca</label>
+                        <input className="mt-1 w-full rounded-sm border border-border bg-card px-2 py-2 text-sm" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Nome, apelido ou número" />
                     </div>
                     <div>
-                        <label className="text-xs uppercase text-muted-foreground">Tipo</label>
-                        <select className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" value={type} onChange={(event) => setType(event.target.value)}>
+                        <label className="admin-filter-label">Tipo</label>
+                        <select className="mt-1 w-full rounded-sm border border-border bg-card px-2 py-2 text-sm" value={type} onChange={(event) => setType(event.target.value)}>
                             <option value="">Todos</option>
                             {types.map((item) => <option key={item} value={item}>{item}</option>)}
                         </select>
                     </div>
                     <div>
-                        <label className="text-xs uppercase text-muted-foreground">Time</label>
-                        <select className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" value={teamId} onChange={(event) => setTeamId(event.target.value)}>
+                        <label className="admin-filter-label">Time</label>
+                        <select className="mt-1 w-full rounded-sm border border-border bg-card px-2 py-2 text-sm" value={teamId} onChange={(event) => setTeamId(event.target.value)}>
                             <option value="">Todos</option>
                             {teams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
                         </select>
                     </div>
                     <div>
-                        <label className="text-xs uppercase text-muted-foreground">Ativo</label>
-                        <select className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" value={isActive} onChange={(event) => setIsActive(event.target.value)}>
+                        <label className="admin-filter-label">Status</label>
+                        <select className="mt-1 w-full rounded-sm border border-border bg-card px-2 py-2 text-sm" value={isActive} onChange={(event) => setIsActive(event.target.value)}>
                             <option value="">Todos</option>
-                            <option value="1">Sim</option>
-                            <option value="0">Não</option>
+                            <option value="1">Ativo</option>
+                            <option value="0">Inativo</option>
                         </select>
                     </div>
                     <div className="md:col-span-5 flex justify-end">
-                        <button className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground" type="submit">Filtrar</button>
+                        <button className="rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground" type="submit">Filtrar</button>
                     </div>
                 </form>
 
-                <div className="overflow-x-auto rounded-sm border">
-                    <table className="min-w-full text-sm">
+                <DataTableShell title="Elenco cadastrado" subtitle="Controle de atletas e personagens usados nas figurinhas da temporada.">
+                    <ResponsiveDataList
+                        items={players.data}
+                        getKey={(player) => player.id}
+                        empty={<EmptyState title="Nenhum jogador encontrado." description="Cadastre atletas para iniciar o catálogo de figurinhas do álbum." />}
+                        renderItem={(player) => (
+                            <div className="space-y-2">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-semibold text-foreground">{player.name}</p>
+                                        <p className="mt-1 text-xs text-dim">{player.team.name}</p>
+                                    </div>
+                                    <StatusBadge value={player.is_active ? 'active' : 'inactive'} label={player.is_active ? 'Ativo' : 'Inativo'} />
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <p className="responsive-data-key">Apelido</p>
+                                        <p className="responsive-data-value">{player.nickname ?? '-'}</p>
+                                    </div>
+                                    <div>
+                                        <p className="responsive-data-key">Nº camisa</p>
+                                        <p className="responsive-data-value">{player.shirt_number ?? '-'}</p>
+                                    </div>
+                                    <div>
+                                        <p className="responsive-data-key">Posição</p>
+                                        <p className="responsive-data-value">{player.position ?? '-'}</p>
+                                    </div>
+                                    <div>
+                                        <p className="responsive-data-key">Tipo</p>
+                                        <p className="responsive-data-value">{player.type}</p>
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap gap-2 pt-1">
+                                    <Link href={`/admin/players/${player.id}`} className="app-link-chip">Ver</Link>
+                                    <Link href={`/admin/players/${player.id}/edit`} className="app-link-chip">Editar</Link>
+                                </div>
+                            </div>
+                        )}
+                    />
+                    <table className="hidden min-w-full text-sm md:table">
                         <thead>
-                            <tr className="border-b text-left">
+                            <tr className="border-b border-border text-left">
                                 <th className="px-4 py-2">Nome</th>
                                 <th className="px-4 py-2">Apelido</th>
                                 <th className="px-4 py-2">Número</th>
                                 <th className="px-4 py-2">Posição</th>
                                 <th className="px-4 py-2">Tipo</th>
                                 <th className="px-4 py-2">Time</th>
-                                <th className="px-4 py-2">Ativo</th>
+                                <th className="px-4 py-2">Status</th>
                                 <th className="px-4 py-2">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {players.data.map((player) => (
-                                <tr key={player.id} className="border-b">
-                                    <td className="px-4 py-2">{player.name}</td>
-                                    <td className="px-4 py-2">{player.nickname ?? '-'}</td>
-                                    <td className="px-4 py-2">{player.shirt_number ?? '-'}</td>
-                                    <td className="px-4 py-2">{player.position ?? '-'}</td>
-                                    <td className="px-4 py-2">{player.type}</td>
-                                    <td className="px-4 py-2">{player.team.name}</td>
-                                    <td className="px-4 py-2">{player.is_active ? 'Sim' : 'Não'}</td>
-                                    <td className="space-x-2 px-4 py-2">
-                                        <Link href={`/admin/players/${player.id}`} className="text-xs underline">Ver</Link>
-                                        <Link href={`/admin/players/${player.id}/edit`} className="text-xs underline">Editar</Link>
+                            {players.data.length === 0 ? (
+                                <tr>
+                                    <td colSpan={8} className="px-4 py-8">
+                                        <EmptyState title="Nenhum jogador encontrado." description="Cadastre atletas para iniciar o catálogo de figurinhas do álbum." />
                                     </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                players.data.map((player) => (
+                                    <tr key={player.id} className="admin-table-row">
+                                        <td className="px-4 py-2 font-medium text-foreground">{player.name}</td>
+                                        <td className="px-4 py-2 text-dim">{player.nickname ?? '-'}</td>
+                                        <td className="px-4 py-2 text-dim">{player.shirt_number ?? '-'}</td>
+                                        <td className="px-4 py-2 text-dim">{player.position ?? '-'}</td>
+                                        <td className="px-4 py-2 text-dim">{player.type}</td>
+                                        <td className="px-4 py-2 text-dim">{player.team.name}</td>
+                                        <td className="px-4 py-2"><StatusBadge value={player.is_active ? 'active' : 'inactive'} label={player.is_active ? 'Ativo' : 'Inativo'} /></td>
+                                        <td className="space-x-2 px-4 py-2">
+                                            <Link href={`/admin/players/${player.id}`} className="text-xs underline">Ver</Link>
+                                            <Link href={`/admin/players/${player.id}/edit`} className="text-xs underline">Editar</Link>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
-                </div>
+                </DataTableShell>
 
                 <div className="flex flex-wrap gap-2">
                     {players.links.map((link, index) => (
-                        <button key={`${link.label}-${index}`} type="button" onClick={() => link.url && router.visit(link.url)} disabled={!link.url} className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-primary text-primary-foreground' : ''}`}>
+                        <button key={`${link.label}-${index}`} type="button" onClick={() => link.url && router.visit(link.url)} disabled={!link.url} className={`rounded-sm border px-2 py-1 text-xs font-semibold ${link.active ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-foreground'}`}>
                             <span dangerouslySetInnerHTML={{ __html: link.label }} />
                         </button>
                     ))}

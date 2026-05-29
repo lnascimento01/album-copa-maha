@@ -38,15 +38,15 @@ export default function AlbumForm({ teams, initialValues, submitLabel, submitUrl
     };
 
     return (
-        <form onSubmit={submit} className="grid gap-3 rounded-sm border p-4 md:grid-cols-2">
+        <form onSubmit={submit} className="album-paper grid gap-3 p-4 md:grid-cols-2">
             <div className="md:col-span-2">
-                <label className="text-xs uppercase text-muted-foreground">Equipes do álbum</label>
-                <div className="mt-1 grid gap-2 rounded-sm border border-zinc-300 bg-white p-3 sm:grid-cols-2 lg:grid-cols-3">
+                <label className="admin-filter-label">Equipes do álbum</label>
+                <div className="mt-1 grid gap-2 rounded-sm border border-border bg-muted/65 p-3 sm:grid-cols-2 lg:grid-cols-3">
                     {teams.map((team) => {
                         const checked = form.data.team_ids.includes(team.id);
 
                         return (
-                            <label key={team.id} className="flex items-center gap-2 text-sm text-zinc-800">
+                            <label key={team.id} className="flex items-center gap-2 text-sm text-foreground">
                                 <input
                                     type="checkbox"
                                     checked={checked}
@@ -67,37 +67,37 @@ export default function AlbumForm({ teams, initialValues, submitLabel, submitUrl
                 {form.errors['team_ids.0'] ? <p className="mt-1 text-xs text-red-600">{form.errors['team_ids.0']}</p> : null}
             </div>
             <div>
-                <label className="text-xs uppercase text-muted-foreground">Nome</label>
-                <input className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" value={form.data.name} onChange={(event) => form.setData('name', event.target.value)} />
+                <label className="admin-filter-label">Nome</label>
+                <input className="mt-1 w-full rounded-sm border border-border bg-card px-2 py-2 text-sm" value={form.data.name} onChange={(event) => form.setData('name', event.target.value)} />
                 {form.errors.name ? <p className="mt-1 text-xs text-red-600">{form.errors.name}</p> : null}
             </div>
             <div>
-                <label className="text-xs uppercase text-muted-foreground">Slug</label>
-                <input className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" value={form.data.slug} onChange={(event) => form.setData('slug', event.target.value)} />
+                <label className="admin-filter-label">Slug</label>
+                <input className="mt-1 w-full rounded-sm border border-border bg-card px-2 py-2 text-sm" value={form.data.slug} onChange={(event) => form.setData('slug', event.target.value)} />
                 {form.errors.slug ? <p className="mt-1 text-xs text-red-600">{form.errors.slug}</p> : null}
             </div>
             <div>
-                <label className="text-xs uppercase text-muted-foreground">Temporada</label>
-                <input className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" value={form.data.season} onChange={(event) => form.setData('season', event.target.value)} />
+                <label className="admin-filter-label">Temporada</label>
+                <input className="mt-1 w-full rounded-sm border border-border bg-card px-2 py-2 text-sm" value={form.data.season} onChange={(event) => form.setData('season', event.target.value)} />
             </div>
             <div>
-                <label className="text-xs uppercase text-muted-foreground">Início</label>
-                <input type="datetime-local" className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" value={form.data.starts_at} onChange={(event) => form.setData('starts_at', event.target.value)} />
+                <label className="admin-filter-label">Início</label>
+                <input type="datetime-local" className="mt-1 w-full rounded-sm border border-border bg-card px-2 py-2 text-sm" value={form.data.starts_at} onChange={(event) => form.setData('starts_at', event.target.value)} />
             </div>
             <div>
-                <label className="text-xs uppercase text-muted-foreground">Fim</label>
-                <input type="datetime-local" className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" value={form.data.ends_at} onChange={(event) => form.setData('ends_at', event.target.value)} />
+                <label className="admin-filter-label">Fim</label>
+                <input type="datetime-local" className="mt-1 w-full rounded-sm border border-border bg-card px-2 py-2 text-sm" value={form.data.ends_at} onChange={(event) => form.setData('ends_at', event.target.value)} />
             </div>
             <div className="md:col-span-2">
-                <label className="text-xs uppercase text-muted-foreground">Cover image path</label>
-                <input className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" value={form.data.cover_image_path} onChange={(event) => form.setData('cover_image_path', event.target.value)} />
+                <label className="admin-filter-label">Capa (URL/caminho)</label>
+                <input className="mt-1 w-full rounded-sm border border-border bg-card px-2 py-2 text-sm" value={form.data.cover_image_path} onChange={(event) => form.setData('cover_image_path', event.target.value)} />
             </div>
             <div className="md:col-span-2">
-                <label className="text-xs uppercase text-muted-foreground">Descrição</label>
-                <textarea className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" rows={4} value={form.data.description} onChange={(event) => form.setData('description', event.target.value)} />
+                <label className="admin-filter-label">Descrição</label>
+                <textarea className="mt-1 w-full rounded-sm border border-border bg-card px-2 py-2 text-sm" rows={4} value={form.data.description} onChange={(event) => form.setData('description', event.target.value)} />
             </div>
             <div className="md:col-span-2">
-                <button type="submit" className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground" disabled={form.processing}>{submitLabel}</button>
+                <button type="submit" className="rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground" disabled={form.processing}>{submitLabel}</button>
             </div>
         </form>
     );

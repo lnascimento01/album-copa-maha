@@ -10,7 +10,7 @@ export default function AdminStickerCreate({ albums, players, types, rarities }:
             <Head title="Nova Figurinha" />
             <div className="space-y-4 p-4">
                 <h1 className="text-xl font-semibold tracking-tight">Nova Figurinha</h1>
-                <p className="text-sm text-zinc-600">Defina código, raridade e apresentação visual da figurinha para o álbum de temporada.</p>
+                <p className="text-sm text-muted-foreground">Defina código, raridade e apresentação visual da figurinha para o álbum de temporada.</p>
                 <StickerForm
                     albums={albums}
                     players={players}

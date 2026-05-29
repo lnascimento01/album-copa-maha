@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="0 0 500 500" role="img" aria-labelledby="title desc">
+  <title id="title">Logo AAPH</title>
+  <desc id="desc">Logo institucional da AAPH para o Álbum da Copa AAPH.</desc>
+
+  <rect width="500" height="500" fill="#ffffff"/>
+  <circle cx="250" cy="250" r="238" fill="none" stroke="#7D9C3D" stroke-width="4"/>
+
+  <!-- Bola estilizada -->
+  <g transform="translate(38 128)">
+    <circle cx="70" cy="92" r="62" fill="#8AA842"/>
+    <g stroke="#ffffff" stroke-width="3" fill="none" opacity="0.95">
+      <path d="M10 88 L28 50 L66 34 L102 46 L126 80 L118 120 L88 144 L46 140 L18 114 Z"/>
+      <path d="M28 50 L44 88 L18 114"/>
+      <path d="M44 88 L86 84 L118 120"/>
+      <path d="M66 34 L86 84 L46 140"/>
+      <path d="M102 46 L86 84 L126 80"/>
+    </g>
+  </g>
+
+  <!-- Atleta estilizado -->
+  <g transform="translate(110 106)">
+    <ellipse cx="36" cy="69" rx="10" ry="10" fill="#295D94"/>
+    <ellipse cx="66" cy="53" rx="12" ry="16" fill="#8AA842"/>
+    <path d="M20 132 C 26 100, 40 80, 56 74 C 72 68, 88 74, 96 84 C 82 84, 66 94, 56 110 C 48 124, 42 142, 20 132 Z" fill="#8AA842"/>
+    <path d="M6 212 C 52 192, 96 150, 122 108 C 132 92, 150 78, 174 76 C 198 74, 220 82, 242 98 C 216 96, 198 104, 182 122 C 162 146, 130 172, 90 194 C 58 210, 30 220, 6 218 Z" fill="#295D94"/>
+    <path d="M12 203 C 58 188, 98 162, 126 130 C 142 112, 160 100, 182 100 C 194 100, 206 102, 218 108 C 194 110, 176 120, 162 136 C 134 166, 96 194, 54 212 C 36 218, 24 220, 12 218 Z" fill="#ffffff"/>
+    <path d="M26 122 C 30 102, 40 90, 52 84 C 62 80, 74 82, 82 90 C 72 92, 64 100, 60 110 C 54 120, 44 130, 26 122 Z" fill="#295D94"/>
+    <path d="M36 38 C 50 36, 62 36, 74 40" fill="none" stroke="#7D9C3D" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <!-- Tipografia -->
+  <g transform="translate(186 184)">
+    <text x="0" y="86" font-family="Arial Black, Arial, sans-serif" font-size="82" font-weight="900" letter-spacing="1.2" fill="#2D5F97">AAPH</text>
+    <text x="2" y="116" font-family="Arial Narrow, Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="1.5" fill="#7D9C3D">ASSOCIACAO APAIXONADOS POR HANDEBOL</text>
+  </g>
+</svg>

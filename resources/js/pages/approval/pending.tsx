@@ -61,7 +61,7 @@ export default function PendingApprovalPage() {
             <Head title="Cadastro pendente" />
             <AuthStatusPage
                 badge="Inscrição recebida"
-                description="Seu cadastro foi enviado para aprovação. Assim que um admin liberar, você poderá acessar o álbum."
+                description="Seu cadastro foi enviado para aprovação. Assim que a administração liberar, você poderá folhear o Álbum da Copa AAPH."
                 extraInfo={lastCheckAt ? `Última verificação automática: ${lastCheckAt}` : 'Verificação automática de aprovação ativa.'}
             />
         </>

@@ -4,6 +4,7 @@ import type { FormEvent } from 'react';
 import { DataTableShell } from '@/components/ui/data-table-shell';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
+import { ResponsiveDataList } from '@/components/ui/responsive-data-list';
 
 type UserOption = {
     id: number;
@@ -72,10 +73,10 @@ export default function AuditLogsIndex({ auditLogs, filters, actors, targets, ac
     return (
         <>
             <Head title="Auditoria" />
-            <div className="space-y-4 p-4 sm:p-5">
+            <div className="brand-app-bg space-y-4 p-4 sm:p-5">
                 <PageHeader title="Auditoria" subtitle="Rastreabilidade de ações críticas do sistema e da operação." />
 
-                <form onSubmit={submit} className="grid gap-3 rounded-md border border-border bg-card p-4 md:grid-cols-5">
+                <form onSubmit={submit} className="admin-filter-grid md:grid-cols-5">
                     <div>
                         <label className="text-xs uppercase tracking-wide text-dim">Ator</label>
                         <select className="mt-1 w-full rounded-sm border bg-card border-border px-2 py-2 text-sm" value={actorId} onChange={(event) => setActorId(event.target.value)}>
@@ -126,7 +127,36 @@ export default function AuditLogsIndex({ auditLogs, filters, actors, targets, ac
                 </form>
 
                 <DataTableShell title="Eventos de auditoria" subtitle="Logs filtrados por ator, alvo, ação e período.">
-                    <table className="min-w-full text-sm">
+                    <ResponsiveDataList
+                        items={auditLogs.data}
+                        getKey={(log) => log.id}
+                        empty={<EmptyState title="Nenhum evento de auditoria encontrado para o filtro." />}
+                        renderItem={(log) => (
+                            <div className="space-y-2">
+                                <div className="flex items-start justify-between gap-2">
+                                    <p className="font-mono text-xs text-foreground">{log.action}</p>
+                                    <p className="text-xs text-dim">{log.created_at ?? '-'}</p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <p className="responsive-data-key">Ator</p>
+                                        <p className="responsive-data-value">{log.actor?.email ?? '-'}</p>
+                                    </div>
+                                    <div>
+                                        <p className="responsive-data-key">Alvo</p>
+                                        <p className="responsive-data-value">{log.target?.email ?? '-'}</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="responsive-data-key">Metadata</p>
+                                    <pre className="mt-1 max-h-40 overflow-y-auto whitespace-pre-wrap rounded-sm border border-border bg-muted/60 p-2 text-[11px] text-dim">
+                                        {JSON.stringify(log.metadata ?? {}, null, 2)}
+                                    </pre>
+                                </div>
+                            </div>
+                        )}
+                    />
+                    <table className="hidden min-w-full text-sm md:table">
                         <thead>
                             <tr className="border-b border-border text-left">
                                 <th className="px-4 py-2">Ação</th>
@@ -145,7 +175,7 @@ export default function AuditLogsIndex({ auditLogs, filters, actors, targets, ac
                                 </tr>
                             ) : (
                                 auditLogs.data.map((log) => (
-                                    <tr key={log.id} className="border-b border-border/60 align-top">
+                                    <tr key={log.id} className="admin-table-row align-top">
                                         <td className="px-4 py-2 font-mono text-xs text-foreground">{log.action}</td>
                                         <td className="px-4 py-2 text-dim">{log.actor?.email ?? '-'}</td>
                                         <td className="px-4 py-2 text-dim">{log.target?.email ?? '-'}</td>
@@ -173,7 +203,7 @@ export default function AuditLogsIndex({ auditLogs, filters, actors, targets, ac
                                 }
                             }}
                             disabled={!link.url}
-                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-primary text-primary-foreground' : 'bg-white text-dim'}`}
+                            className={`rounded-sm border px-2 py-1 text-xs font-semibold ${link.active ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-dim'}`}
                         >
                             <span dangerouslySetInnerHTML={{ __html: link.label }} />
                         </button>

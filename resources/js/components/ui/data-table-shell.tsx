@@ -8,10 +8,10 @@ type Props = {
 
 export function DataTableShell({ title, subtitle, children }: Props) {
     return (
-        <section className="rounded-md border border-border bg-card">
-            <div className="border-b border-border px-4 py-3">
-                <p className="text-sm font-medium text-foreground">{title}</p>
-                {subtitle ? <p className="text-xs text-dim">{subtitle}</p> : null}
+        <section className="album-paper overflow-hidden">
+            <div className="border-b border-border bg-card px-4 py-3">
+                <p className="text-sm font-semibold text-foreground">{title}</p>
+                {subtitle ? <p className="mt-1 text-xs leading-relaxed text-dim">{subtitle}</p> : null}
             </div>
             <div className="overflow-x-auto">{children}</div>
         </section>

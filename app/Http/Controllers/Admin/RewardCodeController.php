@@ -174,7 +174,7 @@ class RewardCodeController extends Controller
                 ])->values()->all(),
             ],
             'shareText' => sprintf(
-                'Use o código %s no Álbum da Copa MAHA e desbloqueie %d pacote(s). Válido até %s.',
+                'Use o código %s no Álbum da Copa AAPH e desbloqueie %d pacote(s). Válido até %s.',
                 $rewardCode->code,
                 $rewardCode->reward_pack_quantity,
                 $rewardCode->expires_at?->format('d/m/Y H:i') ?? 'prazo indefinido',

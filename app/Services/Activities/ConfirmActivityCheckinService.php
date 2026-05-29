@@ -9,6 +9,7 @@ use App\Models\StickerPack;
 use App\Models\User;
 use App\Services\Activities\Exceptions\ActivityCheckinException;
 use App\Services\Audit\AuditLogger;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -19,12 +20,17 @@ class ConfirmActivityCheckinService
     /**
      * @return array{checkin: ActivityCheckin, pack_ids: int[]}
      */
-    public function confirm(int $activityId, int $targetUserId, User $actor, ?string $notes = null): array
-    {
+    public function confirm(
+        int $activityId,
+        int $targetUserId,
+        User $actor,
+        ?string $notes = null,
+        array $options = [],
+    ): array {
         DB::beginTransaction();
 
         try {
-            $result = $this->confirmWithinTransaction($activityId, $targetUserId, $actor, $notes);
+            $result = $this->confirmWithinTransaction($activityId, $targetUserId, $actor, $notes, $options);
 
             DB::commit();
 
@@ -43,8 +49,13 @@ class ConfirmActivityCheckinService
     /**
      * @return array{checkin: ActivityCheckin, pack_ids: int[]}
      */
-    public function confirmWithinTransaction(int $activityId, int $targetUserId, User $actor, ?string $notes = null): array
-    {
+    public function confirmWithinTransaction(
+        int $activityId,
+        int $targetUserId,
+        User $actor,
+        ?string $notes = null,
+        array $options = [],
+    ): array {
         $activity = Activity::query()
             ->with(['album'])
             ->lockForUpdate()
@@ -107,18 +118,40 @@ class ConfirmActivityCheckinService
             ]);
         }
 
-        $checkin = ActivityCheckin::query()->create([
-            'activity_id' => $activity->id,
-            'user_id' => $targetUser->id,
-            'checked_by' => $actor->id,
-            'status' => ActivityCheckin::STATUS_CONFIRMED,
-            'checked_at' => now(),
-            'notes' => $notes,
-            'metadata' => [
-                'activity_title' => $activity->title,
-                'activity_type' => $activity->type,
-            ],
-        ]);
+        $baseMetadata = [
+            'activity_title' => $activity->title,
+            'activity_type' => $activity->type,
+        ];
+
+        $extraMetadata = isset($options['metadata']) && is_array($options['metadata'])
+            ? $options['metadata']
+            : [];
+
+        $extraCheckinAttributes = isset($options['checkin_attributes']) && is_array($options['checkin_attributes'])
+            ? $options['checkin_attributes']
+            : [];
+
+        try {
+            $checkin = ActivityCheckin::query()->create([
+                'activity_id' => $activity->id,
+                'user_id' => $targetUser->id,
+                'checked_by' => $actor->id,
+                'status' => ActivityCheckin::STATUS_CONFIRMED,
+                'checked_at' => now(),
+                'notes' => $notes,
+                'metadata' => array_merge($baseMetadata, $extraMetadata),
+                ...$extraCheckinAttributes,
+            ]);
+        } catch (QueryException $exception) {
+            if ($this->isDuplicateCheckinConstraint($exception)) {
+                throw new ActivityCheckinException('Este participante já possui check-in nesta atividade.', 'duplicate_checkin', [
+                    'activity_id' => $activity->id,
+                    'target_user_id' => $targetUserId,
+                ]);
+            }
+
+            throw $exception;
+        }
 
         $packIds = [];
 
@@ -177,5 +210,14 @@ class ConfirmActivityCheckinService
             'checkin' => $checkin,
             'pack_ids' => $packIds,
         ];
+    }
+
+    private function isDuplicateCheckinConstraint(QueryException $exception): bool
+    {
+        $message = strtolower($exception->getMessage());
+
+        return str_contains($message, 'activity_checkins_activity_id_user_id_unique')
+            || str_contains($message, 'unique constraint failed: activity_checkins.activity_id, activity_checkins.user_id')
+            || str_contains($message, "for key 'activity_checkins_activity_id_user_id_unique'");
     }
 }

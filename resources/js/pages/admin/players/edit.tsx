@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import { PageHeader } from '@/components/ui/page-header';
 import PlayerForm from './form';
 
 type Team = { id: number; name: string };
@@ -21,9 +22,12 @@ export default function AdminPlayerEdit({ player, teams, types }: { player: Play
     return (
         <>
             <Head title={`Editar - ${player.name}`} />
-            <div className="space-y-4 p-4">
-                <h1 className="text-xl font-semibold tracking-tight">Editar Jogador/Personagem</h1>
-                <p className="text-sm text-zinc-600">Ajuste nome, posição e texto do card para o catálogo final da demo.</p>
+            <div className="brand-app-bg space-y-4 p-4 sm:p-5">
+                <PageHeader title={`Editar jogador: ${player.name}`} subtitle="Ajuste posição, texto do card e visibilidade no catálogo da temporada." />
+                <section className="admin-strip">
+                    <p className="text-[10px] font-semibold tracking-[0.14em] text-dim uppercase">Curadoria do card</p>
+                    <p className="mt-1 text-sm text-foreground">Garanta que nome, número e tipo estejam alinhados à experiência oficial do Álbum da Copa AAPH.</p>
+                </section>
                 <PlayerForm
                     teams={teams}
                     types={types}

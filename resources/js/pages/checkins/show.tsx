@@ -22,7 +22,11 @@ type Checkin = {
     revoked_at: string | null;
     revoke_reason: string | null;
     notes: string | null;
-    source: 'admin' | 'self';
+    source: 'admin' | 'self' | 'event';
+    latitude: number | null;
+    longitude: number | null;
+    accuracy_meters: number | null;
+    distance_meters: number | null;
     checked_by: { id: number; name: string; email: string } | null;
     activity: {
         id: number;
@@ -59,6 +63,8 @@ export default function CheckinShow({ checkin }: { checkin: Checkin }) {
                         <div className="mt-2">
                             {checkin.source === 'self' ? (
                                 <OriginBadge source="checkin" label="Você via QR/Código" />
+                            ) : checkin.source === 'event' ? (
+                                <OriginBadge source="event_geolocation" label="Você via geolocalização" />
                             ) : (
                                 <OriginBadge source="admin" label={checkin.checked_by?.email ?? 'Administração'} />
                             )}
@@ -78,6 +84,18 @@ export default function CheckinShow({ checkin }: { checkin: Checkin }) {
                     <h2 className="text-sm font-semibold text-foreground">Descrição da atividade</h2>
                     <p className="mt-2 text-dim">{checkin.activity.description ?? 'Sem descrição cadastrada.'}</p>
                 </section>
+
+                {checkin.source === 'event' ? (
+                    <section className="rounded-md border border-border bg-card p-4 text-sm">
+                        <h2 className="text-sm font-semibold text-foreground">Validação de geolocalização</h2>
+                        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                            <div><span className="text-dim">Latitude:</span> {checkin.latitude ?? '-'}</div>
+                            <div><span className="text-dim">Longitude:</span> {checkin.longitude ?? '-'}</div>
+                            <div><span className="text-dim">Precisão:</span> {checkin.accuracy_meters ?? '-'} m</div>
+                            <div><span className="text-dim">Distância:</span> {checkin.distance_meters ?? '-'} m</div>
+                        </div>
+                    </section>
+                ) : null}
 
                 <DataTableShell title="Pacotes gerados" subtitle="Pacotes vinculados a este check-in.">
                     <table className="min-w-full text-sm">

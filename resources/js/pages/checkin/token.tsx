@@ -1,4 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { PageHeader } from '@/components/ui/page-header';
 
 type Flash = {
     success?: string;
@@ -46,28 +47,33 @@ export default function CheckinTokenPage({ session, activity, status, message, a
     return (
         <>
             <Head title="Check-in por QR" />
-            <div className="mx-auto max-w-3xl space-y-4 p-4">
-                <h1 className="text-xl font-semibold tracking-tight">Check-in por QR Code</h1>
+            <div className="brand-app-bg mx-auto max-w-3xl space-y-4 p-4 sm:p-5">
+                <PageHeader title="Check-in por QR Code" subtitle="Confirme presença para desbloquear pacotes da temporada AAPH." />
 
                 {!activity || !session ? (
-                    <div className="rounded-sm border p-4 text-sm">{message}</div>
+                    <div className="album-paper p-4 text-sm">{message}</div>
                 ) : (
                     <>
+                        <section className="campaign-panel text-sm">
+                            <p className="text-[10px] font-semibold tracking-[0.14em] text-dim uppercase">Leitura de credencial</p>
+                            <p className="mt-1 text-foreground">Sessão ativa para validação de presença na atividade da temporada.</p>
+                        </section>
+
                         <div className="grid gap-3 md:grid-cols-2">
-                            <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Atividade:</span> {activity.title}</div>
-                            <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Tipo:</span> {activity.type}</div>
-                            <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Status:</span> {activity.status}</div>
-                            <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Recompensa:</span> {activity.reward_pack_quantity} pacote(s) de {activity.reward_pack_size}</div>
-                            <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Expira em:</span> {session.expires_at ?? '-'}</div>
-                            <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Usos:</span> {session.used_count}{session.max_uses ? `/${session.max_uses}` : ''}</div>
+                            <div className="album-paper p-4 text-sm"><span className="text-dim">Atividade:</span> {activity.title}</div>
+                            <div className="album-paper p-4 text-sm"><span className="text-dim">Tipo:</span> {activity.type}</div>
+                            <div className="album-paper p-4 text-sm"><span className="text-dim">Status:</span> {activity.status}</div>
+                            <div className="album-paper p-4 text-sm"><span className="text-dim">Recompensa:</span> {activity.reward_pack_quantity} pacote(s) de {activity.reward_pack_size}</div>
+                            <div className="album-paper p-4 text-sm"><span className="text-dim">Expira em:</span> {session.expires_at ?? '-'}</div>
+                            <div className="album-paper p-4 text-sm"><span className="text-dim">Usos:</span> {session.used_count}{session.max_uses ? `/${session.max_uses}` : ''}</div>
                         </div>
 
-                        <div className="rounded-sm border p-4 text-sm">{message}</div>
+                        <div className="mission-ticket text-sm">{message}</div>
 
                         {page.props.flash?.success ? (
-                            <div className="rounded-sm border border-emerald-600 bg-emerald-50 p-4 text-sm text-emerald-800">
+                            <div className="rounded-md border border-[color:var(--brand-secondary)]/45 bg-[color:var(--brand-secondary)]/12 p-4 text-sm text-foreground">
                                 <div className="font-medium">{page.props.flash.success}</div>
-                                <div className="mt-2">Pacotes gerados: {(page.props.flash.selfCheckinResult?.pack_ids ?? []).join(', ') || '-'}</div>
+                                <div className="mt-2 text-dim">Pacotes gerados: {(page.props.flash.selfCheckinResult?.pack_ids ?? []).join(', ') || '-'}</div>
                                 <div className="mt-2 flex gap-3">
                                     <Link className="underline" href="/packs">Ir para meus pacotes</Link>
                                     <Link className="underline" href="/album">Ir para meu álbum</Link>
@@ -77,10 +83,10 @@ export default function CheckinTokenPage({ session, activity, status, message, a
                         ) : null}
 
                         <div className="flex gap-3">
-                            <button type="button" disabled={!canConfirm} onClick={confirm} className="rounded-sm border bg-primary px-4 py-2 text-sm text-primary-foreground disabled:bg-zinc-400">
+                            <button type="button" disabled={!canConfirm} onClick={confirm} className="rounded-sm border border-primary bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:border-border disabled:bg-muted disabled:text-dim">
                                 Confirmar presença
                             </button>
-                            <Link href="/checkin-code" className="rounded-sm border px-4 py-2 text-sm">Usar código manual</Link>
+                            <Link href="/checkin-code" className="rounded-sm border border-border bg-card px-4 py-2 text-sm font-medium">Usar código manual</Link>
                         </div>
                     </>
                 )}

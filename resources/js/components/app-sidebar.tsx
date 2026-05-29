@@ -217,6 +217,11 @@ export function AppSidebar() {
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
+                <div className="px-2 pb-1">
+                    <div className="rounded-sm border border-sidebar-border bg-sidebar-accent/75 px-2 py-1 text-[10px] font-semibold tracking-[0.12em] text-sidebar-accent-foreground uppercase">
+                        Álbum AAPH · Temporada
+                    </div>
+                </div>
             </SidebarHeader>
 
             <SidebarContent>

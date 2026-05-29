@@ -106,7 +106,7 @@ it('participant can access share cards and generated card payload contains reali
 
     $card = ShareCard::query()->where('user_id', $participant->id)->latest('id')->firstOrFail();
 
-    expect((string) ($card->payload['share_copy'] ?? ''))->toContain('Álbum da Copa MAHA');
+    expect((string) ($card->payload['share_copy'] ?? ''))->toContain('Álbum da Copa AAPH');
     expect((string) ($card->payload['share_copy'] ?? ''))->toContain('presença');
 
     $achievement = Achievement::query()->where('slug', 'primeira-figurinha')->firstOrFail();

@@ -1,6 +1,27 @@
 import type { SVGAttributes } from 'react';
+import { useState } from 'react';
+import { cn } from '@/lib/utils';
+
+const BRAND_LOGO_SRC = '/brand/aaph-logo.png';
+const BRAND_LOGO_PLACEHOLDER_SRC = '/brand/aaph-logo-placeholder.svg';
 
 export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
+    const [mode, setMode] = useState<'official' | 'placeholder' | 'fallback'>('official');
+    const className = props.className ?? '';
+
+    if (mode !== 'fallback') {
+        const source = mode === 'official' ? BRAND_LOGO_SRC : BRAND_LOGO_PLACEHOLDER_SRC;
+
+        return (
+            <img
+                src={source}
+                alt={mode === 'official' ? 'Logo AAPH' : 'Placeholder da logo AAPH'}
+                className={cn('object-contain', className)}
+                onError={() => setMode((current) => (current === 'official' ? 'placeholder' : 'fallback'))}
+            />
+        );
+    }
+
     return (
         <svg {...props} viewBox="0 0 40 42" xmlns="http://www.w3.org/2000/svg">
             <path

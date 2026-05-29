@@ -47,9 +47,11 @@ const applyTheme = (appearance: Appearance): void => {
     }
 
     const isDark = isDarkMode(appearance);
+    const resolvedTheme: ResolvedAppearance = isDark ? 'dark' : 'light';
 
     document.documentElement.classList.toggle('dark', isDark);
-    document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+    document.documentElement.dataset.theme = resolvedTheme;
+    document.documentElement.style.colorScheme = resolvedTheme;
 };
 
 const subscribe = (callback: () => void) => {

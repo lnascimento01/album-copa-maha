@@ -67,12 +67,12 @@ class CreateShareCardService
     private function buildShareCopy(string $type, ?string $subtitle, int|string|null $metric): string
     {
         return match ($type) {
-            ShareCard::TYPE_ALBUM_PROGRESS => sprintf('Completei %s%% do Álbum da Copa MAHA. Cada presença conta.', (string) $metric),
-            ShareCard::TYPE_ACHIEVEMENT_UNLOCKED => sprintf('Desbloqueei uma nova conquista no Álbum da Copa MAHA: %s.', (string) ($subtitle ?? 'Nova conquista')),
+            ShareCard::TYPE_ALBUM_PROGRESS => sprintf('Completei %s%% do Álbum da Copa AAPH. Cada presença conta.', (string) $metric),
+            ShareCard::TYPE_ACHIEVEMENT_UNLOCKED => sprintf('Desbloqueei uma nova conquista no Álbum da Copa AAPH: %s.', (string) ($subtitle ?? 'Nova conquista')),
             ShareCard::TYPE_PACK_OPENED => 'Abri mais um pacote e avancei na coleção do time.',
-            ShareCard::TYPE_STICKER_UNLOCKED => 'Desbloqueei uma nova figurinha no Álbum da Copa MAHA. Presença, coleção e time.',
+            ShareCard::TYPE_STICKER_UNLOCKED => 'Desbloqueei uma nova figurinha no Álbum da Copa AAPH. Presença, coleção e time.',
             ShareCard::TYPE_SOCIAL_MISSION_APPROVED => 'Missão social aprovada. Mais um pacote desbloqueado.',
-            default => 'Minha temporada no Álbum da Copa MAHA segue evoluindo.',
+            default => 'Minha temporada no Álbum da Copa AAPH segue evoluindo.',
         };
     }
 }

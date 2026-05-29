@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="0 0 500 500" role="img" aria-labelledby="title desc">
+  <title id="title">Placeholder da logo AAPH</title>
+  <desc id="desc">Marca temporária para o Álbum da Copa AAPH até a inclusão do arquivo oficial PNG.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#295D94"/>
+      <stop offset="100%" stop-color="#1D4672"/>
+    </linearGradient>
+  </defs>
+  <rect width="500" height="500" rx="44" fill="url(#bg)"/>
+  <circle cx="250" cy="250" r="212" fill="none" stroke="#8AA842" stroke-width="10" opacity="0.9"/>
+  <circle cx="118" cy="118" r="20" fill="#8AA842" opacity="0.75"/>
+  <circle cx="382" cy="382" r="16" fill="#8AA842" opacity="0.65"/>
+  <path d="M95 332 L220 160 L273 252 L340 168 L405 332" fill="none" stroke="#8AA842" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <text x="250" y="250" fill="#FFFFFF" font-size="106" font-weight="800" font-family="Arial, sans-serif" text-anchor="middle" dominant-baseline="middle" letter-spacing="2">AAPH</text>
+  <text x="250" y="306" fill="#E8F1FF" font-size="22" font-weight="600" font-family="Arial, sans-serif" text-anchor="middle" letter-spacing="3">ALBUM DA COPA</text>
+</svg>

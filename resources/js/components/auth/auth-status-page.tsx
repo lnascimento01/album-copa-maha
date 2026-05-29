@@ -11,7 +11,7 @@ type Props = {
 export default function AuthStatusPage({ description, badge, reason, extraInfo }: Props) {
     return (
         <div className="space-y-4">
-            <div className="inline-flex rounded-sm border border-primary/40 bg-primary/10 px-2 py-1 text-xs font-semibold tracking-[0.12em] text-primary uppercase">
+            <div className="brand-pill">
                 {badge}
             </div>
 

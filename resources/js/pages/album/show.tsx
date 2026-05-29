@@ -28,7 +28,7 @@ export default function AlbumStickerShow({ sticker, note }: { sticker: Sticker; 
 
                 <div className="grid gap-4 md:grid-cols-[280px_1fr]">
                     <div className="rounded-sm border p-3">
-                        <div className="aspect-[3/4] rounded-sm border bg-zinc-100 p-2">
+                        <div className="aspect-[3/4] rounded-sm border bg-muted p-2">
                             {sticker.image_url && sticker.is_full_visible ? (
                                 <img src={sticker.image_url} alt={sticker.title} className="h-full w-full object-cover" />
                             ) : (

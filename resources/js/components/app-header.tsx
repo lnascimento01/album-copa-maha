@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-react';
+import { Album, LayoutGrid, Menu, Package, Search } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Breadcrumbs } from '@/components/breadcrumbs';
@@ -31,7 +31,7 @@ import {
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useInitials } from '@/hooks/use-initials';
-import { cn, toUrl } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem, NavItem } from '@/types';
 
@@ -49,14 +49,14 @@ const mainNavItems: NavItem[] = [
 
 const rightNavItems: NavItem[] = [
     {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
+        title: 'Álbum',
+        href: '/album',
+        icon: Album,
     },
     {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
+        title: 'Pacotes',
+        href: '/packs',
+        icon: Package,
     },
 ];
 
@@ -71,7 +71,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
 
     return (
         <>
-            <div className="border-b border-sidebar-border/80">
+            <div className="border-b border-sidebar-border/80 bg-card">
                 <div className="mx-auto flex h-16 items-center px-4 md:max-w-7xl">
                     {/* Mobile Menu */}
                     <div className="lg:hidden">
@@ -93,16 +93,22 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                     Navigation menu
                                 </SheetTitle>
                                 <SheetHeader className="flex justify-start text-left">
-                                    <AppLogoIcon className="h-6 w-6 fill-current text-primary" />
+                                    <AppLogoIcon className="h-7 w-7" />
                                 </SheetHeader>
                                 <div className="flex h-full flex-1 flex-col space-y-4 p-4">
+                                    <div className="rounded-sm border border-sidebar-border bg-sidebar-accent/55 px-2.5 py-2 text-[10px] font-semibold tracking-[0.12em] text-sidebar-accent-foreground uppercase">
+                                        Temporada AAPH
+                                    </div>
                                     <div className="flex h-full flex-col justify-between text-sm">
                                         <div className="flex flex-col space-y-4">
                                             {mainNavItems.map((item) => (
                                                 <Link
                                                     key={item.title}
                                                     href={item.href}
-                                                    className="flex items-center space-x-2 font-medium"
+                                                    className={cn(
+                                                        'flex items-center space-x-2 rounded-sm border border-transparent px-2 py-1.5 font-medium',
+                                                        isCurrentUrl(item.href) ? 'border-sidebar-border bg-sidebar-accent/55' : 'hover:bg-sidebar-accent/40',
+                                                    )}
                                                 >
                                                     {item.icon && (
                                                         <item.icon className="h-5 w-5" />
@@ -114,18 +120,19 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
 
                                         <div className="flex flex-col space-y-4">
                                             {rightNavItems.map((item) => (
-                                                <a
+                                                <Link
                                                     key={item.title}
-                                                    href={toUrl(item.href)}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex items-center space-x-2 font-medium"
+                                                    href={item.href}
+                                                    className={cn(
+                                                        'flex items-center space-x-2 rounded-sm border border-transparent px-2 py-1.5 font-medium',
+                                                        isCurrentUrl(item.href) ? 'border-sidebar-border bg-sidebar-accent/55' : 'hover:bg-sidebar-accent/40',
+                                                    )}
                                                 >
                                                     {item.icon && (
                                                         <item.icon className="h-5 w-5" />
                                                     )}
                                                     <span>{item.title}</span>
-                                                </a>
+                                                </Link>
                                             ))}
                                         </div>
                                     </div>
@@ -175,6 +182,9 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                             </NavigationMenuList>
                         </NavigationMenu>
                     </div>
+                    <div className="ml-4 hidden lg:flex">
+                        <span className="brand-pill">Temporada AAPH</span>
+                    </div>
 
                     <div className="ml-auto flex items-center space-x-2">
                         <div className="relative flex items-center space-x-1">
@@ -189,10 +199,8 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                 {rightNavItems.map((item) => (
                                     <Tooltip key={item.title}>
                                         <TooltipTrigger>
-                                            <a
-                                                href={toUrl(item.href)}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
+                                            <Link
+                                                href={item.href}
                                                 className="group inline-flex h-9 w-9 items-center justify-center rounded-md bg-transparent p-0 text-sm font-medium text-accent-foreground ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
                                             >
                                                 <span className="sr-only">
@@ -201,7 +209,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                 {item.icon && (
                                                     <item.icon className="size-5 opacity-80 group-hover:opacity-100" />
                                                 )}
-                                            </a>
+                                            </Link>
                                         </TooltipTrigger>
                                         <TooltipContent>
                                             <p>{item.title}</p>

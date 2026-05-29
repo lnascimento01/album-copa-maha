@@ -1,10 +1,8 @@
-import { Head, Link } from '@inertiajs/react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Head } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
+import { AlbumBook } from '@/components/album/album-book';
+import { AlbumProgressHeader } from '@/components/album/album-progress-header';
 import { EmptyState } from '@/components/ui/empty-state';
-import { MetricCard } from '@/components/ui/metric-card';
-import { PageHeader } from '@/components/ui/page-header';
-import { ProgressBar } from '@/components/ui/progress-bar';
 import { StatusBadge } from '@/components/ui/status-badge';
 
 type AlbumSticker = {
@@ -17,7 +15,7 @@ type AlbumSticker = {
     rarity: string;
     image_url: string | null;
     is_unlocked: boolean;
-    team?: { slug: string | null; name: string | null };
+    team?: { slug: string | null; name: string | null; short_name?: string | null };
 };
 
 type AlbumPayload = {
@@ -39,10 +37,7 @@ type Props = {
     can?: { createShareCard: boolean };
     progressAchievements?: Array<{ id: number; name: string; threshold: number | null; is_unlocked: boolean }>;
     filters: FilterItem[];
-    note: string;
 };
-
-const PAGE_SIZE = 12;
 
 function stickerTypeCategory(type: string): string {
     if (type === 'player') {
@@ -68,10 +63,9 @@ function stickerTypeCategory(type: string): string {
     return 'all';
 }
 
-export default function AlbumIndex({ album, progress, packs, can, progressAchievements, filters, note }: Props) {
+export default function AlbumIndex({ album, progress, packs, can, progressAchievements, filters }: Props) {
     const [activeFilter, setActiveFilter] = useState<string>('all');
     const [activeTeam, setActiveTeam] = useState<string>('all');
-    const [page, setPage] = useState(1);
 
     const teamOptions = useMemo(() => {
         if (!album) {
@@ -97,41 +91,10 @@ export default function AlbumIndex({ album, progress, packs, can, progressAchiev
         });
     }, [album, activeFilter, activeTeam]);
 
-    const pageCount = Math.max(1, Math.ceil(stickers.length / PAGE_SIZE));
-
-    const pagedStickers = useMemo(() => {
-        const start = (page - 1) * PAGE_SIZE;
-
-        return stickers.slice(start, start + PAGE_SIZE);
-    }, [page, stickers]);
-
     return (
         <>
             <Head title="Meu Álbum" />
-            <div className="space-y-4 p-4 sm:p-5">
-                <PageHeader
-                    title="Meu Álbum"
-                    subtitle={note}
-                    actions={(
-                        <>
-                            <Link href={packs?.link ?? '/packs'} className="rounded-sm border border-border bg-card px-3 py-2 text-xs">
-                                Pacotes pendentes: {packs?.pending ?? 0}
-                            </Link>
-                            {can?.createShareCard ? (
-                                <Link
-                                    href="/share-cards"
-                                    method="post"
-                                    data={{ type: 'album_progress' }}
-                                    as="button"
-                                    className="rounded-sm border border-primary bg-primary px-3 py-2 text-xs text-primary-foreground"
-                                >
-                                    Gerar card de progresso
-                                </Link>
-                            ) : null}
-                        </>
-                    )}
-                />
-
+            <div className="brand-app-bg space-y-3 p-3 sm:space-y-4 sm:p-4">
                 {!album ? (
                     <EmptyState
                         title="Nenhum álbum ativo disponível."
@@ -139,29 +102,81 @@ export default function AlbumIndex({ album, progress, packs, can, progressAchiev
                     />
                 ) : (
                     <>
-                        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                            <MetricCard
-                                label="Álbum ativo"
-                                value={album.name}
-                                hint={album.teams.length > 0 ? album.teams.map((team) => team.short_name ?? team.name).join(' • ') : album.team.name}
-                            />
-                            <MetricCard label="Figurinhas desbloqueadas" value={`${progress.unlocked}/${progress.total}`} accent="success" />
-                            <MetricCard label="Progresso" value={`${progress.percent}%`} hint={<ProgressBar value={progress.percent} />} />
-                            <MetricCard
-                                label="Pacotes"
-                                value={packs?.pending ?? 0}
-                                hint={<Link href={packs?.link ?? '/packs'} className="underline">Abrir pacotes</Link>}
-                                accent={(packs?.pending ?? 0) > 0 ? 'warning' : 'default'}
-                            />
-                        </div>
+                        <AlbumProgressHeader
+                            albumName={album.name}
+                            season={album.season}
+                            teams={album.teams}
+                            unlocked={progress.unlocked}
+                            total={progress.total}
+                            percent={progress.percent}
+                            pendingPacks={packs?.pending ?? 0}
+                            packsLink={packs?.link ?? '/packs'}
+                            canCreateShareCard={can?.createShareCard}
+                        />
+
+                        <section className="album-paper p-2.5 sm:p-3">
+                            <p className="text-xs text-dim sm:text-sm">
+                                Complete sua coleção oficial da Copa AAPH. Abra pacotes, encontre figurinhas e avance página por página.
+                            </p>
+                            <div className="mt-2 flex flex-wrap gap-1.5 sm:gap-2">
+                                {teamOptions.map((team) => (
+                                    <button
+                                        key={team.value}
+                                        type="button"
+                                        onClick={() => setActiveTeam(team.value)}
+                                        className={`rounded-sm border px-2.5 py-1 text-[11px] font-semibold tracking-wide sm:px-3 sm:py-1.5 sm:text-xs ${
+                                            activeTeam === team.value
+                                                ? 'border-primary bg-primary text-primary-foreground'
+                                                : 'border-border bg-card text-foreground'
+                                        }`}
+                                    >
+                                        {team.label}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="mt-1.5 flex flex-wrap gap-1.5 sm:gap-2">
+                                {filters.map((filter) => (
+                                    <button
+                                        key={filter.value}
+                                        type="button"
+                                        onClick={() => setActiveFilter(filter.value)}
+                                        className={`rounded-sm border px-2.5 py-1 text-[11px] font-semibold tracking-wide sm:px-3 sm:py-1.5 sm:text-xs ${
+                                            activeFilter === filter.value
+                                                ? 'border-primary bg-primary text-primary-foreground'
+                                                : 'border-border bg-card text-foreground'
+                                        }`}
+                                    >
+                                        {filter.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </section>
+
+                        <AlbumBook
+                            coverImageUrl="/brand/capa_album.png"
+                            albumName={album.name}
+                            season={album.season}
+                            teams={album.teams}
+                            stickers={stickers.map((sticker) => ({
+                                id: sticker.id,
+                                code: sticker.code,
+                                title: sticker.title,
+                                subtitle: sticker.subtitle,
+                                rarity: sticker.rarity,
+                                imageUrl: sticker.image_url,
+                                unlocked: sticker.is_unlocked,
+                                teamShort: sticker.team?.short_name ?? sticker.team?.name ?? null,
+                            }))}
+                        />
 
                         {(progressAchievements ?? []).length > 0 ? (
-                            <section className="rounded-md border border-border bg-card p-4">
-                                <h2 className="text-sm font-semibold text-foreground">Conquistas de progresso</h2>
+                            <section className="album-paper p-4">
+                                <h2 className="text-sm font-semibold text-foreground">Conquistas da sua temporada de coleção</h2>
                                 <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
                                     {(progressAchievements ?? []).map((item) => (
                                         <div key={item.id} className="rounded-md border border-border bg-muted/70 p-2">
-                                            <p className="text-xs font-medium text-foreground">{item.name}</p>
+                                            <p className="text-xs font-semibold text-foreground">{item.name}</p>
                                             <p className="text-[11px] text-dim">Meta: {item.threshold ?? '-'}%</p>
                                             <div className="mt-1">
                                                 <StatusBadge value={item.is_unlocked ? 'approved' : 'pending'} label={item.is_unlocked ? 'Desbloqueada' : 'Bloqueada'} />
@@ -171,112 +186,6 @@ export default function AlbumIndex({ album, progress, packs, can, progressAchiev
                                 </div>
                             </section>
                         ) : null}
-
-                        <section className="space-y-3 rounded-md border border-border bg-card p-3">
-                            <div className="flex flex-wrap gap-2">
-                                {teamOptions.map((team) => (
-                                    <button
-                                        key={team.value}
-                                        type="button"
-                                        onClick={() => {
-                                            setActiveTeam(team.value);
-                                            setPage(1);
-                                        }}
-                                        className={`rounded-sm border px-3 py-1.5 text-xs ${
-                                            activeTeam === team.value
-                                                ? 'border-primary bg-primary text-primary-foreground'
-                                                : 'border-border bg-background text-foreground'
-                                        }`}
-                                    >
-                                        {team.label}
-                                    </button>
-                                ))}
-                            </div>
-
-                            <div className="flex flex-wrap gap-2">
-                                {filters.map((filter) => (
-                                    <button
-                                        key={filter.value}
-                                        type="button"
-                                        onClick={() => {
-                                            setActiveFilter(filter.value);
-                                            setPage(1);
-                                        }}
-                                        className={`rounded-sm border px-3 py-1.5 text-xs ${
-                                            activeFilter === filter.value
-                                                ? 'border-primary bg-primary text-primary-foreground'
-                                                : 'border-border bg-background text-foreground'
-                                        }`}
-                                    >
-                                        {filter.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </section>
-
-                        {stickers.length === 0 ? (
-                            <EmptyState title="Nenhuma figurinha para este filtro." description="Tente outro grupo para continuar navegando no álbum." />
-                        ) : (
-                            <section className="space-y-3 rounded-md border border-border bg-card p-3">
-                                <div className="flex items-center justify-between gap-3">
-                                    <p className="text-xs tracking-wide text-dim uppercase">
-                                        Página {page} de {pageCount} · {stickers.length} slots
-                                    </p>
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                                            disabled={page === 1}
-                                            className="inline-flex items-center gap-1 rounded-sm border border-border bg-background px-2 py-1 text-xs disabled:opacity-40"
-                                        >
-                                            <ChevronLeft className="size-3.5" />
-                                            Anterior
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setPage((prev) => Math.min(pageCount, prev + 1))}
-                                            disabled={page >= pageCount}
-                                            className="inline-flex items-center gap-1 rounded-sm border border-border bg-background px-2 py-1 text-xs disabled:opacity-40"
-                                        >
-                                            Próxima
-                                            <ChevronRight className="size-3.5" />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-                                    {pagedStickers.map((sticker, index) => (
-                                        <Link
-                                            key={sticker.id}
-                                            href={`/album/stickers/${sticker.id}`}
-                                            className="group relative block rounded-md border border-border bg-background p-2 transition hover:-translate-y-0.5 hover:bg-muted motion-reduce:transform-none"
-                                            style={{ animationDelay: `${index * 24}ms` }}
-                                        >
-                                            <div className={`aspect-[3/4] overflow-hidden rounded-sm border ${sticker.is_unlocked ? 'border-border bg-muted' : 'border-border bg-muted/60'}`}>
-                                                {sticker.image_url && sticker.is_unlocked ? (
-                                                    <img src={sticker.image_url} alt={sticker.title} className="h-full w-full object-cover" />
-                                                ) : (
-                                                    <div className="flex h-full flex-col items-center justify-center gap-1 px-2 text-center">
-                                                        <div className="text-[11px] font-mono text-dim">{sticker.code}</div>
-                                                        <div className="text-[11px] text-dim">
-                                                            {sticker.is_unlocked ? 'Imagem indisponível' : 'Slot bloqueado'}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="mt-2 space-y-1">
-                                                <div className="font-mono text-[11px] text-dim">{sticker.code}</div>
-                                                <div className="line-clamp-2 text-xs font-medium text-foreground">{sticker.title}</div>
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <span className="text-[11px] uppercase text-dim">{sticker.rarity}</span>
-                                                    <StatusBadge value={sticker.is_unlocked ? 'approved' : 'pending'} label={sticker.is_unlocked ? 'Ok' : 'Lock'} />
-                                                </div>
-                                            </div>
-                                        </Link>
-                                    ))}
-                                </div>
-                            </section>
-                        )}
                     </>
                 )}
             </div>

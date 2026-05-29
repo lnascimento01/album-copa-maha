@@ -18,6 +18,11 @@ export default function ResetPassword({ token, email, passwordRules }: Props) {
         <>
             <Head title="Redefinir Senha" />
 
+            <div className="campaign-panel mb-4 text-sm text-foreground">
+                <p className="text-[10px] font-semibold tracking-[0.14em] text-dim uppercase">Atualização segura</p>
+                <p className="mt-1">Defina uma nova senha forte para retomar sua jornada no Álbum da Copa AAPH.</p>
+            </div>
+
             <Form
                 {...update.form()}
                 transform={(data) => ({ ...data, token, email })}
@@ -71,5 +76,5 @@ export default function ResetPassword({ token, email, passwordRules }: Props) {
 
 ResetPassword.layout = {
     title: 'Atualize sua credencial',
-    description: 'Defina uma nova senha para continuar sua jornada na temporada MAHA.',
+    description: 'Defina uma nova senha para continuar sua jornada na temporada AAPH.',
 };

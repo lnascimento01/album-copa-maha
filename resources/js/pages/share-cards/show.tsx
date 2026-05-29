@@ -19,31 +19,36 @@ type Props = {
 };
 
 export default function ShareCardsShow({ card }: Props) {
-    const shareCopy = card.payload.share_copy ?? 'Minha temporada no Álbum da Copa MAHA segue evoluindo.';
+    const shareCopy = card.payload.share_copy ?? 'Minha temporada no Álbum da Copa AAPH segue evoluindo.';
 
     return (
         <>
             <Head title={`Share Card #${card.id}`} />
 
-            <div className="space-y-4 p-4 sm:p-5">
+            <div className="brand-app-bg space-y-4 p-4 sm:p-5">
                 <PageHeader
                     title={`Share Card #${card.id}`}
                     subtitle="Card pronto para story, print manual ou compartilhamento textual."
                     actions={<Link href="/share-cards" className="rounded-sm border bg-card border-border px-3 py-2 text-xs">Voltar</Link>}
                 />
 
+                <section className="campaign-panel">
+                    <p className="text-[10px] font-semibold tracking-[0.14em] text-dim uppercase">Vitrine da temporada</p>
+                    <p className="mt-1 text-sm text-foreground">Use este card para destacar evolução, presença e conquistas do álbum oficial.</p>
+                </section>
+
                 <ShareCardPreview
                     payload={card.payload}
                     footer={(
                         <div className="space-y-2 text-xs">
-                            <div className="rounded-sm border bg-card border-border bg-white p-3">
+                            <div className="rounded-sm border border-border bg-card p-3">
                                 <div className="uppercase tracking-wide text-dim">Texto para compartilhar</div>
                                 <p className="mt-1 text-foreground">{shareCopy}</p>
                             </div>
                             <div className="flex flex-wrap gap-2">
                                 <button
                                     type="button"
-                                    className="rounded-sm border bg-card border-border bg-white px-2 py-1"
+                                    className="rounded-sm border border-border bg-card px-2 py-1"
                                     onClick={() => navigator.clipboard.writeText(String(shareCopy))}
                                 >
                                     Copiar texto
@@ -56,7 +61,7 @@ export default function ShareCardsShow({ card }: Props) {
                     )}
                 />
 
-                <div className="rounded-md border border-border bg-card p-4">
+                <div className="album-paper p-4">
                     <div className="text-xs uppercase tracking-wide text-dim">Payload</div>
                     <pre className="mt-2 overflow-x-auto text-xs text-dim">{JSON.stringify(card.payload, null, 2)}</pre>
                 </div>

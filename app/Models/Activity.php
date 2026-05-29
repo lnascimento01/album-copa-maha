@@ -33,6 +33,8 @@ class Activity extends Model
 
     public const STATUS_OPEN = 'open';
 
+    public const STATUS_ACTIVE = self::STATUS_OPEN;
+
     public const STATUS_CLOSED = 'closed';
 
     public const STATUS_CANCELLED = 'cancelled';
@@ -52,6 +54,13 @@ class Activity extends Model
         'type',
         'status',
         'description',
+        'location_name',
+        'latitude',
+        'longitude',
+        'radius_meters',
+        'max_accuracy_meters',
+        'event_timezone',
+        'event_token',
         'starts_at',
         'ends_at',
         'reward_pack_quantity',
@@ -72,6 +81,10 @@ class Activity extends Model
             'ends_at' => 'datetime',
             'reward_pack_quantity' => 'integer',
             'reward_pack_size' => 'integer',
+            'latitude' => 'float',
+            'longitude' => 'float',
+            'radius_meters' => 'integer',
+            'max_accuracy_meters' => 'integer',
             'opened_at' => 'datetime',
             'closed_at' => 'datetime',
             'cancelled_at' => 'datetime',

@@ -113,5 +113,11 @@ class FortifyServiceProvider extends ServiceProvider
                 ($request->input('credential.id') ?: $request->session()->getId()).'|'.$request->ip(),
             );
         });
+
+        RateLimiter::for('event-checkin-confirm', function (Request $request) {
+            return Limit::perMinute(8)->by(
+                ($request->user()?->id ?? 'guest').'|'.$request->ip(),
+            );
+        });
     }
 }

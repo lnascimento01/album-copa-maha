@@ -25,7 +25,7 @@ export default function AdminStickerEdit({ sticker, albums, players, types, rari
             <Head title={`Editar Figurinha - ${sticker.code}`} />
             <div className="space-y-4 p-4">
                 <h1 className="text-xl font-semibold tracking-tight">Editar Figurinha</h1>
-                <p className="text-sm text-zinc-600">Revise copy, código e raridade para manter consistência do catálogo realista.</p>
+                <p className="text-sm text-muted-foreground">Revise copy, código e raridade para manter consistência do catálogo realista.</p>
                 <StickerForm
                     albums={albums}
                     players={players}

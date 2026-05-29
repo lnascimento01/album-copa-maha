@@ -4,6 +4,7 @@ import type { FormEvent } from 'react';
 import { DataTableShell } from '@/components/ui/data-table-shell';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
+import { ResponsiveDataList } from '@/components/ui/responsive-data-list';
 import { StatusBadge } from '@/components/ui/status-badge';
 
 type Role = {
@@ -98,10 +99,10 @@ export default function AdminUsersIndex({ users, filters }: Props) {
     return (
         <>
             <Head title="Usuários" />
-            <div className="space-y-4 p-4 sm:p-5">
+            <div className="brand-app-bg space-y-4 p-4 sm:p-5">
                 <PageHeader title="Usuários" subtitle="Aprovação de cadastro, papéis e acesso operacional." />
 
-                <form onSubmit={submitFilters} className="grid gap-3 rounded-md border border-border bg-card p-4 md:grid-cols-4">
+                <form onSubmit={submitFilters} className="album-paper grid gap-3 p-4 md:grid-cols-4">
                     <div>
                         <label className="text-xs uppercase tracking-wide text-dim">Status</label>
                         <select
@@ -126,14 +127,67 @@ export default function AdminUsersIndex({ users, filters }: Props) {
                         />
                     </div>
                     <div className="flex items-end">
-                        <button className="w-full rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground" type="submit">
+                        <button className="w-full rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground" type="submit">
                             Filtrar
                         </button>
                     </div>
                 </form>
 
                 <DataTableShell title="Lista de usuários" subtitle="Ações disponíveis conforme permissões do operador.">
-                    <table className="min-w-full text-sm">
+                    <ResponsiveDataList
+                        items={users.data}
+                        getKey={(user) => user.id}
+                        empty={<EmptyState title="Nenhum usuário encontrado." description="Ajuste os filtros para ampliar a busca." />}
+                        renderItem={(user) => (
+                            <div className="space-y-2">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-semibold text-foreground">{user.name}</p>
+                                        <p className="mt-1 truncate font-mono text-xs text-dim">{user.email}</p>
+                                    </div>
+                                    <StatusBadge value={user.approval_status} />
+                                </div>
+                                <div>
+                                    <p className="responsive-data-key">Roles</p>
+                                    <p className="responsive-data-value">{user.roles.map((role) => role.slug).join(', ') || '-'}</p>
+                                </div>
+                                <div className="flex flex-wrap gap-2 pt-1">
+                                    <Link className="app-link-chip" href={`/admin/users/${user.id}`}>Detalhes</Link>
+                                    {canApprove ? (
+                                        <button
+                                            type="button"
+                                            className="app-link-chip disabled:cursor-not-allowed disabled:opacity-55"
+                                            onClick={() => approve(user.id)}
+                                            disabled={user.approval_status === 'approved'}
+                                        >
+                                            {user.approval_status === 'approved' ? 'Aprovado' : 'Aprovar'}
+                                        </button>
+                                    ) : null}
+                                    {canReject ? (
+                                        <button
+                                            type="button"
+                                            className="app-link-chip disabled:cursor-not-allowed disabled:opacity-55"
+                                            onClick={() => reject(user.id)}
+                                            disabled={user.approval_status === 'rejected'}
+                                        >
+                                            {user.approval_status === 'rejected' ? 'Rejeitado' : 'Rejeitar'}
+                                        </button>
+                                    ) : null}
+                                    {canSuspend ? (
+                                        <button
+                                            type="button"
+                                            className="app-link-chip disabled:cursor-not-allowed disabled:opacity-55"
+                                            onClick={() => suspend(user.id)}
+                                            disabled={user.approval_status === 'suspended'}
+                                        >
+                                            {user.approval_status === 'suspended' ? 'Suspenso' : 'Suspender'}
+                                        </button>
+                                    ) : null}
+                                </div>
+                            </div>
+                        )}
+                    />
+                    <table className="hidden min-w-full text-sm md:table">
                         <thead>
                             <tr className="border-b border-border text-left">
                                 <th className="px-4 py-2">Nome</th>
@@ -152,7 +206,7 @@ export default function AdminUsersIndex({ users, filters }: Props) {
                                 </tr>
                             ) : (
                                 users.data.map((user) => (
-                                    <tr key={user.id} className="border-b border-border/60 align-top">
+                                    <tr key={user.id} className="admin-table-row align-top">
                                         <td className="px-4 py-2 text-foreground">{user.name}</td>
                                         <td className="px-4 py-2 font-mono text-xs text-dim">{user.email}</td>
                                         <td className="px-4 py-2"><StatusBadge value={user.approval_status} /></td>
@@ -212,7 +266,7 @@ export default function AdminUsersIndex({ users, filters }: Props) {
                                 }
                             }}
                             disabled={!link.url}
-                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-primary text-primary-foreground' : 'bg-white text-dim'}`}
+                            className={`rounded-sm border px-2 py-1 text-xs font-semibold ${link.active ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-dim'}`}
                         >
                             <span dangerouslySetInnerHTML={{ __html: link.label }} />
                         </button>

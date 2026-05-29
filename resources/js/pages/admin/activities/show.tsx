@@ -49,8 +49,18 @@ type Props = {
         type: string;
         status: string;
         description: string | null;
+        location_name: string | null;
+        latitude: number | null;
+        longitude: number | null;
+        radius_meters: number;
+        max_accuracy_meters: number;
+        event_timezone: string;
+        event_token: string | null;
+        event_url: string | null;
         starts_at: string | null;
         ends_at: string | null;
+        starts_at_display: string | null;
+        ends_at_display: string | null;
         reward_pack_quantity: number;
         reward_pack_size: number;
         checkins_count: number;
@@ -190,12 +200,32 @@ export default function AdminActivityShow({ activity, checkins, checkinSessions,
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Álbum:</span> {activity.album.name}</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Status:</span> {activity.status}</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Tipo:</span> {activity.type}</div>
-                    <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Início:</span> {activity.starts_at ?? '-'}</div>
-                    <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Fim:</span> {activity.ends_at ?? '-'}</div>
+                    <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Início:</span> {activity.starts_at_display ?? '-'}</div>
+                    <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Fim:</span> {activity.ends_at_display ?? '-'}</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Recompensa:</span> {activity.reward_pack_quantity} pacote(s) de {activity.reward_pack_size} figurinhas</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Check-ins confirmados:</span> {activity.checkins_count}</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Pacotes gerados:</span> {activity.sticker_packs_count}</div>
+                    {activity.type === 'event' ? (
+                        <>
+                            <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Local:</span> {activity.location_name ?? '-'}</div>
+                            <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Coordenadas:</span> {activity.latitude ?? '-'}, {activity.longitude ?? '-'}</div>
+                            <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Raio:</span> {activity.radius_meters}m</div>
+                            <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Precisão máxima:</span> {activity.max_accuracy_meters}m</div>
+                        </>
+                    ) : null}
                 </div>
+
+                {activity.type === 'event' && activity.event_url ? (
+                    <div className="rounded-sm border p-4 text-sm">
+                        <div className="mb-2 text-xs uppercase text-muted-foreground">Link público de check-in por evento</div>
+                        <div className="break-all">{activity.event_url}</div>
+                        <div className="mt-3 inline-block rounded-sm border bg-white p-2">
+                            <Suspense fallback={<div className="h-[140px] w-[140px] text-xs text-muted-foreground">Gerando QR...</div>}>
+                                <LazyQRCodeSVG value={activity.event_url} size={140} />
+                            </Suspense>
+                        </div>
+                    </div>
+                ) : null}
 
                 <div className="rounded-sm border p-4 text-sm">
                     <div className="mb-2 text-xs uppercase text-muted-foreground">Check-in por QR Code</div>
@@ -251,7 +281,7 @@ export default function AdminActivityShow({ activity, checkins, checkinSessions,
                                 <input value={sessionNote} onChange={(event) => setSessionNote(event.target.value)} className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" />
                             </div>
                             <div className="md:col-span-4 flex justify-end">
-                                <button disabled={activity.status !== 'open'} type="submit" className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground disabled:bg-zinc-400">
+                                <button disabled={activity.status !== 'open'} type="submit" className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground disabled:bg-muted disabled:text-muted-foreground">
                                     Gerar sessão de check-in
                                 </button>
                             </div>

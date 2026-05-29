@@ -18,7 +18,7 @@ export default function Register({ passwordRules }: Props) {
         <>
             <Head title="Cadastro" />
 
-            <div className="mb-4 rounded-sm border border-border bg-muted p-3 text-sm text-dim">
+            <div className="mb-4 rounded-sm border border-primary/30 bg-primary/10 p-3 text-sm text-foreground">
                 Seu cadastro precisa ser aprovado pela administração antes de participar da temporada.
             </div>
 

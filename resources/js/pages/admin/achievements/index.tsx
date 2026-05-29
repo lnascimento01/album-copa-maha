@@ -68,36 +68,36 @@ export default function AdminAchievementsIndex({ achievements, filters, types, t
                     actions={<Link href="/admin/achievements/create" className="rounded-sm border bg-primary px-3 py-2 text-xs text-primary-foreground">Nova conquista</Link>}
                 />
 
-                <form onSubmit={submit} className="grid gap-3 rounded-md border border-zinc-200 bg-white p-4 md:grid-cols-5">
+                <form onSubmit={submit} className="grid gap-3 rounded-md border border-border bg-card p-4 md:grid-cols-5">
                     <div>
-                        <label className="text-xs uppercase tracking-wide text-zinc-500">Busca</label>
-                        <input value={search} onChange={(event) => setSearch(event.target.value)} className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm" />
+                        <label className="text-xs uppercase tracking-wide text-dim">Busca</label>
+                        <input value={search} onChange={(event) => setSearch(event.target.value)} className="mt-1 w-full rounded-sm border border-input px-2 py-2 text-sm" />
                     </div>
                     <div>
-                        <label className="text-xs uppercase tracking-wide text-zinc-500">Tipo</label>
-                        <select value={type} onChange={(event) => setType(event.target.value)} className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm">
+                        <label className="text-xs uppercase tracking-wide text-dim">Tipo</label>
+                        <select value={type} onChange={(event) => setType(event.target.value)} className="mt-1 w-full rounded-sm border border-input px-2 py-2 text-sm">
                             <option value="">Todos</option>
                             {types.map((item) => <option key={item} value={item}>{item}</option>)}
                         </select>
                     </div>
                     <div>
-                        <label className="text-xs uppercase tracking-wide text-zinc-500">Status</label>
-                        <select value={isActive} onChange={(event) => setIsActive(event.target.value)} className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm">
+                        <label className="text-xs uppercase tracking-wide text-dim">Status</label>
+                        <select value={isActive} onChange={(event) => setIsActive(event.target.value)} className="mt-1 w-full rounded-sm border border-input px-2 py-2 text-sm">
                             <option value="">Todos</option>
                             <option value="1">Ativa</option>
                             <option value="0">Inativa</option>
                         </select>
                     </div>
                     <div>
-                        <label className="text-xs uppercase tracking-wide text-zinc-500">Time</label>
-                        <select value={teamId} onChange={(event) => setTeamId(event.target.value)} className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm">
+                        <label className="text-xs uppercase tracking-wide text-dim">Time</label>
+                        <select value={teamId} onChange={(event) => setTeamId(event.target.value)} className="mt-1 w-full rounded-sm border border-input px-2 py-2 text-sm">
                             <option value="">Todos</option>
                             {teams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
                         </select>
                     </div>
                     <div>
-                        <label className="text-xs uppercase tracking-wide text-zinc-500">Álbum</label>
-                        <select value={albumId} onChange={(event) => setAlbumId(event.target.value)} className="mt-1 w-full rounded-sm border border-zinc-300 px-2 py-2 text-sm">
+                        <label className="text-xs uppercase tracking-wide text-dim">Álbum</label>
+                        <select value={albumId} onChange={(event) => setAlbumId(event.target.value)} className="mt-1 w-full rounded-sm border border-input px-2 py-2 text-sm">
                             <option value="">Todos</option>
                             {albums.map((album) => <option key={album.id} value={album.id}>{album.name}</option>)}
                         </select>
@@ -110,7 +110,7 @@ export default function AdminAchievementsIndex({ achievements, filters, types, t
                 <DataTableShell title="Conquistas cadastradas" subtitle="Escopo por time/álbum, threshold e volume de desbloqueios.">
                     <table className="min-w-full text-sm">
                         <thead>
-                            <tr className="border-b border-zinc-200 text-left">
+                            <tr className="border-b border-border text-left">
                                 <th className="px-4 py-2">Nome</th>
                                 <th className="px-4 py-2">Tipo</th>
                                 <th className="px-4 py-2">Threshold</th>
@@ -129,16 +129,16 @@ export default function AdminAchievementsIndex({ achievements, filters, types, t
                                 </tr>
                             ) : (
                                 achievements.data.map((item) => (
-                                    <tr key={item.id} className="border-b border-zinc-100">
+                                    <tr key={item.id} className="border-b border-border/70">
                                         <td className="px-4 py-2">
-                                            <div className="font-medium text-zinc-900">{item.name}</div>
-                                            <div className="font-mono text-[11px] text-zinc-500">{item.slug}</div>
+                                            <div className="font-medium text-foreground">{item.name}</div>
+                                            <div className="font-mono text-[11px] text-dim">{item.slug}</div>
                                         </td>
-                                        <td className="px-4 py-2 text-zinc-700">{item.type}</td>
-                                        <td className="px-4 py-2 text-zinc-700">{item.threshold ?? '-'}</td>
-                                        <td className="px-4 py-2 text-xs text-zinc-700">{item.team?.name ?? 'Global'} / {item.album?.name ?? 'Global'}</td>
+                                        <td className="px-4 py-2 text-dim">{item.type}</td>
+                                        <td className="px-4 py-2 text-dim">{item.threshold ?? '-'}</td>
+                                        <td className="px-4 py-2 text-xs text-dim">{item.team?.name ?? 'Global'} / {item.album?.name ?? 'Global'}</td>
                                         <td className="px-4 py-2"><StatusBadge value={item.is_active ? 'active' : 'archived'} label={item.is_active ? 'Ativa' : 'Inativa'} /></td>
-                                        <td className="px-4 py-2 text-zinc-700">{item.unlocked_count}</td>
+                                        <td className="px-4 py-2 text-dim">{item.unlocked_count}</td>
                                         <td className="space-x-2 px-4 py-2">
                                             <Link href={`/admin/achievements/${item.id}`} className="text-xs underline">Ver</Link>
                                             <Link href={`/admin/achievements/${item.id}/edit`} className="text-xs underline">Editar</Link>
@@ -157,7 +157,7 @@ export default function AdminAchievementsIndex({ achievements, filters, types, t
                             type="button"
                             onClick={() => link.url && router.visit(link.url)}
                             disabled={!link.url}
-                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-primary text-primary-foreground' : 'bg-white text-zinc-700'}`}
+                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-primary text-primary-foreground' : 'bg-card text-dim'}`}
                         >
                             <span dangerouslySetInnerHTML={{ __html: link.label }} />
                         </button>

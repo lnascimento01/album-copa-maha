@@ -29,6 +29,10 @@ class ActivityCheckinFactory extends Factory
             'revoked_by' => null,
             'revoke_reason' => null,
             'notes' => null,
+            'latitude' => null,
+            'longitude' => null,
+            'accuracy_meters' => null,
+            'distance_meters' => null,
             'metadata' => null,
         ];
     }

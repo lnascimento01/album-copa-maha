@@ -97,7 +97,7 @@ class CreateActivityCheckinSessionService
     private function generateUniquePublicCode(): string
     {
         do {
-            $code = 'MAHA-'.strtoupper(Str::random(5));
+            $code = 'AAPH-'.strtoupper(Str::random(5));
         } while (ActivityCheckinSession::query()->where('public_code', $code)->exists());
 
         return $code;

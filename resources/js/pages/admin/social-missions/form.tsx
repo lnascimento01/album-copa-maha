@@ -128,7 +128,7 @@ export default function SocialMissionForm({ initialValues, teams, albums, status
                 <textarea value={form.data.instructions} onChange={(event) => form.setData('instructions', event.target.value)} className="mt-1 min-h-24 w-full rounded-sm border px-2 py-2 text-sm" />
             </div>
 
-            <div className="rounded-sm border bg-zinc-50 p-3 text-xs text-muted-foreground">
+            <div className="rounded-sm border bg-muted p-3 text-xs text-muted-foreground">
                 Cada submissão aprovada nesta missão gera {form.data.reward_pack_quantity} pacote(s) com {form.data.reward_pack_size} figurinha(s).
             </div>
 

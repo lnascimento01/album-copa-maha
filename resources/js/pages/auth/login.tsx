@@ -30,6 +30,10 @@ export default function Login({ status, canResetPassword }: Props) {
                 </div>
             ) : null}
 
+            <div className="mb-4 rounded-sm border border-primary/30 bg-primary/10 px-3 py-2 text-xs leading-relaxed text-foreground">
+                Entre para acompanhar sua temporada no <strong>Álbum da Copa AAPH</strong> e abrir os pacotes da rodada.
+            </div>
+
             <Form
                 {...store.form()}
                 resetOnSuccess={['password']}
@@ -107,5 +111,5 @@ export default function Login({ status, canResetPassword }: Props) {
 
 Login.layout = {
     title: 'Sua temporada começa no check-in',
-    description: 'Entre para registrar presença, evoluir no time e acompanhar sua coleção da Copa MAHA.',
+    description: 'Entre para registrar presença, evoluir no time e acompanhar sua coleção da Copa AAPH.',
 };

@@ -14,10 +14,13 @@ use App\Models\AuditLog;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
+use Illuminate\Support\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use DateTimeInterface;
 
 class ActivityController extends Controller
 {
@@ -98,7 +101,10 @@ class ActivityController extends Controller
     {
         $this->authorize('create', Activity::class);
 
-        $payload = $request->validated();
+        $payload = $this->normalizeEventConfig(
+            type: (string) $request->validated('type'),
+            payload: $request->validated(),
+        );
 
         $activity = Activity::query()->create([
             ...$payload,
@@ -187,8 +193,24 @@ class ActivityController extends Controller
                 'type' => $activity->type,
                 'status' => $activity->status,
                 'description' => $activity->description,
+                'location_name' => $activity->location_name,
+                'latitude' => $activity->latitude,
+                'longitude' => $activity->longitude,
+                'radius_meters' => $activity->radius_meters,
+                'max_accuracy_meters' => $activity->max_accuracy_meters,
+                'event_timezone' => $activity->event_timezone,
+                'event_token' => $activity->event_token,
+                'event_url' => $activity->event_token ? url('/checkin/event/'.$activity->event_token) : null,
                 'starts_at' => optional($activity->starts_at)?->toDateTimeString(),
                 'ends_at' => optional($activity->ends_at)?->toDateTimeString(),
+                'starts_at_display' => $this->formatActivityDateForDisplay(
+                    value: $activity->starts_at,
+                    timezone: $activity->type === Activity::TYPE_EVENT ? $activity->event_timezone : null,
+                ),
+                'ends_at_display' => $this->formatActivityDateForDisplay(
+                    value: $activity->ends_at,
+                    timezone: $activity->type === Activity::TYPE_EVENT ? $activity->event_timezone : null,
+                ),
                 'reward_pack_quantity' => $activity->reward_pack_quantity,
                 'reward_pack_size' => $activity->reward_pack_size,
                 'opened_at' => optional($activity->opened_at)?->toDateTimeString(),
@@ -246,7 +268,7 @@ class ActivityController extends Controller
     {
         $this->authorize('update', $activity);
 
-        if ($activity->status !== Activity::STATUS_DRAFT) {
+        if (! $this->canEditActivity($activity)) {
             abort(403);
         }
 
@@ -259,8 +281,20 @@ class ActivityController extends Controller
                 'slug' => $activity->slug,
                 'type' => $activity->type,
                 'description' => $activity->description,
-                'starts_at' => optional($activity->starts_at)?->format('Y-m-d\\TH:i'),
-                'ends_at' => optional($activity->ends_at)?->format('Y-m-d\\TH:i'),
+                'location_name' => $activity->location_name,
+                'latitude' => $activity->latitude,
+                'longitude' => $activity->longitude,
+                'radius_meters' => $activity->radius_meters,
+                'max_accuracy_meters' => $activity->max_accuracy_meters,
+                'event_timezone' => $activity->event_timezone,
+                'starts_at' => $this->formatActivityDateForForm(
+                    value: $activity->starts_at,
+                    timezone: $activity->type === Activity::TYPE_EVENT ? $activity->event_timezone : null,
+                ),
+                'ends_at' => $this->formatActivityDateForForm(
+                    value: $activity->ends_at,
+                    timezone: $activity->type === Activity::TYPE_EVENT ? $activity->event_timezone : null,
+                ),
                 'reward_pack_quantity' => $activity->reward_pack_quantity,
                 'reward_pack_size' => $activity->reward_pack_size,
             ],
@@ -274,14 +308,18 @@ class ActivityController extends Controller
     {
         $this->authorize('update', $activity);
 
-        if ($activity->status !== Activity::STATUS_DRAFT) {
+        if (! $this->canEditActivity($activity)) {
             return back()->withErrors([
-                'activity' => 'Somente atividades em rascunho podem ser editadas.',
+                'activity' => 'Somente atividades em rascunho ou eventos abertos podem ser editados.',
             ]);
         }
 
         $activity->fill([
-            ...$request->validated(),
+            ...$this->normalizeEventConfig(
+                type: (string) $request->validated('type'),
+                payload: $request->validated(),
+                existingToken: $activity->event_token,
+            ),
             'updated_by' => $request->user()?->id,
         ])->save();
 
@@ -403,5 +441,98 @@ class ActivityController extends Controller
         );
 
         return back()->with('success', 'Atividade cancelada com sucesso.');
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
+    private function normalizeEventConfig(string $type, array $payload, ?string $existingToken = null): array
+    {
+        if ($type !== Activity::TYPE_EVENT) {
+            return [
+                ...$payload,
+                'location_name' => null,
+                'latitude' => null,
+                'longitude' => null,
+                'radius_meters' => 150,
+                'max_accuracy_meters' => 100,
+                'event_timezone' => 'America/Sao_Paulo',
+                'event_token' => null,
+            ];
+        }
+
+        return [
+            ...$payload,
+            'starts_at' => $this->normalizeEventDateForStorage(
+                value: $payload['starts_at'] ?? null,
+                timezone: (string) ($payload['event_timezone'] ?? 'America/Sao_Paulo'),
+            ),
+            'ends_at' => $this->normalizeEventDateForStorage(
+                value: $payload['ends_at'] ?? null,
+                timezone: (string) ($payload['event_timezone'] ?? 'America/Sao_Paulo'),
+            ),
+            'radius_meters' => (int) ($payload['radius_meters'] ?? 150),
+            'max_accuracy_meters' => (int) ($payload['max_accuracy_meters'] ?? 100),
+            'event_timezone' => (string) ($payload['event_timezone'] ?? 'America/Sao_Paulo'),
+            'event_token' => $existingToken ?: $this->generateUniqueEventToken(),
+        ];
+    }
+
+    private function generateUniqueEventToken(): string
+    {
+        do {
+            $token = Str::lower(Str::random(48));
+        } while (Activity::query()->where('event_token', $token)->exists());
+
+        return $token;
+    }
+
+    private function normalizeEventDateForStorage(mixed $value, string $timezone): ?string
+    {
+        if (! is_string($value) || trim($value) === '') {
+            return null;
+        }
+
+        return Carbon::parse($value, $timezone)->utc()->toDateTimeString();
+    }
+
+    private function formatActivityDateForForm(?DateTimeInterface $value, ?string $timezone): ?string
+    {
+        if (! $value instanceof DateTimeInterface) {
+            return null;
+        }
+
+        $formatted = Carbon::instance($value);
+
+        if (is_string($timezone) && trim($timezone) !== '') {
+            $formatted = $formatted->setTimezone($timezone);
+        }
+
+        return $formatted->format('Y-m-d\\TH:i');
+    }
+
+    private function formatActivityDateForDisplay(?DateTimeInterface $value, ?string $timezone): ?string
+    {
+        if (! $value instanceof DateTimeInterface) {
+            return null;
+        }
+
+        $formatted = Carbon::instance($value);
+
+        if (is_string($timezone) && trim($timezone) !== '') {
+            $formatted = $formatted->setTimezone($timezone);
+        }
+
+        return $formatted->format('d/m/Y H:i');
+    }
+
+    private function canEditActivity(Activity $activity): bool
+    {
+        if ($activity->status === Activity::STATUS_DRAFT) {
+            return true;
+        }
+
+        return $activity->type === Activity::TYPE_EVENT && $activity->status === Activity::STATUS_OPEN;
     }
 }

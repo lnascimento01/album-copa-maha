@@ -208,7 +208,7 @@ class SocialMissionController extends Controller
                 ])->values()->all(),
             ],
             'shareText' => sprintf(
-                'Missão MAHA: %s. Recompensa: %d pacote(s) de %d figurinhas. Envie sua evidência no app.',
+                'Missão AAPH: %s. Recompensa: %d pacote(s) de %d figurinhas. Envie sua evidência no app.',
                 $socialMission->title,
                 $socialMission->reward_pack_quantity,
                 $socialMission->reward_pack_size,
