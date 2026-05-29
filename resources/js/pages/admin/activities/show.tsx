@@ -87,6 +87,27 @@ type Props = {
     };
 };
 
+function formatDateTimeBr(value: string | null, timezone?: string): string {
+    if (!value) {
+        return '-';
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return value;
+    }
+
+    return new Intl.DateTimeFormat('pt-BR', {
+        timeZone: timezone || 'America/Sao_Paulo',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    }).format(date);
+}
+
 const LazyQRCodeSVG = lazy(async () => {
     const module = await import('qrcode.react');
 
@@ -200,8 +221,14 @@ export default function AdminActivityShow({ activity, checkins, checkinSessions,
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Álbum:</span> {activity.album.name}</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Status:</span> {activity.status}</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Tipo:</span> {activity.type}</div>
-                    <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Início:</span> {activity.starts_at_display ?? '-'}</div>
-                    <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Fim:</span> {activity.ends_at_display ?? '-'}</div>
+                    <div className="rounded-sm border p-4 text-sm">
+                        <span className="text-muted-foreground">Início:</span>{' '}
+                        {activity.starts_at_display ?? formatDateTimeBr(activity.starts_at, activity.event_timezone)}
+                    </div>
+                    <div className="rounded-sm border p-4 text-sm">
+                        <span className="text-muted-foreground">Fim:</span>{' '}
+                        {activity.ends_at_display ?? formatDateTimeBr(activity.ends_at, activity.event_timezone)}
+                    </div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Recompensa:</span> {activity.reward_pack_quantity} pacote(s) de {activity.reward_pack_size} figurinhas</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Check-ins confirmados:</span> {activity.checkins_count}</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Pacotes gerados:</span> {activity.sticker_packs_count}</div>
