@@ -1,6 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Sparkles, Star } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { PackRevealCinema } from '@/components/packs/pack-reveal-cinema';
 import { EmptyState } from '@/components/ui/empty-state';
 import { OriginBadge } from '@/components/ui/origin-badge';
@@ -45,19 +45,23 @@ type Flash = {
 
 function sourceLabel(pack: Pack): string {
     if (pack.source === 'checkin' && pack.activity) {
-return `Check-in: ${pack.activity.title}`;
-}
+        return `Check-in: ${pack.activity.title}`;
+    }
 
     if (pack.source === 'reward_code' && pack.reward_code) {
-return `Código: ${pack.reward_code.code}`;
-}
+        return `Código: ${pack.reward_code.code}`;
+    }
 
     if (pack.source === 'social_mission' && pack.social_mission) {
-return `Missão: ${pack.social_mission.title}`;
-}
+        return `Missão: ${pack.social_mission.title}`;
+    }
 
     return 'Concessão manual';
 }
+
+// Module-level flag — persists across Inertia component remount so the
+// "closing" curtain phase (set before POST) transfers to the new instance.
+let _doReveal = false;
 
 const RAY_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
 
@@ -78,16 +82,27 @@ export default function PackShow({ pack }: { pack: Pack }) {
     const [isOpening, setIsOpening] = useState(false);
     const [showCinema, setShowCinema] = useState(() => revealedIds.length > 0);
 
+    // Curtain transition state — picks up _doReveal flag on remount
+    const [curtain, setCurtain] = useState<'idle' | 'closing' | 'revealing'>(() => {
+        if (_doReveal) { _doReveal = false; return 'revealing'; }
+        return 'idle';
+    });
+
     const reducedMotion = useMemo(
         () => (typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false),
         [],
     );
 
+    // Auto-clear the "revealing" phase once the curtain has opened
+    useEffect(() => {
+        if (curtain !== 'revealing') return;
+        const t = setTimeout(() => setCurtain('idle'), 800);
+        return () => clearTimeout(t);
+    }, [curtain]);
+
     // Order items by the reveal sequence from flash
     const cinemaItems = useMemo(() => {
-        if (!revealedIds.length) {
-return [];
-}
+        if (!revealedIds.length) return [];
 
         const order = new Map(revealedIds.map((id, i) => [id, i]));
 
@@ -97,21 +112,77 @@ return [];
     }, [pack.items, revealedIds]);
 
     const openPack = () => {
-        if (isOpening) {
-return;
-}
-
+        if (isOpening) return;
         setIsOpening(true);
-        router.post(
-            `/packs/${pack.id}/open`,
-            {},
-            { preserveScroll: true, onFinish: () => setIsOpening(false) },
-        );
+
+        if (reducedMotion) {
+            router.post(`/packs/${pack.id}/open`, {}, { preserveScroll: true });
+            return;
+        }
+
+        // Close curtains first, then fire the POST
+        setCurtain('closing');
+        setTimeout(() => {
+            _doReveal = true;
+            router.post(
+                `/packs/${pack.id}/open`,
+                {},
+                {
+                    preserveScroll: true,
+                    onError: () => {
+                        _doReveal = false;
+                        setIsOpening(false);
+                        setCurtain('idle');
+                    },
+                },
+            );
+        }, 580);
     };
 
     return (
         <>
             <Head title={`Pacote #${pack.id}`} />
+
+            {/* ── Curtain transition overlay (z-60 > cinema z-50) ── */}
+            {curtain !== 'idle' && !reducedMotion && (
+                <div
+                    aria-hidden
+                    className="pointer-events-none fixed inset-0 overflow-hidden"
+                    style={{ zIndex: 60 }}
+                >
+                    {/* Left panel */}
+                    <div
+                        className="absolute left-0 top-0 h-full w-[51%]"
+                        style={{
+                            background: 'linear-gradient(to right, #030209 0%, #0d0a20 70%, #161340 100%)',
+                            borderRight: '1px solid rgba(99,102,241,0.18)',
+                            animation: curtain === 'closing'
+                                ? 'curtain-close-left 0.58s cubic-bezier(0.76,0,0.24,1) both'
+                                : 'curtain-open-left 0.72s cubic-bezier(0.76,0,0.24,1) both',
+                        }}
+                    />
+                    {/* Right panel */}
+                    <div
+                        className="absolute right-0 top-0 h-full w-[51%]"
+                        style={{
+                            background: 'linear-gradient(to left, #030209 0%, #0d0a20 70%, #161340 100%)',
+                            borderLeft: '1px solid rgba(99,102,241,0.18)',
+                            animation: curtain === 'closing'
+                                ? 'curtain-close-right 0.58s cubic-bezier(0.76,0,0.24,1) both'
+                                : 'curtain-open-right 0.72s cubic-bezier(0.76,0,0.24,1) both',
+                        }}
+                    />
+                    {/* Waiting indicator shown only while curtains are closed */}
+                    {curtain === 'closing' && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <Sparkles
+                                className="size-9 text-indigo-400/35"
+                                style={{ animation: 'spin-slow 2s linear infinite' }}
+                            />
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* ── Cinema reveal overlay ── */}
             {showCinema && cinemaItems.length > 0 && (
@@ -250,7 +321,7 @@ return;
                     </section>
                 ) : null}
 
-                {/* ── OPENED: cinematic sticker grid (hidden while cinema overlay is active) ── */}
+                {/* ── OPENED: cinematic sticker grid (unmounted while cinema is active) ── */}
                 {pack.status === 'opened' && !showCinema ? (
                     <section className="space-y-4">
                         {/* Celebration hero */}
@@ -258,13 +329,11 @@ return;
                             className="relative overflow-hidden rounded-xl"
                             style={{ background: 'linear-gradient(145deg, #0a0818 0%, #161340 55%, #0a0818 100%)', border: '1px solid rgba(255,255,255,0.07)' }}
                         >
-                            {/* Star-field dots */}
                             <div
                                 aria-hidden
                                 className="absolute inset-0 opacity-[0.06]"
                                 style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}
                             />
-                            {/* Soft glow */}
                             <div
                                 aria-hidden
                                 className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2"
@@ -307,7 +376,7 @@ return;
                         {pack.items.length === 0 ? (
                             <EmptyState title="Nenhuma figurinha registrada neste pacote." />
                         ) : (
-                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                                 {pack.items.map((item, index) => {
                                     const delay = reducedMotion ? '0ms' : `${index * 90}ms`;
                                     const revealedNow = revealedIds.includes(item.sticker.id);
@@ -320,48 +389,45 @@ return;
                                             style={{
                                                 background: '#0c0a1a',
                                                 border: `1.5px solid rgba(${rc.rgb}, ${revealedNow ? 0.6 : 0.25})`,
-                                                boxShadow: revealedNow ? `0 0 22px 2px rgba(${rc.rgb}, 0.25)` : 'none',
+                                                boxShadow: revealedNow ? `0 0 28px 4px rgba(${rc.rgb}, 0.22)` : 'none',
                                                 animation: reducedMotion ? 'none' : 'sticker-enter 0.5s ease both',
                                                 animationDelay: delay,
                                             }}
                                         >
-                                            {/* Sticker image full-width */}
-                                            <div className="aspect-[3/4] w-full overflow-hidden">
+                                            {/* "Nova" badge overlaid on image */}
+                                            {revealedNow && (
+                                                <span className="absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1 rounded-md border border-emerald-500/50 bg-emerald-950/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-400 backdrop-blur-sm">
+                                                    <Star className="size-2.5" aria-hidden /> Nova
+                                                </span>
+                                            )}
+
+                                            {/* Full sticker image — object-contain preserves the complete card design */}
+                                            <div className="w-full bg-black/20">
                                                 <img
                                                     src={item.sticker.image_url}
                                                     alt={item.sticker.title}
-                                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                    className="w-full transition-transform duration-500 group-hover:scale-[1.03]"
+                                                    style={{ display: 'block' }}
                                                 />
                                             </div>
 
-                                            {/* Info strip */}
-                                            <div className="px-3 pb-3 pt-2.5">
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <span
-                                                        className="inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em]"
-                                                        style={{ color: rc.color, background: `rgba(${rc.rgb}, 0.14)`, border: `1px solid rgba(${rc.rgb}, 0.3)` }}
-                                                    >
-                                                        {item.sticker.rarity === 'legendary' && <Star className="size-2.5" aria-hidden />}
-                                                        {rc.label}
-                                                    </span>
-                                                    {revealedNow && (
-                                                        <span className="inline-flex items-center gap-1 rounded-sm border border-emerald-500/40 bg-emerald-500/14 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-400">
-                                                            <Star className="size-2.5" aria-hidden /> Nova
-                                                        </span>
-                                                    )}
-                                                </div>
-
-                                                <div className="mt-1.5 font-mono text-[10px] text-white/20">{item.sticker.code}</div>
-                                                <div className="mt-0.5 text-sm font-bold text-white">{item.sticker.title}</div>
-                                                {item.sticker.subtitle && (
-                                                    <div className="text-xs text-white/40">{item.sticker.subtitle}</div>
-                                                )}
-
+                                            {/* Minimal footer — rarity + action */}
+                                            <div
+                                                className="flex items-center justify-between gap-2 px-3 py-2.5"
+                                                style={{ borderTop: `1px solid rgba(${rc.rgb}, 0.15)` }}
+                                            >
+                                                <span
+                                                    className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.12em]"
+                                                    style={{ color: rc.color }}
+                                                >
+                                                    {item.sticker.rarity === 'legendary' && <Star className="size-2.5" aria-hidden />}
+                                                    {rc.label}
+                                                </span>
                                                 <Link
                                                     href={`/album/stickers/${item.sticker.id}`}
-                                                    className="mt-2.5 block rounded-md border border-white/10 py-1.5 text-center text-[11px] font-semibold text-white/50 transition-colors hover:border-white/22 hover:text-white/80"
+                                                    className="text-[11px] font-semibold text-white/35 transition-colors hover:text-white/70"
                                                 >
-                                                    Ver no álbum
+                                                    Ver no álbum →
                                                 </Link>
                                             </div>
                                         </div>

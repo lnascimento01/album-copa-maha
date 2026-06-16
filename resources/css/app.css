@@ -1621,6 +1621,11 @@ html[data-design='linear'] .admin-table-row:hover {
     to   { opacity: 1; transform: translateY(0)    scale(1);    }
 }
 
+@keyframes curtain-close-left  { from { transform: translateX(-101%); } to { transform: translateX(0); } }
+@keyframes curtain-close-right { from { transform: translateX(101%);  } to { transform: translateX(0); } }
+@keyframes curtain-open-left   { from { transform: translateX(0); } to { transform: translateX(-101%); } }
+@keyframes curtain-open-right  { from { transform: translateX(0); } to { transform: translateX(101%);  } }
+
 /* ── End Pack Cinema ─────────────────────────────────────────── */
 
 @media (max-width: 1279px) {
