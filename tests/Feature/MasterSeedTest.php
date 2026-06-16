@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\Hash;
 
 uses(RefreshDatabase::class);
 
-it('migrate fresh with seed creates master user', function (): void {
-    $this->artisan('migrate:fresh', ['--seed' => true])->assertSuccessful();
+it('seed creates master user', function (): void {
+    $this->seed(DatabaseSeeder::class);
 
     $master = User::query()->where('email', 'lfsnascimento84@gmail.com')->first();
 

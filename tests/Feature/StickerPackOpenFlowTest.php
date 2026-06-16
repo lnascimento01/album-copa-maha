@@ -170,6 +170,62 @@ it('does not open pack when album is complete and logs no missing stickers', fun
     ]);
 });
 
+it('delivers epic sticker when it is the only missing one', function (): void {
+    $user = makePackUser();
+    $album = Album::factory()->active()->create();
+
+    $epic = Sticker::factory()->for($album)->create(['rarity' => Sticker::RARITY_EPIC]);
+
+    $pack = StickerPack::factory()->create([
+        'user_id' => $user->id,
+        'album_id' => $album->id,
+        'status' => StickerPack::STATUS_PENDING,
+        'size' => 1,
+    ]);
+
+    $this->actingAs($user)->post("/packs/{$pack->id}/open")->assertRedirect();
+
+    $deliveredIds = StickerPackItem::query()->where('sticker_pack_id', $pack->id)->pluck('sticker_id')->all();
+
+    expect($deliveredIds)->toContain($epic->id);
+});
+
+it('falls back to common pool when epic pool is fully owned', function (): void {
+    $user = makePackUser();
+    $album = Album::factory()->active()->create();
+
+    $ownedEpic = Sticker::factory()->for($album)->create(['rarity' => Sticker::RARITY_EPIC]);
+
+    UserSticker::query()->create([
+        'user_id' => $user->id,
+        'sticker_id' => $ownedEpic->id,
+        'source' => 'seed',
+        'source_id' => null,
+        'unlocked_at' => now(),
+        'created_at' => now(),
+    ]);
+
+    Sticker::factory()->count(3)->for($album)->create(['rarity' => Sticker::RARITY_COMMON]);
+
+    $pack = StickerPack::factory()->create([
+        'user_id' => $user->id,
+        'album_id' => $album->id,
+        'status' => StickerPack::STATUS_PENDING,
+        'size' => 2,
+    ]);
+
+    $this->actingAs($user)->post("/packs/{$pack->id}/open")->assertRedirect();
+
+    $deliveredIds = StickerPackItem::query()->where('sticker_pack_id', $pack->id)->pluck('sticker_id')->all();
+
+    expect($deliveredIds)->toHaveCount(2);
+    expect($deliveredIds)->not->toContain($ownedEpic->id);
+
+    $deliveredRarities = Sticker::query()->whereIn('id', $deliveredIds)->pluck('rarity')->unique()->values()->all();
+
+    expect($deliveredRarities)->toBe([Sticker::RARITY_COMMON]);
+});
+
 it('second attempt to open same pack does not duplicate items or user stickers', function (): void {
     $user = makePackUser();
     $album = Album::query()->where('status', Album::STATUS_ACTIVE)->firstOrFail();
