@@ -15,6 +15,7 @@ services:
       APP_ENV: "${APP_ENV:-staging}"
       APP_DEBUG: "${APP_DEBUG:-false}"
       PHP_OPCACHE_VALIDATE_TIMESTAMPS: 0
+      SKIP_ASSET_BUILD: "${SKIP_ASSET_BUILD:-0}"
     working_dir: /var/www/html
     volumes:
       - ../:/var/www/html
