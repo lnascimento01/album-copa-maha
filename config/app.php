@@ -138,4 +138,20 @@ return [
         FILTER_VALIDATE_BOOL,
     ),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Design Theme Template
+    |--------------------------------------------------------------------------
+    |
+    | Controls the active visual design template for the application.
+    |
+    | Supported values:
+    |   "auto"     — Spotify theme for public pages, Linear theme for admin
+    |   "spotify"  — Dark, content-first Spotify-inspired theme everywhere
+    |   "linear"   — Clean, minimal Linear-inspired theme everywhere
+    |   "default"  — Original blue/green theme (revert to this if needed)
+    |
+    */
+    'design_theme' => env('APP_DESIGN_THEME', 'auto'),
+
 ];

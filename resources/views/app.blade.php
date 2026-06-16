@@ -1,14 +1,36 @@
+@php
+    $designTheme = config('app.design_theme', 'auto');
+    if ($designTheme === 'auto') {
+        $designTheme = (request()->is('admin') || request()->is('admin/*')) ? 'linear' : 'spotify';
+    }
+    $forceDark = in_array($designTheme, ['spotify', 'linear']);
+    $initBg = match($designTheme) {
+        'spotify' => '#121212',
+        'linear'  => '#0f0e13',
+        default   => '#f6f8f2',
+    };
+    $initBgDark = match($designTheme) {
+        'spotify' => '#121212',
+        'linear'  => '#0f0e13',
+        default   => '#07111f',
+    };
+@endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" @class(['dark' => ($appearance ?? 'system') == 'dark'])>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+      data-design="{{ $designTheme }}"
+      @class(['dark' => ($appearance ?? 'system') == 'dark' || $forceDark])>
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <script>
             (function () {
-                const serverAppearance = '{{ $appearance ?? "system" }}';
-                const storedAppearance = window.localStorage.getItem('appearance') || serverAppearance;
-                const useDark = storedAppearance === 'dark' || (storedAppearance === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                var serverAppearance = '{{ $appearance ?? "system" }}';
+                var forceDark = {{ $forceDark ? 'true' : 'false' }};
+                var storedAppearance = window.localStorage.getItem('appearance') || serverAppearance;
+                var useDark = forceDark
+                    || storedAppearance === 'dark'
+                    || (storedAppearance === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
                 if (useDark) {
                     document.documentElement.classList.add('dark');
@@ -22,11 +44,11 @@
 
         <style>
             html {
-                background-color: #f6f8f2;
+                background-color: {{ $initBg }};
             }
 
             html.dark {
-                background-color: #07111f;
+                background-color: {{ $initBgDark }};
             }
         </style>
 
