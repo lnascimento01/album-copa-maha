@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 
 type Team = { id: number; name: string };
@@ -13,6 +13,7 @@ type PlayerFormValues = {
     type: string;
     bio: string;
     photo_path: string;
+    photo_upload: File | null;
     sort_order: number;
     is_active: boolean;
 };
@@ -28,6 +29,17 @@ type PlayerFormProps = {
 
 export default function PlayerForm({ teams, types, initialValues, submitLabel, submitUrl, method }: PlayerFormProps) {
     const form = useForm<PlayerFormValues>(initialValues);
+    const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!form.data.photo_upload) {
+            setFilePreviewUrl(null);
+            return;
+        }
+        const url = URL.createObjectURL(form.data.photo_upload);
+        setFilePreviewUrl(url);
+        return () => URL.revokeObjectURL(url);
+    }, [form.data.photo_upload]);
 
     const submit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -41,11 +53,12 @@ export default function PlayerForm({ teams, types, initialValues, submitLabel, s
         form.patch(submitUrl);
     };
 
-    const hasPhotoPreview = useMemo(() => {
+    const previewSrc = useMemo(() => {
+        if (filePreviewUrl) return filePreviewUrl;
         const value = form.data.photo_path.trim();
-
-        return value.startsWith('http://') || value.startsWith('https://') || value.startsWith('/');
-    }, [form.data.photo_path]);
+        if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('/')) return value;
+        return null;
+    }, [filePreviewUrl, form.data.photo_path]);
 
     return (
         <form onSubmit={submit} className="album-paper space-y-4 p-4">
@@ -98,17 +111,27 @@ export default function PlayerForm({ teams, types, initialValues, submitLabel, s
                     <label className="admin-filter-label">Ordem no catálogo</label>
                     <input type="number" min={0} className="mt-1 w-full rounded-sm border border-border bg-card px-2 py-2 text-sm" value={form.data.sort_order} onChange={(event) => form.setData('sort_order', Number(event.target.value) || 0)} />
                 </div>
-                <div>
+                <div className="md:col-span-2">
+                    <label className="admin-filter-label">Foto — upload de arquivo</label>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        className="mt-1 w-full rounded-sm border border-border bg-card px-2 py-2 text-sm file:mr-2 file:cursor-pointer file:rounded-sm file:border-0 file:bg-primary file:px-2 file:py-1 file:text-xs file:font-semibold file:text-primary-foreground"
+                        onChange={(e) => form.setData('photo_upload', e.target.files?.[0] ?? null)}
+                    />
+                    {form.errors.photo_upload ? <p className="mt-1 text-xs text-red-600 dark:text-red-300">{form.errors.photo_upload}</p> : null}
+                    <p className="mt-1 text-[11px] text-dim">Ou informe uma URL abaixo para manter a foto atual.</p>
+                </div>
+                <div className="md:col-span-2">
                     <label className="admin-filter-label">Foto (URL/caminho)</label>
                     <input className="mt-1 w-full rounded-sm border border-border bg-card px-2 py-2 text-sm" value={form.data.photo_path} onChange={(event) => form.setData('photo_path', event.target.value)} placeholder="https://... ou /storage/..." />
-                    <p className="mt-1 text-[11px] text-dim">Nesta etapa o campo é textual. Upload real pode ser evoluído depois.</p>
                 </div>
             </div>
 
-            {hasPhotoPreview ? (
+            {previewSrc ? (
                 <div className="rounded-sm border border-border bg-muted/70 p-3">
                     <div className="admin-filter-label">Preview de foto</div>
-                    <img src={form.data.photo_path} alt="Preview de atleta" className="mt-2 h-36 w-28 rounded-sm border border-border object-cover" />
+                    <img src={previewSrc} alt="Preview de atleta" className="mt-2 h-36 w-28 rounded-sm border border-border object-cover" />
                 </div>
             ) : null}
 

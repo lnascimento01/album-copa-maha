@@ -40,6 +40,7 @@ export default function AdminPlayerEdit({ player, teams, types }: { player: Play
                         type: player.type,
                         bio: player.bio ?? '',
                         photo_path: player.photo_path ?? '',
+                        photo_upload: null,
                         sort_order: player.sort_order,
                         is_active: player.is_active,
                     }}
