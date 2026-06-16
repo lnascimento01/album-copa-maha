@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\StickerPackController as AdminStickerPackControll
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\UserApprovalController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\UserStickerResetController;
 use App\Http\Controllers\AlbumCollectionController;
 use App\Http\Controllers\ApprovalStatusController;
 use App\Http\Controllers\DashboardController;
@@ -497,6 +498,10 @@ Route::middleware(['auth'])->group(function () {
         Route::match(['post', 'patch'], '/users/{user}/suspend', [UserApprovalController::class, 'suspend'])
             ->middleware('permission:users.update')
             ->name('users.suspend');
+
+        Route::delete('/users/{user}/stickers/reset', UserStickerResetController::class)
+            ->middleware('permission:users.resetStickers')
+            ->name('users.stickers.reset');
 
         Route::get('/roles', [RoleController::class, 'index'])
             ->middleware('permission:roles.viewAny')

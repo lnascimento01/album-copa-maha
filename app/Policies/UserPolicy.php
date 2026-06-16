@@ -43,4 +43,9 @@ class UserPolicy
     {
         return $user->hasPermission('users.update') && $user->id !== $target->id;
     }
+
+    public function resetStickers(User $user, User $target): bool
+    {
+        return $user->hasPermission('users.resetStickers') && $user->id !== $target->id;
+    }
 }

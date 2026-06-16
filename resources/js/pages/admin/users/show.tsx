@@ -42,9 +42,10 @@ type Props = {
     canApprove: boolean;
     canReject: boolean;
     canSuspend: boolean;
+    canResetStickers: boolean;
 };
 
-export default function AdminUserShow({ userDetail, auditLogs, canApprove, canReject, canSuspend }: Props) {
+export default function AdminUserShow({ userDetail, auditLogs, canApprove, canReject, canSuspend, canResetStickers }: Props) {
     const approve = () => {
         router.patch(`/admin/users/${userDetail.id}/approve`);
     };
@@ -65,6 +66,14 @@ export default function AdminUserShow({ userDetail, auditLogs, canApprove, canRe
         }
 
         router.patch(`/admin/users/${userDetail.id}/suspend`);
+    };
+
+    const resetStickers = () => {
+        if (!window.confirm(`Resetar todo o histórico de figurinhas de ${userDetail.name}? Os registros serão mantidos com soft delete.`)) {
+            return;
+        }
+
+        router.delete(`/admin/users/${userDetail.id}/stickers/reset`);
     };
 
     return (
@@ -92,7 +101,7 @@ export default function AdminUserShow({ userDetail, auditLogs, canApprove, canRe
                             <div>{userDetail.rejection_reason ?? '-'}</div>
                         </div>
                     </div>
-                    <div className="mt-4 flex gap-2">
+                    <div className="mt-4 flex flex-wrap gap-2">
                         {canApprove ? (
                             <button type="button" className="rounded-sm border px-2 py-1 text-xs" onClick={approve}>
                                 Aprovar
@@ -106,6 +115,11 @@ export default function AdminUserShow({ userDetail, auditLogs, canApprove, canRe
                         {canSuspend ? (
                             <button type="button" className="rounded-sm border px-2 py-1 text-xs" onClick={suspend}>
                                 Suspender
+                            </button>
+                        ) : null}
+                        {canResetStickers ? (
+                            <button type="button" className="rounded-sm border border-red-600 px-2 py-1 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-950" onClick={resetStickers}>
+                                Resetar figurinhas
                             </button>
                         ) : null}
                     </div>

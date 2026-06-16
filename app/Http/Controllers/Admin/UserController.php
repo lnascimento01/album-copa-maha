@@ -112,6 +112,7 @@ class UserController extends Controller
             'canApprove' => $request->user()?->can('approve', $user) ?? false,
             'canReject' => $request->user()?->can('reject', $user) ?? false,
             'canSuspend' => $request->user()?->can('suspend', $user) ?? false,
+            'canResetStickers' => $request->user()?->can('resetStickers', $user) ?? false,
         ]);
     }
 }

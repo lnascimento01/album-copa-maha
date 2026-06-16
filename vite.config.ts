@@ -1,13 +1,14 @@
 import inertia from '@inertiajs/vite';
 import { wayfinder } from '@laravel/vite-plugin-wayfinder';
 import tailwindcss from '@tailwindcss/vite';
-import react from '@vitejs/plugin-react';
+import react from '@vitejs/plugin-react-swc';
 import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
 import { defineConfig } from 'vite';
 
 export default defineConfig(({ command }) => ({
     build: {
+        target: 'esnext',
         rollupOptions: {
             output: {
                 manualChunks(id) {
@@ -51,11 +52,7 @@ export default defineConfig(({ command }) => ({
             ],
         }),
         inertia(),
-        react({
-            babel: {
-                plugins: ['babel-plugin-react-compiler'],
-            },
-        }),
+        react(),
         tailwindcss(),
         ...(command === 'serve'
             ? [

@@ -19,6 +19,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'Approve user', 'slug' => 'users.approve', 'group' => 'users'],
             ['name' => 'Reject user', 'slug' => 'users.reject', 'group' => 'users'],
             ['name' => 'Update user', 'slug' => 'users.update', 'group' => 'users'],
+            ['name' => 'Reset user stickers', 'slug' => 'users.resetStickers', 'group' => 'users'],
             ['name' => 'List roles', 'slug' => 'roles.viewAny', 'group' => 'roles'],
             ['name' => 'View role', 'slug' => 'roles.view', 'group' => 'roles'],
             ['name' => 'Create role', 'slug' => 'roles.create', 'group' => 'roles'],
