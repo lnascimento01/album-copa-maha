@@ -16,6 +16,7 @@ class DemoDataSeeder extends Seeder
             RewardCodeSeeder::class,
             SocialMissionSeeder::class,
             StickerCatalogSeeder::class,
+            MahaAthletesSeeder::class,
             AchievementSeeder::class,
             UserStickerSeeder::class,
             StickerPackSeeder::class,
