@@ -50,7 +50,7 @@ export default function PlayerForm({ teams, types, initialValues, submitLabel, s
             return;
         }
 
-        form.patch(submitUrl);
+        form.patch(submitUrl, { forceFormData: true });
     };
 
     const previewSrc = useMemo(() => {

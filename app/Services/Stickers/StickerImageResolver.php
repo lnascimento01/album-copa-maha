@@ -35,6 +35,22 @@ class StickerImageResolver
             }
         }
 
+        $playerPhoto = $sticker->player?->photo_path;
+
+        if (is_string($playerPhoto) && trim($playerPhoto) !== '') {
+            $photoPath = trim($playerPhoto);
+
+            if (Str::startsWith($photoPath, ['http://', 'https://'])) {
+                return $photoPath;
+            }
+
+            $normalized = ltrim($photoPath, '/');
+
+            if ($this->existsInPublic($normalized)) {
+                return asset($normalized);
+            }
+        }
+
         return $this->fallbackUrl();
     }
 
