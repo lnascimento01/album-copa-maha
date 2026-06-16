@@ -155,7 +155,7 @@ return value;
             </label>
 
             <div className="flex justify-end">
-                <button type="submit" className="rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground" disabled={form.processing}>{submitLabel}</button>
+                <button type="submit" className="cursor-pointer rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110" disabled={form.processing}>{submitLabel}</button>
             </div>
         </form>
     );

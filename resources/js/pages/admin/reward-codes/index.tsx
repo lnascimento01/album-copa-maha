@@ -99,7 +99,7 @@ export default function AdminRewardCodesIndex({ rewardCodes, filters, statuses, 
                         </select>
                     </div>
                     <div className="md:col-span-4 flex justify-end">
-                        <button type="submit" className="rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground">Filtrar</button>
+                        <button type="submit" className="cursor-pointer rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110">Filtrar</button>
                     </div>
                 </form>
 

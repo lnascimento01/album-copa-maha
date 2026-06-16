@@ -147,7 +147,7 @@ export default function RewardCodeForm({
             </div>
 
             <div className="flex justify-end">
-                <button type="submit" disabled={form.processing} className="rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground">{submitLabel}</button>
+                <button type="submit" disabled={form.processing} className="cursor-pointer rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110">{submitLabel}</button>
             </div>
         </form>
     );

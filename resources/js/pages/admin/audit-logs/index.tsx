@@ -120,7 +120,7 @@ export default function AuditLogsIndex({ auditLogs, filters, actors, targets, ac
                         />
                     </div>
                     <div className="flex items-end">
-                        <button className="w-full rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground" type="submit">
+                        <button className="cursor-pointer w-full rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground transition-all hover:brightness-110" type="submit">
                             Filtrar
                         </button>
                     </div>

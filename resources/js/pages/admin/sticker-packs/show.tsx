@@ -57,7 +57,7 @@ export default function AdminStickerPackShow({ pack, auditLogs, canCancel }: { p
                 <div className="flex items-center justify-between gap-4">
                     <h1 className="text-xl font-semibold tracking-tight">Pacote #{pack.id}</h1>
                     {canCancel && pack.status === 'pending' ? (
-                        <button type="button" className="rounded-sm border px-3 py-2 text-xs" onClick={cancel}>Cancelar pacote</button>
+                        <button type="button" className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent" onClick={cancel}>Cancelar pacote</button>
                     ) : null}
                 </div>
 

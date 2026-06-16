@@ -209,10 +209,10 @@ export default function AdminActivityShow({ activity, checkins, checkinSessions,
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <h1 className="text-xl font-semibold tracking-tight">{activity.title}</h1>
                     <div className="flex flex-wrap gap-2">
-                        <Link href={`/admin/activities/${activity.id}/edit`} className="rounded-sm border px-3 py-2 text-xs">Editar</Link>
-                        {can.open ? <button type="button" className="rounded-sm border px-3 py-2 text-xs" onClick={() => router.patch(`/admin/activities/${activity.id}/open`)}>Abrir</button> : null}
-                        {can.close ? <button type="button" className="rounded-sm border px-3 py-2 text-xs" onClick={() => router.patch(`/admin/activities/${activity.id}/close`)}>Fechar</button> : null}
-                        {can.cancel ? <button type="button" className="rounded-sm border px-3 py-2 text-xs" onClick={cancelActivity}>Cancelar</button> : null}
+                        <Link href={`/admin/activities/${activity.id}/edit`} className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent">Editar</Link>
+                        {can.open ? <button type="button" className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent" onClick={() => router.patch(`/admin/activities/${activity.id}/open`)}>Abrir</button> : null}
+                        {can.close ? <button type="button" className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent" onClick={() => router.patch(`/admin/activities/${activity.id}/close`)}>Fechar</button> : null}
+                        {can.cancel ? <button type="button" className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent" onClick={cancelActivity}>Cancelar</button> : null}
                     </div>
                 </div>
 
@@ -335,7 +335,7 @@ export default function AdminActivityShow({ activity, checkins, checkinSessions,
                             <input value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" />
                         </div>
                         <div className="flex items-end">
-                            <button type="submit" className="w-full rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground">Marcar presença</button>
+                            <button type="submit" className="cursor-pointer w-full rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground transition-all hover:brightness-110">Marcar presença</button>
                         </div>
                     </form>
                 ) : null}

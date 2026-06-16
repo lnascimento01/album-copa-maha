@@ -103,17 +103,17 @@ export default function AdminUserShow({ userDetail, auditLogs, canApprove, canRe
                     </div>
                     <div className="mt-4 flex flex-wrap gap-2">
                         {canApprove ? (
-                            <button type="button" className="rounded-sm border px-2 py-1 text-xs" onClick={approve}>
+                            <button type="button" className="cursor-pointer rounded-sm border px-2 py-1 text-xs transition-colors hover:bg-accent" onClick={approve}>
                                 Aprovar
                             </button>
                         ) : null}
                         {canReject ? (
-                            <button type="button" className="rounded-sm border px-2 py-1 text-xs" onClick={reject}>
+                            <button type="button" className="cursor-pointer rounded-sm border px-2 py-1 text-xs transition-colors hover:bg-accent" onClick={reject}>
                                 Rejeitar
                             </button>
                         ) : null}
                         {canSuspend ? (
-                            <button type="button" className="rounded-sm border px-2 py-1 text-xs" onClick={suspend}>
+                            <button type="button" className="cursor-pointer rounded-sm border px-2 py-1 text-xs transition-colors hover:bg-accent" onClick={suspend}>
                                 Suspender
                             </button>
                         ) : null}

@@ -44,8 +44,8 @@ export default function AdminSocialMissionSubmissionShow({ submission, auditLogs
                 <div className="flex flex-wrap items-center justify-between gap-2">
                     <h1 className="text-xl font-semibold tracking-tight">Submissão #{submission.id}</h1>
                     <div className="flex gap-2">
-                        {can.approve ? <button type="button" onClick={approve} className="rounded-sm border px-3 py-2 text-xs">Aprovar</button> : null}
-                        {can.reject ? <button type="button" onClick={reject} className="rounded-sm border px-3 py-2 text-xs">Rejeitar</button> : null}
+                        {can.approve ? <button type="button" onClick={approve} className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent">Aprovar</button> : null}
+                        {can.reject ? <button type="button" onClick={reject} className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent">Rejeitar</button> : null}
                     </div>
                 </div>
 

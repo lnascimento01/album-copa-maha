@@ -69,7 +69,7 @@ export default function AdminRolesIndex({ roles, allPermissions }: Props) {
                                 <div className="font-mono text-xs text-muted-foreground">{role.slug}</div>
                             </div>
                             <div className="text-xs uppercase text-muted-foreground">
-                                {role.is_system ? 'System role' : 'Custom role'}
+                                {role.is_system ? 'Papel de sistema' : 'Papel personalizado'}
                             </div>
                         </div>
 
@@ -104,7 +104,7 @@ export default function AdminRolesIndex({ roles, allPermissions }: Props) {
                         ) : (
                             <button
                                 type="button"
-                                className="mt-3 rounded-sm border bg-primary px-3 py-2 text-xs text-primary-foreground"
+                                className="mt-3 cursor-pointer rounded-sm border bg-primary px-3 py-2 text-xs text-primary-foreground transition-all hover:brightness-110"
                                 onClick={() => save(role.id)}
                             >
                                 Salvar permissões

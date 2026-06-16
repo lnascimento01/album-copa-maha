@@ -97,7 +97,7 @@ export default function AlbumForm({ teams, initialValues, submitLabel, submitUrl
                 <textarea className="mt-1 w-full rounded-sm border border-border bg-card px-2 py-2 text-sm" rows={4} value={form.data.description} onChange={(event) => form.setData('description', event.target.value)} />
             </div>
             <div className="md:col-span-2">
-                <button type="submit" className="rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground" disabled={form.processing}>{submitLabel}</button>
+                <button type="submit" className="cursor-pointer rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110" disabled={form.processing}>{submitLabel}</button>
             </div>
         </form>
     );

@@ -120,7 +120,7 @@ export default function AdminActivitiesIndex({ activities, filters, statuses, ty
                         <input type="date" value={dateTo} onChange={(event) => setDateTo(event.target.value)} className="mt-1 w-full rounded-sm border border-input px-2 py-2 text-sm" />
                     </div>
                     <div className="md:col-span-7 flex justify-end">
-                        <button className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground" type="submit">Filtrar</button>
+                        <button className="cursor-pointer rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground transition-all hover:brightness-110" type="submit">Filtrar</button>
                     </div>
                 </form>
 
