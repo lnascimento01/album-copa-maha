@@ -133,7 +133,7 @@ export default function AdminStickerPacksIndex({ packs, filters, users, albums, 
                         <input type="date" className="mt-1 w-full rounded-sm border border-border bg-card px-2 py-2 text-sm" value={dateTo} onChange={(event) => setDateTo(event.target.value)} />
                     </div>
                     <div className="md:col-span-6 flex justify-end">
-                        <button className="rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground" type="submit">Filtrar</button>
+                        <button className="cursor-pointer rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110" type="submit">Filtrar</button>
                     </div>
                 </form>
 

@@ -82,7 +82,7 @@ export default function AdminSocialMissionSubmissionsIndex({ submissions, filter
                         <input value={search} onChange={(event) => setSearch(event.target.value)} className="mt-1 w-full rounded-sm border border-input px-2 py-2 text-sm" placeholder="Texto/URL" />
                     </div>
                     <div className="md:col-span-4 flex justify-end">
-                        <button type="submit" className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground">Filtrar</button>
+                        <button type="submit" className="cursor-pointer rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground transition-all hover:brightness-110">Filtrar</button>
                     </div>
                 </form>
 

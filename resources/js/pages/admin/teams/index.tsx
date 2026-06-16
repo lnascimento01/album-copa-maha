@@ -83,7 +83,7 @@ export default function TeamsIndex({ teams, filters }: Props) {
                         </select>
                     </div>
                     <div className="flex items-end">
-                        <button className="w-full rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground" type="submit">
+                        <button className="cursor-pointer w-full rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110" type="submit">
                             Filtrar
                         </button>
                     </div>

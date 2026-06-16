@@ -21,9 +21,9 @@ export default function AdminAlbumShow({ album }: { album: Album }) {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <h1 className="text-xl font-semibold tracking-tight">{album.name}</h1>
                     <div className="flex gap-2">
-                        <Link href={`/admin/albums/${album.id}/edit`} className="rounded-sm border px-3 py-2 text-xs">Editar</Link>
-                        <button type="button" className="rounded-sm border px-3 py-2 text-xs" onClick={() => router.patch(`/admin/albums/${album.id}/publish`)}>Publicar</button>
-                        <button type="button" className="rounded-sm border px-3 py-2 text-xs" onClick={() => router.patch(`/admin/albums/${album.id}/archive`)}>Arquivar</button>
+                        <Link href={`/admin/albums/${album.id}/edit`} className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent">Editar</Link>
+                        <button type="button" className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent" onClick={() => router.patch(`/admin/albums/${album.id}/publish`)}>Publicar</button>
+                        <button type="button" className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent" onClick={() => router.patch(`/admin/albums/${album.id}/archive`)}>Arquivar</button>
                     </div>
                 </div>
 

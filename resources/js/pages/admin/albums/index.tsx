@@ -67,7 +67,7 @@ export default function AlbumsIndex({ albums, filters, teams, statuses }: Props)
                             {statuses.map((item) => <option key={item} value={item}>{item}</option>)}
                         </select>
                     </div>
-                    <div className="flex items-end"><button className="w-full rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground" type="submit">Filtrar</button></div>
+                    <div className="flex items-end"><button className="cursor-pointer w-full rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110" type="submit">Filtrar</button></div>
                 </form>
 
                 <DataTableShell title="Álbuns cadastrados" subtitle="Times vinculados, status de publicação e volume de figurinhas.">

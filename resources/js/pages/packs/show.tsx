@@ -59,9 +59,12 @@ function sourceLabel(pack: Pack): string {
     return 'Concessão manual';
 }
 
-// Module-level flag — persists across Inertia component remount so the
-// "closing" curtain phase (set before POST) transfers to the new instance.
+// Persists across Inertia in-place prop update AND component remount.
+// Set just before the POST fires; consumed by the new/updated instance.
 let _doReveal = false;
+
+// Stable empty array — avoids new reference on every render when flash is null.
+const EMPTY_IDS: number[] = [];
 
 const RAY_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
 
@@ -74,11 +77,7 @@ const RARITY_COLORS = {
 
 export default function PackShow({ pack }: { pack: Pack }) {
     const page = usePage<{ flash?: Flash }>();
-    const revealedIds = useMemo(
-        () => page.props.flash?.revealedStickerIds ?? [],
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [],
-    );
+    const revealedIds = page.props.flash?.revealedStickerIds ?? EMPTY_IDS;
     const [isOpening, setIsOpening] = useState(false);
     const [showCinema, setShowCinema] = useState(() => revealedIds.length > 0);
 
@@ -99,6 +98,20 @@ export default function PackShow({ pack }: { pack: Pack }) {
         const t = setTimeout(() => setCurtain('idle'), 800);
         return () => clearTimeout(t);
     }, [curtain]);
+
+    // In-place update: when revealedIds arrives from flash, show cinema
+    useEffect(() => {
+        if (revealedIds.length > 0) {
+            setShowCinema(true);
+        }
+    }, [revealedIds]);
+
+    // In-place update: when pack opens while curtains are still closing, advance to reveal
+    useEffect(() => {
+        if (pack.status === 'opened' && curtain === 'closing') {
+            setCurtain('revealing');
+        }
+    }, [pack.status, curtain]);
 
     // Order items by the reveal sequence from flash
     const cinemaItems = useMemo(() => {

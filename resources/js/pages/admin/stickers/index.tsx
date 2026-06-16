@@ -93,7 +93,7 @@ export default function StickersIndex({ stickers, filters, albums, types, rariti
                         </select>
                     </div>
                     <div className="md:col-span-6 flex justify-end">
-                        <button className="rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground" type="submit">Filtrar</button>
+                        <button className="cursor-pointer rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110" type="submit">Filtrar</button>
                     </div>
                 </form>
 
