@@ -78,19 +78,19 @@ class OpenStickerPackService
                 ]);
             }
 
-            $activeStickerIds = $pack->album->collectibleStickersQuery()
-                ->pluck('id')
-                ->all();
+            $activeStickers = $pack->album->collectibleStickersQuery()
+                ->select(['id', 'rarity'])
+                ->get();
 
             $unlockedIds = UserSticker::query()
                 ->where('user_id', $pack->user_id)
-                ->whereIn('sticker_id', $activeStickerIds)
+                ->whereIn('sticker_id', $activeStickers->pluck('id')->all())
                 ->pluck('sticker_id')
                 ->all();
 
-            $missingIds = array_values(array_diff($activeStickerIds, $unlockedIds));
+            $missingStickers = $activeStickers->whereNotIn('id', $unlockedIds);
 
-            if ($missingIds === []) {
+            if ($missingStickers->isEmpty()) {
                 throw new StickerPackOpenException(
                     'Você já completou este álbum. Este pacote não pode ser aberto agora.',
                     'no_missing_stickers',
@@ -102,11 +102,7 @@ class OpenStickerPackService
                 );
             }
 
-            $deliveredStickerIds = collect($missingIds)
-                ->shuffle()
-                ->take($pack->size)
-                ->values()
-                ->all();
+            $deliveredStickerIds = $this->drawByRarity($missingStickers, $pack->size);
 
             $now = now();
 
@@ -172,6 +168,82 @@ class OpenStickerPackService
 
             throw $exception;
         }
+    }
+
+    /**
+     * Draw sticker IDs weighted by rarity.
+     *
+     * For each slot the rarity is chosen proportionally to its weight.
+     * When a rarity pool runs out (user already owns all stickers of that
+     * rarity) it is excluded and the remaining weights are renormalised
+     * automatically on the next draw.
+     *
+     * Weights: common=70, rare=20, epic=8, legendary=2.
+     *
+     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Sticker>  $missing
+     * @return int[]
+     */
+    private function drawByRarity(\Illuminate\Database\Eloquent\Collection $missing, int $slots): array
+    {
+        $weights = [
+            'common'    => 70,
+            'rare'      => 20,
+            'epic'      => 8,
+            'legendary' => 2,
+        ];
+
+        $pools = [];
+
+        foreach ($missing as $sticker) {
+            $pools[$sticker->rarity][] = $sticker->id;
+        }
+
+        foreach (array_keys($pools) as $rarity) {
+            shuffle($pools[$rarity]);
+        }
+
+        $drawn = [];
+
+        while ($slots > 0) {
+            $available = array_filter($pools, fn (array $ids): bool => $ids !== []);
+
+            if ($available === []) {
+                break;
+            }
+
+            $totalWeight = 0;
+
+            foreach (array_keys($available) as $rarity) {
+                $totalWeight += $weights[$rarity] ?? 1;
+            }
+
+            $rand = random_int(1, $totalWeight);
+            $cumulative = 0;
+            $chosen = null;
+
+            foreach ($weights as $rarity => $weight) {
+                if (! isset($available[$rarity])) {
+                    continue;
+                }
+
+                $cumulative += $weight;
+
+                if ($rand <= $cumulative) {
+                    $chosen = $rarity;
+                    break;
+                }
+            }
+
+            // Fallback for rarities not present in the weights table
+            if ($chosen === null) {
+                $chosen = (string) array_key_first($available);
+            }
+
+            $drawn[] = array_shift($pools[$chosen]);
+            $slots--;
+        }
+
+        return $drawn;
     }
 
     private function auditFailedOpen(StickerPackOpenException $exception, User $actor): void
