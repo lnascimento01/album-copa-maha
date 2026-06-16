@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AchievementController;
+use App\Http\Controllers\DeployWebhookController;
 use App\Http\Controllers\ActivityHistoryController;
 use App\Http\Controllers\Admin\AchievementController as AdminAchievementController;
 use App\Http\Controllers\Admin\ActivityCheckinController as AdminActivityCheckinController;
@@ -35,6 +36,10 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\NewPasswordController;
 use Laravel\Fortify\Http\Controllers\PasswordResetLinkController;
 use Laravel\Fortify\Http\Controllers\RegisteredUserController;
+
+Route::post('/webhook/deploy', [DeployWebhookController::class, 'handle'])
+    ->middleware('throttle:5,1')
+    ->name('webhook.deploy');
 
 Route::get('/', function () {
     if (auth()->check()) {
