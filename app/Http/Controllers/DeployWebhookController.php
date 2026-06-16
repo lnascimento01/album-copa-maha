@@ -24,8 +24,8 @@ class DeployWebhookController extends Controller
         $steps = [
             "git -C {$dir} pull " . ($remote ?: 'origin') . ' main',
             "composer -d {$dir} install --no-dev --optimize-autoloader --no-interaction",
-            "pnpm --dir {$dir} install --frozen-lockfile",
-            "pnpm --dir {$dir} run build",
+            "npm --prefix {$dir} ci",
+            "npm --prefix {$dir} run build",
             "php {$dir}/artisan migrate --force",
             "php {$dir}/artisan optimize:clear",
             "php {$dir}/artisan optimize",

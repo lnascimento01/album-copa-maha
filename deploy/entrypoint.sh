@@ -6,11 +6,11 @@ cd /var/www/html
 echo "[deploy] composer install"
 composer install --no-dev --optimize-autoloader --no-interaction
 
-echo "[deploy] pnpm install"
-pnpm install --frozen-lockfile
+echo "[deploy] npm ci"
+npm ci
 
-echo "[deploy] pnpm build"
-pnpm run build
+echo "[deploy] npm build"
+npm run build
 
 echo "[deploy] storage:link"
 php artisan storage:link || true
