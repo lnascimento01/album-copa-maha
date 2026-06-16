@@ -10,6 +10,7 @@ use App\Models\Team;
 use App\Services\Audit\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -78,8 +79,17 @@ class PlayerController extends Controller
     {
         $this->authorize('create', Player::class);
 
+        $data = $request->validated();
+
+        if ($request->hasFile('photo_upload')) {
+            $storedPath = $request->file('photo_upload')->store('players', 'public');
+            $data['photo_path'] = Storage::disk('public')->url($storedPath);
+        }
+
+        unset($data['photo_upload']);
+
         $player = Player::query()->create([
-            ...$request->validated(),
+            ...$data,
             'is_active' => $request->boolean('is_active', true),
             'sort_order' => $request->integer('sort_order', 0),
         ]);
@@ -152,8 +162,17 @@ class PlayerController extends Controller
     {
         $this->authorize('update', $player);
 
+        $data = $request->validated();
+
+        if ($request->hasFile('photo_upload')) {
+            $storedPath = $request->file('photo_upload')->store('players', 'public');
+            $data['photo_path'] = Storage::disk('public')->url($storedPath);
+        }
+
+        unset($data['photo_upload']);
+
         $player->fill([
-            ...$request->validated(),
+            ...$data,
             'is_active' => $request->boolean('is_active'),
             'sort_order' => $request->integer('sort_order', 0),
         ])->save();

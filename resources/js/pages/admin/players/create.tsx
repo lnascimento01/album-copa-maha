@@ -26,6 +26,7 @@ export default function AdminPlayerCreate({ teams, types }: { teams: Team[]; typ
                         type: types[0] ?? 'player',
                         bio: '',
                         photo_path: '',
+                        photo_upload: null,
                         sort_order: 0,
                         is_active: true,
                     }}
