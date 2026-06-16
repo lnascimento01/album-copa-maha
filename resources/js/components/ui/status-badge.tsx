@@ -55,12 +55,29 @@ const classes: Record<Variant, string> = {
     default: 'border-border bg-card text-foreground',
 };
 
+const ptBrLabels: Record<Variant, string> = {
+    pending:   'Pendente',
+    approved:  'Aprovado',
+    rejected:  'Rejeitado',
+    suspended: 'Suspenso',
+    active:    'Ativo',
+    opened:    'Aberto',
+    cancelled: 'Cancelado',
+    draft:     'Rascunho',
+    closed:    'Fechado',
+    archived:  'Arquivado',
+    revoked:   'Revogado',
+    inactive:  'Inativo',
+    default:   '',
+};
+
 export function StatusBadge({ value, label }: Props) {
     const variant = resolveVariant(value);
+    const displayLabel = label ?? ptBrLabels[variant] || value;
 
     return (
         <Badge variant="outline" className={`rounded-sm px-2 py-0.5 text-[11px] font-semibold tracking-[0.1em] uppercase ${classes[variant]}`}>
-            {label ?? value}
+            {displayLabel}
         </Badge>
     );
 }

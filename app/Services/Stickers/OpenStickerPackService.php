@@ -82,7 +82,9 @@ class OpenStickerPackService
                 ->select(['id', 'rarity'])
                 ->get();
 
-            $unlockedIds = UserSticker::query()
+            // withTrashed: soft-deleted stickers still occupy the unique(user_id, sticker_id)
+            // DB row; re-inserting would throw a constraint violation → 500.
+            $unlockedIds = UserSticker::withTrashed()
                 ->where('user_id', $pack->user_id)
                 ->whereIn('sticker_id', $activeStickers->pluck('id')->all())
                 ->pluck('sticker_id')
