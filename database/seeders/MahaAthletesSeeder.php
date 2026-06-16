@@ -45,7 +45,7 @@ class MahaAthletesSeeder extends Seeder
                     'player_id' => $player->id,
                     'title' => $payload['name'],
                     'subtitle' => $payload['position'] ?? null,
-                    'description' => $payload['description'],
+                    'description' => $payload['description'] ?? $payload['bio'] ?? null,
                     'type' => $payload['sticker_type'],
                     'rarity' => $payload['rarity'],
                     'image_path' => $payload['image_path'] ?? null,
