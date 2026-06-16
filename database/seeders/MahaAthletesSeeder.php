@@ -281,6 +281,23 @@ class MahaAthletesSeeder extends Seeder
                     ['code' => 'MH-070', 'title' => 'PRI', 'sticker_type' => Sticker::TYPE_SPECIAL, 'rarity' => Sticker::RARITY_EPIC, 'img' => 70],
                 ],
             ],
+            [
+                'name' => 'Rodrigo', 'position' => 'Goleiro', 'shirt_number' => '12',
+                'bio' => 'Goleiro com reflexos rápidos e excelente posicionamento. Pilar defensivo da equipe MAHA.',
+                'player_type' => Player::TYPE_GOALKEEPER, 'photo_img' => 51,
+                'stickers' => [
+                    ['code' => 'MH-051', 'title' => 'RODRIGO', 'sticker_type' => Sticker::TYPE_GOALKEEPER, 'rarity' => Sticker::RARITY_COMMON, 'img' => 51],
+                    ['code' => 'MH-052', 'title' => 'RODRIGO', 'sticker_type' => Sticker::TYPE_SPECIAL, 'rarity' => Sticker::RARITY_EPIC, 'img' => 52],
+                ],
+            ],
+            [
+                'name' => 'Carlos', 'position' => 'Técnico', 'shirt_number' => null,
+                'bio' => 'Técnico experiente com vasta trajetória no esporte. Responsável pelo sucesso tático da equipe MAHA.',
+                'player_type' => Player::TYPE_STAFF, 'photo_img' => 54,
+                'stickers' => [
+                    ['code' => 'MH-054', 'title' => 'CARLOS', 'sticker_type' => Sticker::TYPE_STAFF, 'rarity' => Sticker::RARITY_RARE, 'img' => 54],
+                ],
+            ],
         ];
 
         foreach ($athletes as $index => $athleteData) {
