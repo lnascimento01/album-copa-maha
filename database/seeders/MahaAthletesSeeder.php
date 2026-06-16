@@ -167,6 +167,22 @@ class MahaAthletesSeeder extends Seeder
                 'is_special' => false,
             ],
 
+            // MISAEL — RARA (#16)
+            [
+                'name' => 'Misael',
+                'position' => 'Armador',
+                'shirt_number' => '10',
+                'bio' => 'Armador técnico e experiente. Visão de jogo e precisão nas jogadas fazem de Misael um dos destaques da equipe MAHA.',
+                'player_type' => Player::TYPE_PLAYER,
+                'code' => 'MH-016',
+                'sticker_type' => Sticker::TYPE_SPECIAL,
+                'rarity' => Sticker::RARITY_EPIC,
+                'photo_path' => '/stickers/maha/athletes/misael-rara.png',
+                'image_path' => '/stickers/maha/athletes/misael-rara.png',
+                'segment' => 'special_player',
+                'is_special' => true,
+            ],
+
             // PRI — RARA (#70)
             [
                 'name' => 'Pri',
