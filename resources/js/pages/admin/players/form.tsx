@@ -32,13 +32,13 @@ export default function PlayerForm({ teams, types, initialValues, submitLabel, s
     const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!form.data.photo_upload) {
-            setFilePreviewUrl(null);
-            return;
-        }
+        if (!form.data.photo_upload) return;
         const url = URL.createObjectURL(form.data.photo_upload);
         setFilePreviewUrl(url);
-        return () => URL.revokeObjectURL(url);
+        return () => {
+            URL.revokeObjectURL(url);
+            setFilePreviewUrl(null);
+        };
     }, [form.data.photo_upload]);
 
     const submit = (event: FormEvent<HTMLFormElement>) => {
