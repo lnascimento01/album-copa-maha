@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { FormEvent } from 'react';
 
 type Team = { id: number; name: string };
@@ -29,17 +29,17 @@ type PlayerFormProps = {
 
 export default function PlayerForm({ teams, types, initialValues, submitLabel, submitUrl, method }: PlayerFormProps) {
     const form = useForm<PlayerFormValues>(initialValues);
-    const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
+
+    const filePreviewUrl = useMemo(
+        () => (form.data.photo_upload ? URL.createObjectURL(form.data.photo_upload) : null),
+        [form.data.photo_upload],
+    );
 
     useEffect(() => {
-        if (!form.data.photo_upload) return;
-        const url = URL.createObjectURL(form.data.photo_upload);
-        setFilePreviewUrl(url);
-        return () => {
-            URL.revokeObjectURL(url);
-            setFilePreviewUrl(null);
-        };
-    }, [form.data.photo_upload]);
+        if (!filePreviewUrl) return;
+
+        return () => URL.revokeObjectURL(filePreviewUrl);
+    }, [filePreviewUrl]);
 
     const submit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();

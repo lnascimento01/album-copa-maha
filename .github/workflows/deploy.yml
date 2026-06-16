@@ -10,7 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger staging deploy webhook
+        env:
+          DEPLOY_URL: ${{ secrets.DEPLOY_URL }}
+          DEPLOY_SECRET: ${{ secrets.DEPLOY_SECRET }}
         run: |
-          curl --fail -X POST "${{ secrets.DEPLOY_URL }}/webhook/deploy" \
-            -H "X-Deploy-Secret: ${{ secrets.DEPLOY_SECRET }}" \
+          if [ -z "$DEPLOY_URL" ]; then
+            echo "DEPLOY_URL secret not configured — skipping deploy webhook"
+            exit 0
+          fi
+          curl --fail -X POST "$DEPLOY_URL/webhook/deploy" \
+            -H "X-Deploy-Secret: $DEPLOY_SECRET" \
             -H "Content-Type: application/json"
