@@ -1,6 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Sparkles, Star } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { PackRevealCinema } from '@/components/packs/pack-reveal-cinema';
 import { EmptyState } from '@/components/ui/empty-state';
 import { OriginBadge } from '@/components/ui/origin-badge';
 import { PageHeader } from '@/components/ui/page-header';
@@ -44,46 +45,85 @@ type Flash = {
 
 function sourceLabel(pack: Pack): string {
     if (pack.source === 'checkin' && pack.activity) {
-        return `Check-in: ${pack.activity.title}`;
-    }
+return `Check-in: ${pack.activity.title}`;
+}
 
     if (pack.source === 'reward_code' && pack.reward_code) {
-        return `Código promocional: ${pack.reward_code.code}`;
-    }
+return `Código: ${pack.reward_code.code}`;
+}
 
     if (pack.source === 'social_mission' && pack.social_mission) {
-        return `Missão social: ${pack.social_mission.title}`;
-    }
+return `Missão: ${pack.social_mission.title}`;
+}
 
     return 'Concessão manual';
 }
 
+const RAY_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
+
 export default function PackShow({ pack }: { pack: Pack }) {
     const page = usePage<{ flash?: Flash }>();
-    const revealedIds = page.props.flash?.revealedStickerIds ?? [];
+    const revealedIds = useMemo(
+        () => page.props.flash?.revealedStickerIds ?? [],
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [],
+    );
     const [isOpening, setIsOpening] = useState(false);
+    const [showCinema, setShowCinema] = useState(() => revealedIds.length > 0);
 
     const reducedMotion = useMemo(
         () => (typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false),
         [],
     );
 
+    // Order items by the reveal sequence from flash
+    const cinemaItems = useMemo(() => {
+        if (!revealedIds.length) {
+return [];
+}
+
+        const order = new Map(revealedIds.map((id, i) => [id, i]));
+
+        return pack.items
+            .filter(item => order.has(item.sticker.id))
+            .sort((a, b) => (order.get(a.sticker.id) ?? 0) - (order.get(b.sticker.id) ?? 0));
+    }, [pack.items, revealedIds]);
+
     const openPack = () => {
+        if (isOpening) {
+return;
+}
+
         setIsOpening(true);
-        router.post(`/packs/${pack.id}/open`, {}, {
-            preserveScroll: true,
-            onFinish: () => setIsOpening(false),
-        });
+        router.post(
+            `/packs/${pack.id}/open`,
+            {},
+            { preserveScroll: true, onFinish: () => setIsOpening(false) },
+        );
     };
 
     return (
         <>
             <Head title={`Pacote #${pack.id}`} />
+
+            {/* ── Cinema reveal overlay ── */}
+            {showCinema && cinemaItems.length > 0 && (
+                <PackRevealCinema
+                    items={cinemaItems}
+                    onDone={() => setShowCinema(false)}
+                    reducedMotion={reducedMotion}
+                />
+            )}
+
             <div className="brand-app-bg space-y-4 p-4 sm:p-5">
                 <PageHeader
                     title={`Pacote #${pack.id}`}
                     subtitle="Revelação da rodada e histórico das figurinhas entregues."
-                    actions={<Link href="/packs" className="rounded-sm border border-border bg-card px-3 py-2 text-xs font-semibold">Voltar para pacotes</Link>}
+                    actions={
+                        <Link href="/packs" className="rounded-sm border border-border bg-card px-3 py-2 text-xs font-semibold">
+                            Voltar para pacotes
+                        </Link>
+                    }
                 />
 
                 <section className="season-hero">
@@ -124,32 +164,78 @@ export default function PackShow({ pack }: { pack: Pack }) {
                     </div>
                 ) : null}
 
+                {/* ── PENDING: cinematic pack reveal area ── */}
                 {pack.status === 'pending' ? (
-                    <section className="album-paper overflow-hidden p-4">
-                        <p className="text-sm text-dim">Pacote fechado pronto para abertura.</p>
-                        <div className="mt-3 p-4">
-                            <div className={`collector-envelope relative mx-auto flex min-h-44 max-w-2xl items-center justify-center px-4 transition ${isOpening ? 'scale-[1.01] animate-pulse' : ''} motion-reduce:transform-none`}>
-                                <div className="text-center">
-                                    <div className="inline-flex items-center gap-1 rounded-full border border-primary/35 bg-primary/12 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-primary">
-                                        <Sparkles className="size-3" /> Reveal AAPH
+                    <section
+                        className="overflow-hidden rounded-xl"
+                        style={{ background: '#050508', border: '1px solid rgba(255,255,255,0.06)' }}
+                    >
+                        {/* Light-ray stage */}
+                        <div className="relative flex min-h-64 items-center justify-center overflow-hidden py-10">
+                            {/* Animated rays */}
+                            {!reducedMotion &&
+                                RAY_ANGLES.map((deg, i) => (
+                                    <div
+                                        key={deg}
+                                        aria-hidden
+                                        className="absolute origin-bottom"
+                                        style={{
+                                            width: 2,
+                                            height: '46%',
+                                            bottom: '50%',
+                                            left: '50%',
+                                            marginLeft: -1,
+                                            background: 'linear-gradient(to top, rgba(99,102,241,0.5) 0%, transparent 100%)',
+                                            transformOrigin: 'bottom center',
+                                            '--ray-deg': `${deg}deg`,
+                                            animation: `pack-ray 3.5s ease-in-out ${i * 437}ms infinite`,
+                                        } as React.CSSProperties}
+                                    />
+                                ))}
+
+                            {/* Glowing envelope */}
+                            <div
+                                className="relative z-10"
+                                style={isOpening && !reducedMotion ? { animation: 'pack-shake 0.55s ease-in-out' } : {}}
+                            >
+                                <div
+                                    className="collector-envelope flex h-44 w-64 flex-col items-center justify-center gap-4 rounded-2xl"
+                                    style={
+                                        !isOpening && !reducedMotion
+                                            ? { animation: 'glow-pulse-pack 2.8s ease-in-out infinite' }
+                                            : {}
+                                    }
+                                >
+                                    <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
+                                        <Sparkles className="size-3" aria-hidden />
+                                        Reveal
                                     </div>
-                                    <div className="mt-3 text-xl font-semibold text-foreground">{pack.size} figurinhas da temporada</div>
-                                    <div className="mt-1 text-xs text-dim">{isOpening ? 'Revelando pacote...' : 'Toque para abrir o envelope da rodada'}</div>
+                                    <div className="text-xl font-bold text-foreground">{pack.size} figurinhas</div>
+                                    <div className="text-[11px] text-dim">
+                                        {isOpening ? 'Preparando revelação…' : 'Clique para abrir o envelope'}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <button
-                            type="button"
-                            className="mt-3 inline-flex items-center gap-2 rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
-                            onClick={openPack}
-                            disabled={isOpening}
-                        >
-                            <Sparkles className="size-4" />
-                            {isOpening ? 'Abrindo...' : 'Abrir pacote'}
-                        </button>
+
+                        {/* CTA */}
+                        <div className="flex items-center gap-4 border-t border-white/[0.06] px-5 py-4">
+                            <button
+                                type="button"
+                                onClick={openPack}
+                                disabled={isOpening}
+                                className="inline-flex items-center gap-2 rounded-lg border border-primary bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-60"
+                                style={!isOpening ? { boxShadow: '0 0 18px rgba(99,102,241,0.4)' } : {}}
+                            >
+                                <Sparkles className="size-4" aria-hidden />
+                                {isOpening ? 'Abrindo…' : 'Abrir Pacote'}
+                            </button>
+                            <span className="text-xs text-white/20">{sourceLabel(pack)}</span>
+                        </div>
                     </section>
                 ) : null}
 
+                {/* ── CANCELLED ── */}
                 {pack.status === 'cancelled' ? (
                     <section className="rounded-md border border-red-500/35 bg-red-500/10 p-4 text-sm">
                         <div className="font-medium text-red-700 dark:text-red-300">Pacote cancelado</div>
@@ -157,11 +243,23 @@ export default function PackShow({ pack }: { pack: Pack }) {
                     </section>
                 ) : null}
 
+                {/* ── OPENED: sticker grid ── */}
                 {pack.status === 'opened' ? (
                     <section className="album-paper p-4">
                         <div className="flex items-center justify-between gap-3">
                             <h2 className="text-sm font-semibold text-foreground">Figurinhas reveladas</h2>
-                            <Link href="/album" className="text-xs underline">Ver no álbum</Link>
+                            <div className="flex items-center gap-3">
+                                {!showCinema && revealedIds.length > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowCinema(true)}
+                                        className="text-xs text-primary underline"
+                                    >
+                                        ✨ Rever animação
+                                    </button>
+                                )}
+                                <Link href="/album" className="text-xs underline">Ver no álbum</Link>
+                            </div>
                         </div>
                         {pack.items.length === 0 ? (
                             <div className="mt-3">
@@ -181,11 +279,15 @@ export default function PackShow({ pack }: { pack: Pack }) {
                                         >
                                             {revealedNow ? (
                                                 <span className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-sm border border-[color:var(--brand-secondary)]/50 bg-[color:var(--brand-secondary)]/18 px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.08em] text-[color:var(--brand-secondary)] uppercase">
-                                                    <Star className="size-3" /> Nova
+                                                    <Star className="size-3" aria-hidden /> Nova
                                                 </span>
                                             ) : null}
                                             <div className="aspect-[3/4] overflow-hidden rounded-sm border border-[color:var(--sticker-frame)] bg-card">
-                                                <img src={item.sticker.image_url} alt={item.sticker.title} className="h-full w-full object-cover" />
+                                                <img
+                                                    src={item.sticker.image_url}
+                                                    alt={item.sticker.title}
+                                                    className="h-full w-full object-cover"
+                                                />
                                             </div>
                                             <div className="mt-2 font-mono text-xs text-dim">{item.sticker.code}</div>
                                             <div className="mt-1 text-sm font-semibold text-foreground">{item.sticker.title}</div>

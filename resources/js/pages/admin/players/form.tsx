@@ -36,7 +36,9 @@ export default function PlayerForm({ teams, types, initialValues, submitLabel, s
     );
 
     useEffect(() => {
-        if (!filePreviewUrl) return;
+        if (!filePreviewUrl) {
+return;
+}
 
         return () => URL.revokeObjectURL(filePreviewUrl);
     }, [filePreviewUrl]);
@@ -54,9 +56,16 @@ export default function PlayerForm({ teams, types, initialValues, submitLabel, s
     };
 
     const previewSrc = useMemo(() => {
-        if (filePreviewUrl) return filePreviewUrl;
+        if (filePreviewUrl) {
+return filePreviewUrl;
+}
+
         const value = form.data.photo_path.trim();
-        if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('/')) return value;
+
+        if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('/')) {
+return value;
+}
+
         return null;
     }, [filePreviewUrl, form.data.photo_path]);
 
