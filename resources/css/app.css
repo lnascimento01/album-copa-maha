@@ -1616,6 +1616,11 @@ html[data-design='linear'] .admin-table-row:hover {
     100% { transform: scale(1.55); opacity: 0; }
 }
 
+@keyframes sticker-enter {
+    from { opacity: 0; transform: translateY(22px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
 /* ── End Pack Cinema ─────────────────────────────────────────── */
 
 @media (max-width: 1279px) {

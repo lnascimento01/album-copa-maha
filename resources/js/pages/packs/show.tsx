@@ -61,6 +61,13 @@ return `Missão: ${pack.social_mission.title}`;
 
 const RAY_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
 
+const RARITY_COLORS = {
+    common:    { label: 'Comum',    color: '#9ca3af', rgb: '156,163,175' },
+    rare:      { label: 'Raro',     color: '#60a5fa', rgb: '96,165,250'  },
+    epic:      { label: 'Épico',    color: '#c084fc', rgb: '192,132,252' },
+    legendary: { label: 'Lendário', color: '#fbbf24', rgb: '251,191,36'  },
+} as const;
+
 export default function PackShow({ pack }: { pack: Pack }) {
     const page = usePage<{ flash?: Flash }>();
     const revealedIds = useMemo(
@@ -243,62 +250,119 @@ return;
                     </section>
                 ) : null}
 
-                {/* ── OPENED: sticker grid ── */}
-                {pack.status === 'opened' ? (
-                    <section className="album-paper p-4">
-                        <div className="flex items-center justify-between gap-3">
-                            <h2 className="text-sm font-semibold text-foreground">Figurinhas reveladas</h2>
-                            <div className="flex items-center gap-3">
-                                {!showCinema && revealedIds.length > 0 && (
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowCinema(true)}
-                                        className="text-xs text-primary underline"
+                {/* ── OPENED: cinematic sticker grid (hidden while cinema overlay is active) ── */}
+                {pack.status === 'opened' && !showCinema ? (
+                    <section className="space-y-4">
+                        {/* Celebration hero */}
+                        <div
+                            className="relative overflow-hidden rounded-xl"
+                            style={{ background: 'linear-gradient(145deg, #0a0818 0%, #161340 55%, #0a0818 100%)', border: '1px solid rgba(255,255,255,0.07)' }}
+                        >
+                            {/* Star-field dots */}
+                            <div
+                                aria-hidden
+                                className="absolute inset-0 opacity-[0.06]"
+                                style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}
+                            />
+                            {/* Soft glow */}
+                            <div
+                                aria-hidden
+                                className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2"
+                                style={{ width: 360, height: 360, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(99,102,241,0.2) 0%, transparent 70%)' }}
+                            />
+
+                            <div className="relative z-10 flex flex-col items-center gap-3 px-6 py-8 text-center">
+                                <div className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-indigo-300">
+                                    <Sparkles className="size-3" aria-hidden />
+                                    Pacote aberto
+                                </div>
+                                <h2 className="text-2xl font-bold text-white">
+                                    {pack.items.length} figurinha{pack.items.length !== 1 ? 's' : ''} revelada{pack.items.length !== 1 ? 's' : ''}!
+                                </h2>
+                                <p className="text-sm text-white/40">{sourceLabel(pack)}</p>
+
+                                <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+                                    {revealedIds.length > 0 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowCinema(true)}
+                                            className="inline-flex items-center gap-2 rounded-lg border border-white/12 bg-white/6 px-4 py-2 text-sm font-semibold text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                                        >
+                                            <Sparkles className="size-3.5" aria-hidden />
+                                            Rever animação
+                                        </button>
+                                    )}
+                                    <Link
+                                        href="/album"
+                                        className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-all hover:brightness-110"
+                                        style={{ boxShadow: '0 0 16px rgba(99,102,241,0.4)' }}
                                     >
-                                        ✨ Rever animação
-                                    </button>
-                                )}
-                                <Link href="/album" className="text-xs underline">Ver no álbum</Link>
+                                        Ver no álbum
+                                    </Link>
+                                </div>
                             </div>
                         </div>
+
+                        {/* Sticker grid */}
                         {pack.items.length === 0 ? (
-                            <div className="mt-3">
-                                <EmptyState title="Nenhuma figurinha registrada neste pacote." />
-                            </div>
+                            <EmptyState title="Nenhuma figurinha registrada neste pacote." />
                         ) : (
-                            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                                 {pack.items.map((item, index) => {
-                                    const delay = reducedMotion ? '0ms' : `${index * 80}ms`;
+                                    const delay = reducedMotion ? '0ms' : `${index * 90}ms`;
                                     const revealedNow = revealedIds.includes(item.sticker.id);
+                                    const rc = RARITY_COLORS[item.sticker.rarity as keyof typeof RARITY_COLORS] ?? RARITY_COLORS.common;
 
                                     return (
                                         <div
                                             key={item.id}
-                                            className="relative overflow-hidden rounded-md border border-[color:var(--sticker-frame)] bg-[color:var(--sticker-surface)] p-3"
-                                            style={{ animationDelay: delay }}
+                                            className="group relative overflow-hidden rounded-xl"
+                                            style={{
+                                                background: '#0c0a1a',
+                                                border: `1.5px solid rgba(${rc.rgb}, ${revealedNow ? 0.6 : 0.25})`,
+                                                boxShadow: revealedNow ? `0 0 22px 2px rgba(${rc.rgb}, 0.25)` : 'none',
+                                                animation: reducedMotion ? 'none' : 'sticker-enter 0.5s ease both',
+                                                animationDelay: delay,
+                                            }}
                                         >
-                                            {revealedNow ? (
-                                                <span className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-sm border border-[color:var(--brand-secondary)]/50 bg-[color:var(--brand-secondary)]/18 px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.08em] text-[color:var(--brand-secondary)] uppercase">
-                                                    <Star className="size-3" aria-hidden /> Nova
-                                                </span>
-                                            ) : null}
-                                            <div className="aspect-[3/4] overflow-hidden rounded-sm border border-[color:var(--sticker-frame)] bg-card">
+                                            {/* Sticker image full-width */}
+                                            <div className="aspect-[3/4] w-full overflow-hidden">
                                                 <img
                                                     src={item.sticker.image_url}
                                                     alt={item.sticker.title}
-                                                    className="h-full w-full object-cover"
+                                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                                                 />
                                             </div>
-                                            <div className="mt-2 font-mono text-xs text-dim">{item.sticker.code}</div>
-                                            <div className="mt-1 text-sm font-semibold text-foreground">{item.sticker.title}</div>
-                                            <div className="text-xs text-dim">{item.sticker.type} • {item.sticker.rarity}</div>
-                                            <div className="mt-2 flex items-center justify-between gap-2">
-                                                <Link className="text-xs underline" href={`/album/stickers/${item.sticker.id}`}>
+
+                                            {/* Info strip */}
+                                            <div className="px-3 pb-3 pt-2.5">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <span
+                                                        className="inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em]"
+                                                        style={{ color: rc.color, background: `rgba(${rc.rgb}, 0.14)`, border: `1px solid rgba(${rc.rgb}, 0.3)` }}
+                                                    >
+                                                        {item.sticker.rarity === 'legendary' && <Star className="size-2.5" aria-hidden />}
+                                                        {rc.label}
+                                                    </span>
+                                                    {revealedNow && (
+                                                        <span className="inline-flex items-center gap-1 rounded-sm border border-emerald-500/40 bg-emerald-500/14 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-400">
+                                                            <Star className="size-2.5" aria-hidden /> Nova
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                <div className="mt-1.5 font-mono text-[10px] text-white/20">{item.sticker.code}</div>
+                                                <div className="mt-0.5 text-sm font-bold text-white">{item.sticker.title}</div>
+                                                {item.sticker.subtitle && (
+                                                    <div className="text-xs text-white/40">{item.sticker.subtitle}</div>
+                                                )}
+
+                                                <Link
+                                                    href={`/album/stickers/${item.sticker.id}`}
+                                                    className="mt-2.5 block rounded-md border border-white/10 py-1.5 text-center text-[11px] font-semibold text-white/50 transition-colors hover:border-white/22 hover:text-white/80"
+                                                >
                                                     Ver no álbum
                                                 </Link>
-                                                {revealedNow ? (
-                                                    <StatusBadge value="opened" label="Revelada agora" />
-                                                ) : null}
                                             </div>
                                         </div>
                                     );
