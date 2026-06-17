@@ -1,5 +1,7 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import type { DriveStep } from 'driver.js';
 import type { FormEvent } from 'react';
+import { PageTour, TourReplayButton } from '@/components/page-tour';
 import { Button } from '@/components/ui/button';
 import { DataTableShell } from '@/components/ui/data-table-shell';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -7,6 +9,22 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PageHeader } from '@/components/ui/page-header';
 import { ResponsiveDataList } from '@/components/ui/responsive-data-list';
+
+const TOUR_STEPS: DriveStep[] = [
+    {
+        popover: {
+            title: 'Resgatar código',
+            description: 'Recebeu um código promocional do time? É aqui que você troca por pacotes no álbum.',
+        },
+    },
+    {
+        element: '[data-tour="reward-code-form"]',
+        popover: {
+            title: 'Digite e resgate',
+            description: 'Informe o código (ex.: AAPH10) e toque em “Resgatar código”. Os pacotes liberados aparecem em “Meus Pacotes”.',
+        },
+    },
+];
 
 type RedemptionRow = {
     id: number;
@@ -41,7 +59,12 @@ export default function RewardCodeRedeemPage({ recentRedemptions, activeAlbum }:
                 <PageHeader
                     title="Resgatar Código Promocional"
                     subtitle="Digite o código divulgado pelo time para receber novos pacotes no Álbum da Copa AAPH."
-                    actions={<Link href="/reward-codes/history" className="rounded-sm border border-border bg-card px-3 py-2 text-xs font-semibold">Histórico completo</Link>}
+                    actions={(
+                        <div className="flex flex-wrap gap-2">
+                            <TourReplayButton tourKey="reward-code" />
+                            <Link href="/reward-codes/history" className="rounded-sm border border-border bg-card px-3 py-2 text-xs font-semibold">Histórico completo</Link>
+                        </div>
+                    )}
                 />
 
                 <section className="season-hero">
@@ -54,7 +77,7 @@ export default function RewardCodeRedeemPage({ recentRedemptions, activeAlbum }:
                     </div>
                 </section>
 
-                <form onSubmit={submit} className="form-panel space-y-3 md:max-w-xl">
+                <form onSubmit={submit} data-tour="reward-code-form" className="form-panel space-y-3 md:max-w-xl">
                     <div className="form-panel-muted px-3 py-2 text-xs">
                         Escopo de resgate atual: {activeAlbum?.name ?? 'Nenhum álbum ativo'}
                     </div>
@@ -140,6 +163,8 @@ export default function RewardCodeRedeemPage({ recentRedemptions, activeAlbum }:
                     </table>
                 </DataTableShell>
             </div>
+
+            <PageTour tourKey="reward-code" steps={TOUR_STEPS} />
         </>
     );
 }

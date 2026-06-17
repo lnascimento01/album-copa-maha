@@ -1,8 +1,26 @@
 import { Head, Link } from '@inertiajs/react';
+import type { DriveStep } from 'driver.js';
+import { PageTour, TourReplayButton } from '@/components/page-tour';
 import { EmptyState } from '@/components/ui/empty-state';
 import { OriginBadge } from '@/components/ui/origin-badge';
 import { PageHeader } from '@/components/ui/page-header';
 import { StatusBadge } from '@/components/ui/status-badge';
+
+const TOUR_STEPS: DriveStep[] = [
+    {
+        popover: {
+            title: 'Missões sociais',
+            description: 'Cumpra missões do time, envie sua prova e ganhe pacotes após a validação.',
+        },
+    },
+    {
+        element: '[data-tour="missions-list"]',
+        popover: {
+            title: 'Escolha uma missão',
+            description: 'Cada card mostra a recompensa e o prazo. Toque em “Abrir missão” para ver as instruções e enviar sua participação.',
+        },
+    },
+];
 
 type Mission = {
     id: number;
@@ -48,7 +66,12 @@ export default function SocialMissionsIndex({ missions }: { missions: Mission[] 
                 <PageHeader
                     title="Desafios da Temporada"
                     subtitle="Cumpra missões oficiais, envie sua prova e receba pacotes após validação."
-                    actions={<Link href="/social-submissions" className="rounded-sm border border-border bg-card px-3 py-2 text-xs font-semibold">Minhas submissões</Link>}
+                    actions={(
+                        <div className="flex flex-wrap gap-2">
+                            <TourReplayButton tourKey="social-missions" />
+                            <Link href="/social-submissions" className="rounded-sm border border-border bg-card px-3 py-2 text-xs font-semibold">Minhas submissões</Link>
+                        </div>
+                    )}
                 />
 
                 <section className="season-hero">
@@ -64,7 +87,7 @@ export default function SocialMissionsIndex({ missions }: { missions: Mission[] 
                 {missions.length === 0 ? (
                     <EmptyState title="Nenhuma missão ativa no momento." description="Quando o time publicar novas missões, elas aparecerão aqui." />
                 ) : (
-                    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                    <div data-tour="missions-list" className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                         {missions.map((mission) => (
                             <article key={mission.id} className="mission-ticket">
                                 <div className="flex items-start justify-between gap-3">
@@ -101,6 +124,8 @@ export default function SocialMissionsIndex({ missions }: { missions: Mission[] 
                     </div>
                 )}
             </div>
+
+            <PageTour tourKey="social-missions" steps={TOUR_STEPS} enabled={missions.length > 0} />
         </>
     );
 }

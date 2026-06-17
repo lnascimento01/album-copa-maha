@@ -249,7 +249,7 @@ export function AlbumBook({ coverImageUrl, albumName, season, teams, stickers }:
 
                         {!isOpen ? (
                             <div className="album-book__cover-actions album-cover-actions">
-                                <button type="button" onClick={() => setIsOpen(true)} className="album-book__button album-book__button--primary">
+                                <button type="button" onClick={() => setIsOpen(true)} data-tour="album-open" className="album-book__button album-book__button--primary">
                                     <BookOpen className="size-4" /> Abrir álbum
                                 </button>
                             </div>

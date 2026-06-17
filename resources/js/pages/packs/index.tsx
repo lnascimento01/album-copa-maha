@@ -1,4 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
+import type { DriveStep } from 'driver.js';
+import { PageTour, TourReplayButton } from '@/components/page-tour';
 import { DataTableShell } from '@/components/ui/data-table-shell';
 import { EmptyState } from '@/components/ui/empty-state';
 import { MetricCard } from '@/components/ui/metric-card';
@@ -7,6 +9,35 @@ import { PageHeader } from '@/components/ui/page-header';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { ResponsiveDataList } from '@/components/ui/responsive-data-list';
 import { StatusBadge } from '@/components/ui/status-badge';
+
+const TOUR_STEPS: DriveStep[] = [
+    {
+        popover: {
+            title: 'Seus pacotes 📦',
+            description: 'Aqui é onde você abre pacotes e ganha figurinhas novas para o álbum. Vamos ver onde fica cada coisa.',
+        },
+    },
+    {
+        element: '[data-tour="packs-pending"]',
+        popover: {
+            title: 'Pacotes disponíveis',
+            description: 'Seus pacotes prontos para abrir aparecem aqui. Toque em um pacote para abri-lo e revelar as figurinhas.',
+        },
+    },
+    {
+        element: '[data-tour="packs-stats"]',
+        popover: {
+            title: 'Seu resumo',
+            description: 'Acompanhe pacotes pendentes, abertos e o seu progresso no álbum.',
+        },
+    },
+    {
+        popover: {
+            title: 'Pronto! 🎉',
+            description: 'Ganhe pacotes participando de atividades, resgatando códigos e concluindo missões.',
+        },
+    },
+];
 
 type PackRow = {
     id: number;
@@ -57,7 +88,12 @@ export default function PacksIndex({ pendingPacks, historyPacks, stats, can }: P
                 <PageHeader
                     title="Meus Pacotes"
                     subtitle="Abra seus pacotes pendentes e avance no Álbum da Copa AAPH."
-                    actions={<Link href="/album" className="rounded-sm border border-border bg-card px-3 py-2 text-xs font-semibold">Ver álbum</Link>}
+                    actions={(
+                        <div className="flex flex-wrap gap-2">
+                            <TourReplayButton tourKey="packs-index" />
+                            <Link href="/album" className="rounded-sm border border-border bg-card px-3 py-2 text-xs font-semibold">Ver álbum</Link>
+                        </div>
+                    )}
                 />
 
                 <section className="season-hero">
@@ -70,14 +106,14 @@ export default function PacksIndex({ pendingPacks, historyPacks, stats, can }: P
                     </div>
                 </section>
 
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <div data-tour="packs-stats" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                     <MetricCard label="Pendentes" value={stats.pending} accent={stats.pending > 0 ? 'warning' : 'default'} />
                     <MetricCard label="Abertos" value={stats.opened} />
                     <MetricCard label="Figurinhas desbloqueadas" value={stats.unlocked} />
                     <MetricCard label="Progresso do álbum" value={`${percentage}%`} hint={<ProgressBar value={percentage} />} accent="success" />
                 </div>
 
-                <section className="album-paper p-4">
+                <section data-tour="packs-pending" className="album-paper p-4">
                     <h2 className="text-sm font-semibold text-foreground">Pacotes pendentes</h2>
                     {pendingPacks.length === 0 ? (
                         <div className="mt-3">
@@ -203,6 +239,8 @@ export default function PacksIndex({ pendingPacks, historyPacks, stats, can }: P
                     </table>
                 </DataTableShell>
             </div>
+
+            <PageTour tourKey="packs-index" steps={TOUR_STEPS} />
         </>
     );
 }

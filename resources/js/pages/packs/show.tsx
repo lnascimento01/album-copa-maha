@@ -1,7 +1,9 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import type { DriveStep } from 'driver.js';
 import { Sparkles, Star } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { PackRevealCinema } from '@/components/packs/pack-reveal-cinema';
+import { PageTour } from '@/components/page-tour';
 import { EmptyState } from '@/components/ui/empty-state';
 import { OriginBadge } from '@/components/ui/origin-badge';
 import { PageHeader } from '@/components/ui/page-header';
@@ -74,6 +76,22 @@ const RARITY_COLORS = {
     epic:      { label: 'Épico',    color: '#c084fc', rgb: '192,132,252' },
     legendary: { label: 'Lendário', color: '#fbbf24', rgb: '251,191,36'  },
 } as const;
+
+const TOUR_STEPS: DriveStep[] = [
+    {
+        popover: {
+            title: 'Hora de abrir! ✨',
+            description: 'Este é o seu pacote. Vamos ver como revelar as figurinhas.',
+        },
+    },
+    {
+        element: '[data-tour="pack-open-btn"]',
+        popover: {
+            title: 'Abrir o pacote',
+            description: 'Toque aqui para abrir o envelope e revelar suas figurinhas com a animação. As novas vão direto para o seu álbum.',
+        },
+    },
+];
 
 export default function PackShow({ pack }: { pack: Pack }) {
     const page = usePage<{ flash?: Flash }>();
@@ -315,6 +333,7 @@ export default function PackShow({ pack }: { pack: Pack }) {
                                 type="button"
                                 onClick={openPack}
                                 disabled={isOpening}
+                                data-tour="pack-open-btn"
                                 className="inline-flex items-center gap-2 rounded-lg border border-primary bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-60"
                                 style={!isOpening ? { boxShadow: '0 0 18px rgba(99,102,241,0.4)' } : {}}
                             >
@@ -398,37 +417,34 @@ export default function PackShow({ pack }: { pack: Pack }) {
                                     return (
                                         <div
                                             key={item.id}
-                                            className="group relative overflow-hidden rounded-xl"
+                                            className="group relative"
                                             style={{
-                                                background: '#0c0a1a',
-                                                border: `1.5px solid rgba(${rc.rgb}, ${revealedNow ? 0.6 : 0.25})`,
-                                                boxShadow: revealedNow ? `0 0 28px 4px rgba(${rc.rgb}, 0.22)` : 'none',
                                                 animation: reducedMotion ? 'none' : 'sticker-enter 0.5s ease both',
                                                 animationDelay: delay,
                                             }}
                                         >
-                                            {/* "Nova" badge overlaid on image */}
-                                            {revealedNow && (
-                                                <span className="absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1 rounded-md border border-emerald-500/50 bg-emerald-950/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-400 backdrop-blur-sm">
-                                                    <Star className="size-2.5" aria-hidden /> Nova
-                                                </span>
-                                            )}
-
-                                            {/* Full sticker image — object-contain preserves the complete card design */}
-                                            <div className="w-full bg-black/20">
+                                            {/* The sticker image is already a complete framed card, so we
+                                                show it whole (no extra border/clip that would cut its frame)
+                                                and only add a rarity glow + badge around it. */}
+                                            <div className="relative">
+                                                {revealedNow && (
+                                                    <span className="absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1 rounded-md border border-emerald-500/50 bg-emerald-950/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-400 backdrop-blur-sm">
+                                                        <Star className="size-2.5" aria-hidden /> Nova
+                                                    </span>
+                                                )}
                                                 <img
                                                     src={item.sticker.image_url}
                                                     alt={item.sticker.title}
-                                                    className="w-full transition-transform duration-500 group-hover:scale-[1.03]"
-                                                    style={{ display: 'block' }}
+                                                    className="block w-full rounded-lg transition-transform duration-500 group-hover:scale-[1.02]"
+                                                    style={{
+                                                        boxShadow: revealedNow
+                                                            ? `0 0 26px 2px rgba(${rc.rgb}, 0.4)`
+                                                            : '0 6px 18px rgba(0, 0, 0, 0.35)',
+                                                    }}
                                                 />
                                             </div>
 
-                                            {/* Minimal footer — rarity + action */}
-                                            <div
-                                                className="flex items-center justify-between gap-2 px-3 py-2.5"
-                                                style={{ borderTop: `1px solid rgba(${rc.rgb}, 0.15)` }}
-                                            >
+                                            <div className="mt-2 flex items-center justify-between gap-2 px-1">
                                                 <span
                                                     className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.12em]"
                                                     style={{ color: rc.color }}
@@ -438,7 +454,7 @@ export default function PackShow({ pack }: { pack: Pack }) {
                                                 </span>
                                                 <Link
                                                     href={`/album/stickers/${item.sticker.id}`}
-                                                    className="text-[11px] font-semibold text-white/35 transition-colors hover:text-white/70"
+                                                    className="text-[11px] font-semibold text-white/45 transition-colors hover:text-white/80"
                                                 >
                                                     Ver no álbum →
                                                 </Link>
@@ -451,6 +467,8 @@ export default function PackShow({ pack }: { pack: Pack }) {
                     </section>
                 ) : null}
             </div>
+
+            <PageTour tourKey="packs-open" steps={TOUR_STEPS} enabled={pack.status === 'pending'} />
         </>
     );
 }

@@ -1,8 +1,26 @@
 import { Head, Link, useForm } from '@inertiajs/react';
+import type { DriveStep } from 'driver.js';
 import type { FormEvent } from 'react';
+import { PageTour, TourReplayButton } from '@/components/page-tour';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PageHeader } from '@/components/ui/page-header';
+
+const TOUR_STEPS: DriveStep[] = [
+    {
+        popover: {
+            title: 'Check-in por código',
+            description: 'Quando a administração informar um código numa atividade, é aqui que você confirma sua presença.',
+        },
+    },
+    {
+        element: '[data-tour="checkin-code-form"]',
+        popover: {
+            title: 'Digite o código',
+            description: 'Informe o código (ex.: AAPH-7F3K9) e toque em “Confirmar presença”. Cada check-in pode gerar pacotes.',
+        },
+    },
+];
 
 export default function CheckinCodePage() {
     const form = useForm({
@@ -18,14 +36,18 @@ export default function CheckinCodePage() {
         <>
             <Head title="Check-in por Código" />
             <div className="brand-app-bg mx-auto max-w-xl space-y-4 p-4 sm:p-5">
-                <PageHeader title="Check-in por Código" subtitle="Digite o código informado pela administração para confirmar presença na Copa AAPH." />
+                <PageHeader
+                    title="Check-in por Código"
+                    subtitle="Digite o código informado pela administração para confirmar presença na Copa AAPH."
+                    actions={<TourReplayButton tourKey="checkin-code" />}
+                />
 
                 <section className="campaign-panel">
                     <p className="text-[10px] font-semibold tracking-[0.14em] text-[color:var(--info-soft-text)] uppercase">Validação da temporada</p>
                     <p className="mt-1 text-sm text-[color:var(--info-soft-text)]">Cada check-in confirmado pode gerar pacotes e acelerar sua coleção.</p>
                 </section>
 
-                <form onSubmit={submit} className="form-panel space-y-3">
+                <form onSubmit={submit} data-tour="checkin-code-form" className="form-panel space-y-3">
                     <div>
                         <Label htmlFor="checkin-code" className="text-xs font-semibold tracking-[0.1em] text-dim uppercase">Código</Label>
                         <Input
@@ -44,6 +66,8 @@ export default function CheckinCodePage() {
                     </div>
                 </form>
             </div>
+
+            <PageTour tourKey="checkin-code" steps={TOUR_STEPS} />
         </>
     );
 }
