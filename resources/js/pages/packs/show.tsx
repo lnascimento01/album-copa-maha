@@ -398,37 +398,34 @@ export default function PackShow({ pack }: { pack: Pack }) {
                                     return (
                                         <div
                                             key={item.id}
-                                            className="group relative overflow-hidden rounded-xl"
+                                            className="group relative"
                                             style={{
-                                                background: '#0c0a1a',
-                                                border: `1.5px solid rgba(${rc.rgb}, ${revealedNow ? 0.6 : 0.25})`,
-                                                boxShadow: revealedNow ? `0 0 28px 4px rgba(${rc.rgb}, 0.22)` : 'none',
                                                 animation: reducedMotion ? 'none' : 'sticker-enter 0.5s ease both',
                                                 animationDelay: delay,
                                             }}
                                         >
-                                            {/* "Nova" badge overlaid on image */}
-                                            {revealedNow && (
-                                                <span className="absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1 rounded-md border border-emerald-500/50 bg-emerald-950/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-400 backdrop-blur-sm">
-                                                    <Star className="size-2.5" aria-hidden /> Nova
-                                                </span>
-                                            )}
-
-                                            {/* Full sticker image — object-contain preserves the complete card design */}
-                                            <div className="w-full bg-black/20">
+                                            {/* The sticker image is already a complete framed card, so we
+                                                show it whole (no extra border/clip that would cut its frame)
+                                                and only add a rarity glow + badge around it. */}
+                                            <div className="relative">
+                                                {revealedNow && (
+                                                    <span className="absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1 rounded-md border border-emerald-500/50 bg-emerald-950/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-400 backdrop-blur-sm">
+                                                        <Star className="size-2.5" aria-hidden /> Nova
+                                                    </span>
+                                                )}
                                                 <img
                                                     src={item.sticker.image_url}
                                                     alt={item.sticker.title}
-                                                    className="w-full transition-transform duration-500 group-hover:scale-[1.03]"
-                                                    style={{ display: 'block' }}
+                                                    className="block w-full rounded-lg transition-transform duration-500 group-hover:scale-[1.02]"
+                                                    style={{
+                                                        boxShadow: revealedNow
+                                                            ? `0 0 26px 2px rgba(${rc.rgb}, 0.4)`
+                                                            : '0 6px 18px rgba(0, 0, 0, 0.35)',
+                                                    }}
                                                 />
                                             </div>
 
-                                            {/* Minimal footer — rarity + action */}
-                                            <div
-                                                className="flex items-center justify-between gap-2 px-3 py-2.5"
-                                                style={{ borderTop: `1px solid rgba(${rc.rgb}, 0.15)` }}
-                                            >
+                                            <div className="mt-2 flex items-center justify-between gap-2 px-1">
                                                 <span
                                                     className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.12em]"
                                                     style={{ color: rc.color }}
@@ -438,7 +435,7 @@ export default function PackShow({ pack }: { pack: Pack }) {
                                                 </span>
                                                 <Link
                                                     href={`/album/stickers/${item.sticker.id}`}
-                                                    className="text-[11px] font-semibold text-white/35 transition-colors hover:text-white/70"
+                                                    className="text-[11px] font-semibold text-white/45 transition-colors hover:text-white/80"
                                                 >
                                                     Ver no álbum →
                                                 </Link>
