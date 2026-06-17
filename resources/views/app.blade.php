@@ -3,11 +3,14 @@
     if ($designTheme === 'auto') {
         $designTheme = (request()->is('admin') || request()->is('admin/*')) ? 'linear' : 'spotify';
     }
-    $forceDark = in_array($designTheme, ['spotify', 'linear']);
-    $initBg = match($designTheme) {
-        'spotify' => '#121212',
-        'linear'  => '#0f0e13',
-        default   => '#f6f8f2',
+    // Linear is always dark (admin). Spotify follows the user's appearance preference.
+    $userAppearance = $appearance ?? 'system';
+    $forceDark = $designTheme === 'linear' || ($designTheme === 'spotify' && $userAppearance !== 'light');
+    $initBg = match(true) {
+        $designTheme === 'spotify' && $userAppearance === 'light' => '#ffffff',
+        $designTheme === 'spotify' => '#121212',
+        $designTheme === 'linear'  => '#0f0e13',
+        default                    => '#f6f8f2',
     };
     $initBgDark = match($designTheme) {
         'spotify' => '#121212',
@@ -26,11 +29,15 @@
         <script>
             (function () {
                 var serverAppearance = '{{ $appearance ?? "system" }}';
+                var design = '{{ $designTheme }}';
                 var forceDark = {{ $forceDark ? 'true' : 'false' }};
                 var storedAppearance = window.localStorage.getItem('appearance') || serverAppearance;
                 var useDark = forceDark
                     || storedAppearance === 'dark'
                     || (storedAppearance === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+                var theme = useDark ? 'dark' : 'light';
+                document.documentElement.dataset.theme = theme;
 
                 if (useDark) {
                     document.documentElement.classList.add('dark');
