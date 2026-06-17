@@ -1,6 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import type { DriveStep } from 'driver.js';
-import { PageTour } from '@/components/page-tour';
+import { PageTour, TourReplayButton } from '@/components/page-tour';
 import { DataTableShell } from '@/components/ui/data-table-shell';
 import { EmptyState } from '@/components/ui/empty-state';
 import { MetricCard } from '@/components/ui/metric-card';
@@ -88,7 +88,12 @@ export default function PacksIndex({ pendingPacks, historyPacks, stats, can }: P
                 <PageHeader
                     title="Meus Pacotes"
                     subtitle="Abra seus pacotes pendentes e avance no Álbum da Copa AAPH."
-                    actions={<Link href="/album" className="rounded-sm border border-border bg-card px-3 py-2 text-xs font-semibold">Ver álbum</Link>}
+                    actions={(
+                        <div className="flex flex-wrap gap-2">
+                            <TourReplayButton tourKey="packs-index" />
+                            <Link href="/album" className="rounded-sm border border-border bg-card px-3 py-2 text-xs font-semibold">Ver álbum</Link>
+                        </div>
+                    )}
                 />
 
                 <section className="season-hero">

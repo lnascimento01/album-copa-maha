@@ -14,7 +14,7 @@ class OnboardingController extends Controller
      *
      * @var list<string>
      */
-    private const TOURS = ['main-menu', 'packs-index', 'packs-open', 'album'];
+    private const TOURS = ['main-menu', 'packs-index', 'packs-open', 'album', 'checkin-code', 'reward-code', 'social-missions'];
 
     /**
      * Mark an onboarding tour as completed for the authenticated user so it

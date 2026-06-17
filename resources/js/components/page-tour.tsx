@@ -1,6 +1,7 @@
 import { router, usePage } from '@inertiajs/react';
 import { driver } from 'driver.js';
 import type { Config, DriveStep } from 'driver.js';
+import { Compass } from 'lucide-react';
 import { useCallback, useEffect, useRef } from 'react';
 import 'driver.js/dist/driver.css';
 
@@ -16,11 +17,25 @@ const DRIVER_CONFIG: Config = {
     progressText: '{{current}} de {{total}}',
 };
 
+const REPLAY_EVENT_PREFIX = 'page-tour:start:';
+
+/** Replays the page tour with the given key (used by TourReplayButton). */
+export function startPageTour(tourKey: string): void {
+    window.dispatchEvent(new CustomEvent(`${REPLAY_EVENT_PREFIX}${tourKey}`));
+}
+
 type TourUser = {
     roles?: string[];
     permissions?: string[];
     preferences?: { tours?: Record<string, string> } | null;
 };
+
+function useIsAlbumUser(): boolean {
+    const page = usePage<{ auth: { user?: TourUser | null } }>();
+    const user = page.props.auth.user;
+
+    return !!user && !(user.roles ?? []).includes('admin');
+}
 
 type Props = {
     /** Unique key; completion is stored per key in preferences.tours[tourKey]. */
@@ -38,6 +53,7 @@ type Props = {
  * (the main menu by default) is done — so tours don't stack on a first visit.
  * Targets that aren't in the DOM are skipped, and if nothing is left to show
  * the tour is not started (and not marked complete) so it can run later.
+ * Can also be replayed on demand via startPageTour(tourKey) / TourReplayButton.
  */
 export function PageTour({ tourKey, steps, requiresTour = 'main-menu', enabled = true }: Props) {
     const page = usePage<{ auth: { user?: TourUser | null } }>();
@@ -70,6 +86,7 @@ export function PageTour({ tourKey, steps, requiresTour = 'main-menu', enabled =
         return true;
     }, [steps, tourKey]);
 
+    // Auto-start once.
     useEffect(() => {
         if (!enabled || !isAlbumUser || completed || !prerequisiteDone || startedRef.current) {
             return;
@@ -82,5 +99,43 @@ export function PageTour({ tourKey, steps, requiresTour = 'main-menu', enabled =
         return () => window.clearTimeout(timer);
     }, [enabled, isAlbumUser, completed, prerequisiteDone, startTour]);
 
+    // Manual replay (explicit user action — bypasses the completion gate).
+    useEffect(() => {
+        const handler = () => startTour();
+        const eventName = `${REPLAY_EVENT_PREFIX}${tourKey}`;
+        window.addEventListener(eventName, handler);
+
+        return () => window.removeEventListener(eventName, handler);
+    }, [startTour, tourKey]);
+
     return null;
+}
+
+type ReplayButtonProps = {
+    tourKey: string;
+    label?: string;
+    className?: string;
+};
+
+/** Contextual "replay this page's tour" button (non-admin users only). */
+export function TourReplayButton({ tourKey, label = 'Rever tour', className }: ReplayButtonProps) {
+    const isAlbumUser = useIsAlbumUser();
+
+    if (!isAlbumUser) {
+        return null;
+    }
+
+    return (
+        <button
+            type="button"
+            onClick={() => startPageTour(tourKey)}
+            className={
+                className ??
+                'inline-flex items-center gap-1.5 rounded-sm border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-muted/60'
+            }
+        >
+            <Compass className="size-3.5" aria-hidden />
+            {label}
+        </button>
+    );
 }

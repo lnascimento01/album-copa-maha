@@ -3,7 +3,7 @@ import type { DriveStep } from 'driver.js';
 import { useMemo, useState } from 'react';
 import { AlbumBook } from '@/components/album/album-book';
 import { AlbumProgressHeader } from '@/components/album/album-progress-header';
-import { PageTour } from '@/components/page-tour';
+import { PageTour, TourReplayButton } from '@/components/page-tour';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
 
@@ -146,9 +146,12 @@ export default function AlbumIndex({ album, progress, packs, can, progressAchiev
                         />
 
                         <section data-tour="album-filters" className="album-paper p-2.5 sm:p-3">
-                            <p className="text-xs text-dim sm:text-sm">
-                                Complete sua coleção oficial da Copa AAPH. Abra pacotes, encontre figurinhas e avance página por página.
-                            </p>
+                            <div className="flex items-start justify-between gap-2">
+                                <p className="text-xs text-dim sm:text-sm">
+                                    Complete sua coleção oficial da Copa AAPH. Abra pacotes, encontre figurinhas e avance página por página.
+                                </p>
+                                <TourReplayButton tourKey="album" className="inline-flex shrink-0 items-center gap-1.5 rounded-sm border border-border bg-card px-2 py-1 text-[11px] font-semibold text-foreground transition-colors hover:bg-muted/60" />
+                            </div>
                             <div className="mt-2 flex flex-wrap gap-1.5 sm:gap-2">
                                 {teamOptions.map((team) => (
                                     <button
