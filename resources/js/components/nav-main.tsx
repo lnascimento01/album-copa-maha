@@ -5,13 +5,31 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    useSidebar,
 } from '@/components/ui/sidebar';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { toUrl } from '@/lib/utils';
 import type { NavItem } from '@/types';
 
+// Stable hook target for the onboarding tour, derived from the route, e.g.
+// "/album" -> "nav-album", "/checkin-code" -> "nav-checkin-code".
+function tourId(href: NavItem['href']): string {
+    const segment = toUrl(href).replace(/^\/+/, '').split(/[/?#]/)[0];
+
+    return `nav-${segment || 'dashboard'}`;
+}
+
 export function NavMain({ items = [] }: { items: NavItem[] }) {
     const { isCurrentUrl } = useCurrentUrl();
+    const { isMobile, setOpenMobile } = useSidebar();
+
+    // On mobile the menu lives in an off-canvas drawer that did not close when
+    // a destination was chosen — close it so the selected page is visible.
+    const handleNavigate = () => {
+        if (isMobile) {
+            setOpenMobile(false);
+        }
+    };
     const operationItems = items.filter((item) => {
         const href = toUrl(item.href);
 
@@ -38,7 +56,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                         isActive={isCurrentUrl(item.href)}
                         tooltip={{ children: item.title }}
                     >
-                        <Link href={item.href} prefetch>
+                        <Link href={item.href} prefetch data-tour={tourId(item.href)} onClick={handleNavigate}>
                             {item.icon && <item.icon />}
                             <span>{item.title}</span>
                         </Link>
