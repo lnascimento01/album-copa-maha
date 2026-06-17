@@ -73,7 +73,7 @@ const ptBrLabels: Record<Variant, string> = {
 
 export function StatusBadge({ value, label }: Props) {
     const variant = resolveVariant(value);
-    const displayLabel = label ?? ptBrLabels[variant] || value;
+    const displayLabel = (label ?? ptBrLabels[variant]) || value;
 
     return (
         <Badge variant="outline" className={`rounded-sm px-2 py-0.5 text-[11px] font-semibold tracking-[0.1em] uppercase ${classes[variant]}`}>
