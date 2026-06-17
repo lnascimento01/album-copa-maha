@@ -18,18 +18,23 @@
 
 ## Deploy
 
-1. `composer install --no-dev --optimize-autoloader`.
-2. `npm ci`.
-3. `npm run build`.
-4. Subir containers (`docker compose ... up -d`).
-5. Rodar migrations (`php artisan migrate --force`).
-6. Rodar seed mínimo ou demo, conforme `APP_SEED_DEMO_DATA`.
-7. Criar storage link (`php artisan storage:link`).
-8. `php artisan config:cache`.
-9. `php artisan route:cache`.
-10. `php artisan view:cache`.
-11. Reiniciar serviços se necessário.
-12. Validar logs no Docker e Laravel.
+### Primeira subida
+
+1. `cp .env.staging.example .env` e preencher variáveis.
+2. `bash deploy/staging-build.sh` (build da imagem imutável + up + migrate + storage:link).
+3. Rodar seed mínimo ou demo, conforme `APP_SEED_DEMO_DATA`.
+4. Validar logs no Docker e Laravel.
+
+### Releases seguintes (zero-downtime)
+
+1. Garantir que o host tem o plugin `docker-rollout` instalado.
+2. Garantir que as migrations do release são backward-compatible (expand/contract).
+3. `bash deploy/deploy.sh` — faz `git pull` → `build` → `migrate --force` → `docker rollout app`.
+4. Confirmar que o site respondeu sem interrupção durante a troca.
+5. Validar logs no Docker e Laravel.
+
+> Build de assets/vendor e cache de config/rotas/views são feitos na imagem
+> e no entrypoint — não há mais passo manual de `npm`/`composer`/`*:cache`.
 
 ## Pós-deploy
 
@@ -53,6 +58,8 @@
 ## Rollback básico
 
 1. Restaurar backup de banco.
-2. Voltar para imagem/código anterior.
+2. Voltar para a imagem anterior: `git checkout <tag/commit anterior>` e
+   `bash deploy/deploy.sh` (o rollout sobe a imagem antiga e troca de volta
+   sem downtime).
 3. Rodar rollback de migration apenas se seguro.
 4. Preferir restore completo para piloto controlado.

@@ -1,12 +1,23 @@
 #!/usr/bin/env bash
 # Zero-downtime staging deploy.
 #
-# Strategy:
-#   1. Pull latest code (git pull) while old container keeps serving.
-#   2. Pre-build assets inside a throw-away container (no ports, no
-#      traffic) using the same image that is already running.
-#   3. Restart the app container with SKIP_ASSET_BUILD=1 — it only
-#      runs migrate + optimize + php-fpm, so downtime is ~10-20 s.
+# How it stays up the whole time:
+#   1. Pull the latest code (the running container is unaffected — its code is
+#      baked into the current image, not read from the working tree).
+#   2. Build a brand-new immutable image (code + composer vendor + Vite assets
+#      baked in) while the old container keeps serving.
+#   3. Run database migrations once, in a throw-away container of the NEW
+#      image, before any traffic is swapped. Migrations must be
+#      backward-compatible (expand/contract) because the old container is
+#      still serving during the brief overlap.
+#   4. `docker rollout` starts a new app container next to the old one, waits
+#      until it is healthy, then removes the old one. nginx re-resolves the
+#      app hostname per request, so traffic shifts to the new container with
+#      no restart and no dropped connections.
+#
+# Requirements on the host:
+#   - Docker + Compose v2
+#   - docker-rollout plugin (https://github.com/wowu/docker-rollout)
 #
 # Usage (from the server, inside the repo root):
 #   cd /path/to/album-copa-maha
@@ -14,42 +25,31 @@
 
 set -euo pipefail
 
-COMPOSE="docker compose -f deploy/docker-compose.staging.yml"
+COMPOSE_FILE="deploy/docker-compose.staging.yml"
+COMPOSE="docker compose -f ${COMPOSE_FILE}"
+
+if ! docker rollout --help >/dev/null 2>&1; then
+    echo "[deploy] ERROR: the 'docker rollout' plugin is not installed." >&2
+    echo "         Install it from https://github.com/wowu/docker-rollout" >&2
+    exit 1
+fi
 
 echo "[deploy] pulling latest code…"
 git pull --ff-only
 
-echo "[deploy] pre-building assets (old container keeps serving)…"
-# Run composer + npm inside a one-off container that shares the
-# working-directory volume but has no ports open and no healthcheck.
-$COMPOSE run --rm --no-deps \
-    -e SKIP_ASSET_BUILD=0 \
-    --entrypoint bash \
-    app -c "
-        set -euo pipefail
-        cd /var/www/html
-        echo '  -> composer install'
-        composer install --no-dev --optimize-autoloader --no-interaction
-        echo '  -> npm ci'
-        npm ci
-        echo '  -> npm run build'
-        npm run build
-        echo '  -> pre-build done'
-    "
+echo "[deploy] building new immutable image (old container keeps serving)…"
+$COMPOSE build app
 
-echo "[deploy] restarting app with pre-built assets…"
-SKIP_ASSET_BUILD=1 $COMPOSE up -d --force-recreate app
+echo "[deploy] running migrations on the new image (expand/contract)…"
+# One-off container of the freshly built image; --no-deps avoids touching the
+# running services. The DB stays shared, so migrations apply before the swap.
+$COMPOSE run --rm --no-deps app php artisan migrate --force
 
-echo "[deploy] waiting for app to become healthy…"
-timeout 200 bash -c "
-    until docker inspect \
-        \$(docker compose -f deploy/docker-compose.staging.yml ps -q app) \
-        --format '{{.State.Health.Status}}' 2>/dev/null | grep -q healthy; do
-        sleep 5
-    done
-"
+echo "[deploy] zero-downtime rollout of app…"
+# Starts the new container, waits for its healthcheck, then retires the old.
+docker rollout -f "${COMPOSE_FILE}" app
 
-echo "[deploy] reloading nginx…"
+echo "[deploy] reloading nginx (safety; the swap itself needs no reload)…"
 $COMPOSE exec nginx nginx -s reload 2>/dev/null || true
 
-echo "[deploy] done — site is up."
+echo "[deploy] done — site stayed up throughout."
