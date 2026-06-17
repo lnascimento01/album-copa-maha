@@ -40,6 +40,7 @@ class User extends Authenticatable implements PasskeyUser
         'rejection_reason',
         'last_login_at',
         'last_login_ip',
+        'preferences',
     ];
 
     protected $hidden = [
@@ -63,7 +64,28 @@ class User extends Authenticatable implements PasskeyUser
             'approved_at' => 'datetime',
             'rejected_at' => 'datetime',
             'last_login_at' => 'datetime',
+            'preferences' => 'array',
         ];
+    }
+
+    /**
+     * Whether the user has already finished the given onboarding tour.
+     */
+    public function hasCompletedTour(string $tour): bool
+    {
+        return (bool) data_get($this->preferences, "tours.{$tour}");
+    }
+
+    /**
+     * Persist that the user finished (or skipped) the given onboarding tour.
+     */
+    public function markTourCompleted(string $tour): void
+    {
+        $preferences = $this->preferences ?? [];
+        $preferences['tours'][$tour] = now()->toIso8601String();
+
+        $this->preferences = $preferences;
+        $this->save();
     }
 
     public function roles(): BelongsToMany

@@ -26,6 +26,7 @@ use App\Http\Controllers\AlbumCollectionController;
 use App\Http\Controllers\ApprovalStatusController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventCheckinController;
+use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\RankingController;
 use App\Http\Controllers\RewardCodeRedemptionController;
 use App\Http\Controllers\SelfCheckinController;
@@ -73,6 +74,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', DashboardController::class)
         ->middleware('approved')
         ->name('dashboard');
+
+    Route::post('/onboarding/tour/{tour}/complete', [OnboardingController::class, 'complete'])
+        ->middleware('approved')
+        ->name('onboarding.tour.complete');
 
     Route::get('/album', [AlbumCollectionController::class, 'index'])
         ->middleware(['approved', 'permission:albumCollection.viewOwn'])

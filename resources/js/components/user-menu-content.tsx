@@ -1,5 +1,6 @@
 import { Link, router } from '@inertiajs/react';
-import { LogOut, Settings } from 'lucide-react';
+import { Compass, LogOut, Settings } from 'lucide-react';
+import { ONBOARDING_START_EVENT } from '@/components/onboarding-tour';
 import {
     DropdownMenuGroup,
     DropdownMenuItem,
@@ -19,9 +20,19 @@ type Props = {
 export function UserMenuContent({ user }: Props) {
     const cleanup = useMobileNavigation();
 
+    const roles = (user.roles as string[] | undefined) ?? [];
+    const permissions = (user.permissions as string[] | undefined) ?? [];
+    // Same eligibility as the auto tour: non-admin album users only.
+    const canReplayTour = !roles.includes('admin') && permissions.includes('albumCollection.viewOwn');
+
     const handleLogout = () => {
         cleanup();
         router.flushAll();
+    };
+
+    const handleReplayTour = () => {
+        cleanup();
+        window.dispatchEvent(new CustomEvent(ONBOARDING_START_EVENT));
     };
 
     return (
@@ -44,6 +55,12 @@ export function UserMenuContent({ user }: Props) {
                         Settings
                     </Link>
                 </DropdownMenuItem>
+                {canReplayTour && (
+                    <DropdownMenuItem className="cursor-pointer" onClick={handleReplayTour}>
+                        <Compass className="mr-2" />
+                        Rever tour
+                    </DropdownMenuItem>
+                )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
