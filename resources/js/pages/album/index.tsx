@@ -1,9 +1,40 @@
 import { Head } from '@inertiajs/react';
+import type { DriveStep } from 'driver.js';
 import { useMemo, useState } from 'react';
 import { AlbumBook } from '@/components/album/album-book';
 import { AlbumProgressHeader } from '@/components/album/album-progress-header';
+import { PageTour } from '@/components/page-tour';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
+
+const TOUR_STEPS: DriveStep[] = [
+    {
+        popover: {
+            title: 'Seu álbum 📖',
+            description: 'Aqui fica sua coleção. Vamos ver como navegar e completar o álbum.',
+        },
+    },
+    {
+        element: '[data-tour="album-open"]',
+        popover: {
+            title: 'Abrir e folhear',
+            description: 'Toque para abrir o álbum e use as setas para folhear as páginas, como num álbum de verdade.',
+        },
+    },
+    {
+        element: '[data-tour="album-filters"]',
+        popover: {
+            title: 'Filtrar figurinhas',
+            description: 'Filtre por tipo e por time para encontrar figurinhas específicas mais rápido.',
+        },
+    },
+    {
+        popover: {
+            title: 'Coletadas x faltando',
+            description: 'As figurinhas que você já tem aparecem coloridas; as que faltam ficam em cinza. Abra pacotes para completar!',
+        },
+    },
+];
 
 type AlbumSticker = {
     id: number;
@@ -114,7 +145,7 @@ export default function AlbumIndex({ album, progress, packs, can, progressAchiev
                             canCreateShareCard={can?.createShareCard}
                         />
 
-                        <section className="album-paper p-2.5 sm:p-3">
+                        <section data-tour="album-filters" className="album-paper p-2.5 sm:p-3">
                             <p className="text-xs text-dim sm:text-sm">
                                 Complete sua coleção oficial da Copa AAPH. Abra pacotes, encontre figurinhas e avance página por página.
                             </p>
@@ -189,6 +220,8 @@ export default function AlbumIndex({ album, progress, packs, can, progressAchiev
                     </>
                 )}
             </div>
+
+            <PageTour tourKey="album" steps={TOUR_STEPS} enabled={!!album} />
         </>
     );
 }

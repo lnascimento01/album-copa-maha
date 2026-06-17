@@ -1,7 +1,9 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import type { DriveStep } from 'driver.js';
 import { Sparkles, Star } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { PackRevealCinema } from '@/components/packs/pack-reveal-cinema';
+import { PageTour } from '@/components/page-tour';
 import { EmptyState } from '@/components/ui/empty-state';
 import { OriginBadge } from '@/components/ui/origin-badge';
 import { PageHeader } from '@/components/ui/page-header';
@@ -74,6 +76,22 @@ const RARITY_COLORS = {
     epic:      { label: 'Épico',    color: '#c084fc', rgb: '192,132,252' },
     legendary: { label: 'Lendário', color: '#fbbf24', rgb: '251,191,36'  },
 } as const;
+
+const TOUR_STEPS: DriveStep[] = [
+    {
+        popover: {
+            title: 'Hora de abrir! ✨',
+            description: 'Este é o seu pacote. Vamos ver como revelar as figurinhas.',
+        },
+    },
+    {
+        element: '[data-tour="pack-open-btn"]',
+        popover: {
+            title: 'Abrir o pacote',
+            description: 'Toque aqui para abrir o envelope e revelar suas figurinhas com a animação. As novas vão direto para o seu álbum.',
+        },
+    },
+];
 
 export default function PackShow({ pack }: { pack: Pack }) {
     const page = usePage<{ flash?: Flash }>();
@@ -315,6 +333,7 @@ export default function PackShow({ pack }: { pack: Pack }) {
                                 type="button"
                                 onClick={openPack}
                                 disabled={isOpening}
+                                data-tour="pack-open-btn"
                                 className="inline-flex items-center gap-2 rounded-lg border border-primary bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-60"
                                 style={!isOpening ? { boxShadow: '0 0 18px rgba(99,102,241,0.4)' } : {}}
                             >
@@ -448,6 +467,8 @@ export default function PackShow({ pack }: { pack: Pack }) {
                     </section>
                 ) : null}
             </div>
+
+            <PageTour tourKey="packs-open" steps={TOUR_STEPS} enabled={pack.status === 'pending'} />
         </>
     );
 }
