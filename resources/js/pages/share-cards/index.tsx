@@ -1,4 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
+import ShareCardPreview from '@/components/share-card-preview';
 import { DataTableShell } from '@/components/ui/data-table-shell';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
@@ -16,12 +17,29 @@ type Card = {
     album: { id: number; name: string; slug: string } | null;
 };
 
-type Props = {
-    cards: { data: Card[]; links: PaginationLink[] };
+type Preview = {
+    available: boolean;
+    reason: string | null;
+    payload: Record<string, unknown> | null;
 };
 
-export default function ShareCardsIndex({ cards }: Props) {
+type Props = {
+    cards: { data: Card[]; links: PaginationLink[] };
+    previews: Record<string, Preview>;
+};
+
+const TYPE_OPTIONS = [
+    { value: 'album_progress', label: 'Progresso do álbum' },
+    { value: 'pack_opened', label: 'Último pacote aberto' },
+    { value: 'sticker_unlocked', label: 'Última figurinha desbloqueada' },
+    { value: 'social_mission_approved', label: 'Última missão aprovada' },
+];
+
+export default function ShareCardsIndex({ cards, previews }: Props) {
     const cardForm = useForm({ type: 'album_progress', achievement_id: '' as number | string });
+
+    const preview = previews[cardForm.data.type];
+    const canGenerate = preview?.available ?? false;
 
     return (
         <>
@@ -30,7 +48,7 @@ export default function ShareCardsIndex({ cards }: Props) {
             <div className="brand-app-bg space-y-4 p-4 sm:p-5">
                 <PageHeader
                     title="Meus Share Cards"
-                    subtitle="Cards prontos para story, print ou compartilhamento manual."
+                    subtitle="Escolha um card, veja o preview e compartilhe sua temporada."
                 />
 
                 <section className="season-hero">
@@ -43,26 +61,57 @@ export default function ShareCardsIndex({ cards }: Props) {
                     </div>
                 </section>
 
-                <form
-                    onSubmit={(event) => {
-                        event.preventDefault();
-                        cardForm.post('/share-cards');
-                    }}
-                    className="album-paper grid gap-3 p-4 md:grid-cols-3"
-                >
+                <div className="grid gap-4 md:grid-cols-2">
+                    <form
+                        onSubmit={(event) => {
+                            event.preventDefault();
+
+                            if (canGenerate) {
+                                cardForm.post('/share-cards');
+                            }
+                        }}
+                        className="album-paper flex flex-col gap-3 p-4"
+                    >
+                        <div>
+                            <label className="text-xs uppercase tracking-wide text-dim">Tipo do card</label>
+                            <select
+                                value={cardForm.data.type}
+                                onChange={(event) => cardForm.setData('type', event.target.value)}
+                                className="mt-1 w-full rounded-sm border bg-card border-border px-2 py-2 text-sm"
+                            >
+                                {TYPE_OPTIONS.map((option) => (
+                                    <option key={option.value} value={option.value} disabled={!previews[option.value]?.available}>
+                                        {option.label}
+                                        {previews[option.value]?.available ? '' : ' (sem dados)'}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {!canGenerate && preview?.reason ? (
+                            <p className="rounded-sm border border-border bg-muted/50 px-3 py-2 text-xs text-dim">{preview.reason}</p>
+                        ) : null}
+
+                        <button
+                            type="submit"
+                            className="mt-auto rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+                            disabled={cardForm.processing || !canGenerate}
+                        >
+                            {cardForm.processing ? 'Gerando…' : 'Gerar card'}
+                        </button>
+                    </form>
+
                     <div>
-                        <label className="text-xs uppercase tracking-wide text-dim">Tipo do card</label>
-                        <select value={cardForm.data.type} onChange={(event) => cardForm.setData('type', event.target.value)} className="mt-1 w-full rounded-sm border bg-card border-border px-2 py-2 text-sm">
-                            <option value="album_progress">Progresso do álbum</option>
-                            <option value="pack_opened">Último pacote aberto</option>
-                            <option value="sticker_unlocked">Última figurinha desbloqueada</option>
-                            <option value="social_mission_approved">Última missão aprovada</option>
-                        </select>
+                        <p className="mb-1 text-xs uppercase tracking-wide text-dim">Pré-visualização</p>
+                        {preview?.payload ? (
+                            <ShareCardPreview payload={preview.payload} />
+                        ) : (
+                            <div className="flex aspect-[9/16] w-full max-w-[340px] items-center justify-center rounded-md border border-dashed border-border bg-card p-6 text-center text-sm text-dim">
+                                {preview?.reason ?? 'Sem dados para pré-visualizar este card ainda.'}
+                            </div>
+                        )}
                     </div>
-                    <div className="md:col-span-2 flex items-end justify-end">
-                        <button type="submit" className="rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground" disabled={cardForm.processing}>Gerar card</button>
-                    </div>
-                </form>
+                </div>
 
                 <DataTableShell title="Cards gerados" subtitle="Histórico dos cards prontos para compartilhamento.">
                     <ResponsiveDataList

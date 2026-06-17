@@ -1,11 +1,26 @@
-import type { ReactNode } from 'react';
+import { forwardRef  } from 'react';
+import type {ReactNode} from 'react';
 
 type Props = {
     payload: Record<string, unknown>;
     footer?: ReactNode;
 };
 
-export default function ShareCardPreview({ payload, footer }: Props) {
+const TYPE_LABELS: Record<string, string> = {
+    album_progress: 'Progresso do álbum',
+    pack_opened: 'Pacote aberto',
+    sticker_unlocked: 'Figurinha desbloqueada',
+    achievement_unlocked: 'Conquista desbloqueada',
+    social_mission_approved: 'Missão aprovada',
+    checkin_confirmed: 'Presença confirmada',
+};
+
+/**
+ * The visual 9:16 share card. The forwarded ref points at the card surface
+ * itself (not the outer wrapper/footer) so it can be rasterized to a PNG for
+ * download / native share.
+ */
+const ShareCardPreview = forwardRef<HTMLDivElement, Props>(function ShareCardPreview({ payload, footer }, ref) {
     const type = String(payload.type ?? 'share_card');
     const userName = String(payload.user_name ?? 'Participante AAPH');
     const albumName = String(payload.album_name ?? 'Álbum da temporada');
@@ -14,10 +29,18 @@ export default function ShareCardPreview({ payload, footer }: Props) {
     const metric = payload.metric as string | number | null | undefined;
     const date = String(payload.date ?? '');
     const seasonLabel = date ? `Temporada ${new Date(date).getFullYear()}` : 'Temporada AAPH';
+    const typeLabel = TYPE_LABELS[type] ?? type.replace(/_/g, ' ');
+
+    const related = (payload.related ?? {}) as Record<string, unknown>;
+    const percent = type === 'album_progress' ? Number(related.percent ?? metric ?? 0) : null;
+    const hasMetric = metric !== null && metric !== undefined && metric !== '';
 
     return (
         <div className="rounded-md border border-border bg-card p-3 text-foreground">
-            <div className="mx-auto aspect-[9/16] w-full max-w-[340px] overflow-hidden rounded-md border border-[color:var(--pack-border)] bg-[color:var(--album-paper)]">
+            <div
+                ref={ref}
+                className="mx-auto aspect-[9/16] w-full max-w-[340px] overflow-hidden rounded-md border border-[color:var(--pack-border)] bg-[color:var(--album-paper)]"
+            >
                 <div className="relative h-full p-5">
                     <div className="absolute inset-0 opacity-40 brand-grid" />
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-1.5 bg-primary" />
@@ -25,11 +48,20 @@ export default function ShareCardPreview({ payload, footer }: Props) {
 
                     <div className="relative z-10 flex h-full flex-col justify-between text-foreground">
                         <div className="space-y-4">
-                            <div className="inline-block rounded-sm border border-primary/35 bg-primary/10 px-2 py-1 text-[10px] uppercase tracking-[0.2em] text-primary">
-                                Álbum da Copa AAPH
-                            </div>
-                            <div className="inline-block rounded-sm border border-[color:var(--brand-secondary)]/35 bg-[color:var(--brand-secondary)]/14 px-2 py-1 text-[10px] uppercase tracking-[0.18em] text-[color:var(--success)]">
-                                {seasonLabel}
+                            <div className="flex items-start justify-between gap-2">
+                                <div className="space-y-1.5">
+                                    <div className="inline-block rounded-sm border border-primary/35 bg-primary/10 px-2 py-1 text-[10px] uppercase tracking-[0.2em] text-primary">
+                                        Álbum da Copa AAPH
+                                    </div>
+                                    <div className="inline-block rounded-sm border border-[color:var(--brand-secondary)]/35 bg-[color:var(--brand-secondary)]/14 px-2 py-1 text-[10px] uppercase tracking-[0.18em] text-[color:var(--success)]">
+                                        {seasonLabel}
+                                    </div>
+                                </div>
+                                <img
+                                    src="/favicon.svg"
+                                    alt="AAPH"
+                                    className="size-12 shrink-0 rounded-full border border-[color:var(--sticker-frame)] bg-white object-contain p-0.5"
+                                />
                             </div>
 
                             <div className="space-y-1">
@@ -50,7 +82,20 @@ export default function ShareCardPreview({ payload, footer }: Props) {
                         </div>
 
                         <div className="space-y-2">
-                            {metric !== null && metric !== undefined && metric !== '' ? (
+                            {percent !== null ? (
+                                <div className="rounded-sm border border-[color:var(--aaph-blue)]/35 bg-primary/8 p-3">
+                                    <div className="flex items-baseline justify-between">
+                                        <span className="text-[10px] uppercase tracking-[0.16em] text-dim">Progresso</span>
+                                        <span className="text-3xl font-bold leading-none text-foreground">{percent}%</span>
+                                    </div>
+                                    <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[color:var(--sticker-frame)]">
+                                        <div
+                                            className="h-full rounded-full bg-primary"
+                                            style={{ width: `${Math.min(100, Math.max(0, percent))}%` }}
+                                        />
+                                    </div>
+                                </div>
+                            ) : hasMetric ? (
                                 <div className="rounded-sm border border-[color:var(--aaph-blue)]/35 bg-primary/8 p-3">
                                     <div className="text-[10px] uppercase tracking-[0.16em] text-dim">Métrica</div>
                                     <div className="text-3xl font-bold leading-none text-foreground">{metric}</div>
@@ -59,7 +104,7 @@ export default function ShareCardPreview({ payload, footer }: Props) {
 
                             <div className="flex items-center justify-between border-t border-border pt-2 text-[10px] uppercase tracking-[0.16em] text-dim">
                                 <span>Presença, coleção e time.</span>
-                                <span>{type.replace(/_/g, ' ')}</span>
+                                <span>{typeLabel}</span>
                             </div>
                         </div>
                     </div>
@@ -69,4 +114,6 @@ export default function ShareCardPreview({ payload, footer }: Props) {
             {footer ? <div className="mt-3">{footer}</div> : null}
         </div>
     );
-}
+});
+
+export default ShareCardPreview;

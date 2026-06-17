@@ -45,7 +45,61 @@ class ShareCardController extends Controller
         return Inertia::render('share-cards/index', [
             'cards' => $cards,
             'types' => ShareCard::TYPES,
+            'previews' => $this->buildPreviews($user),
         ]);
+    }
+
+    /**
+     * Live previews for the self-service card types, so the user can see the
+     * card built from their own data before generating it.
+     *
+     * @return array<string, array{available: bool, reason: string|null, payload: array<string, mixed>|null}>
+     */
+    private function buildPreviews(User $user): array
+    {
+        $types = [
+            ShareCard::TYPE_ALBUM_PROGRESS,
+            ShareCard::TYPE_PACK_OPENED,
+            ShareCard::TYPE_STICKER_UNLOCKED,
+            ShareCard::TYPE_SOCIAL_MISSION_APPROVED,
+        ];
+
+        $album = Album::query()->where('status', Album::STATUS_ACTIVE)->first();
+        $previews = [];
+
+        foreach ($types as $type) {
+            if (! $album) {
+                $previews[$type] = ['available' => false, 'reason' => 'Nenhum álbum ativo disponível.', 'payload' => null];
+
+                continue;
+            }
+
+            [$title, $subtitle, $metric, $related] = $this->resolvePayloadSource($type, $user, $album, []);
+
+            if ($title === null) {
+                $previews[$type] = ['available' => false, 'reason' => $this->unavailableReason($type), 'payload' => null];
+
+                continue;
+            }
+
+            $previews[$type] = [
+                'available' => true,
+                'reason' => null,
+                'payload' => $this->createShareCardService->buildPayload($user, $type, $album, $title, $subtitle, $metric, $related),
+            ];
+        }
+
+        return $previews;
+    }
+
+    private function unavailableReason(string $type): string
+    {
+        return match ($type) {
+            ShareCard::TYPE_PACK_OPENED => 'Abra um pacote para gerar este card.',
+            ShareCard::TYPE_STICKER_UNLOCKED => 'Desbloqueie uma figurinha para gerar este card.',
+            ShareCard::TYPE_SOCIAL_MISSION_APPROVED => 'Tenha uma missão social aprovada para gerar este card.',
+            default => 'Ainda não há dados para gerar este card.',
+        };
     }
 
     public function show(ShareCard $shareCard): Response
