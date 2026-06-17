@@ -61,6 +61,7 @@ class ShareCardController extends Controller
             ShareCard::TYPE_ALBUM_PROGRESS,
             ShareCard::TYPE_PACK_OPENED,
             ShareCard::TYPE_STICKER_UNLOCKED,
+            ShareCard::TYPE_ACHIEVEMENT_UNLOCKED,
             ShareCard::TYPE_SOCIAL_MISSION_APPROVED,
         ];
 
@@ -97,6 +98,7 @@ class ShareCardController extends Controller
         return match ($type) {
             ShareCard::TYPE_PACK_OPENED => 'Abra um pacote para gerar este card.',
             ShareCard::TYPE_STICKER_UNLOCKED => 'Desbloqueie uma figurinha para gerar este card.',
+            ShareCard::TYPE_ACHIEVEMENT_UNLOCKED => 'Desbloqueie uma conquista para gerar este card.',
             ShareCard::TYPE_SOCIAL_MISSION_APPROVED => 'Tenha uma missão social aprovada para gerar este card.',
             default => 'Ainda não há dados para gerar este card.',
         };
@@ -212,22 +214,27 @@ class ShareCardController extends Controller
     {
         $achievementId = isset($validated['achievement_id']) ? (int) $validated['achievement_id'] : null;
 
-        if (! $achievementId) {
-            return [null, null, null, []];
-        }
+        if ($achievementId) {
+            // Specific achievement (e.g. coming from the achievements page).
+            $achievement = Achievement::query()->find($achievementId);
 
-        $achievement = Achievement::query()->find($achievementId);
+            $owns = $achievement && $user->userAchievements()
+                ->where('achievement_id', $achievement->id)
+                ->exists();
 
-        if (! $achievement) {
-            return [null, null, null, []];
-        }
+            if (! $owns) {
+                return [null, null, null, []];
+            }
+        } else {
+            // No id (e.g. from the share-cards screen): use the most recently
+            // unlocked achievement.
+            $achievement = $user->achievements()
+                ->orderByPivot('unlocked_at', 'desc')
+                ->first();
 
-        $hasAchievement = $user->userAchievements()
-            ->where('achievement_id', $achievement->id)
-            ->exists();
-
-        if (! $hasAchievement) {
-            return [null, null, null, []];
+            if (! $achievement) {
+                return [null, null, null, []];
+            }
         }
 
         return [

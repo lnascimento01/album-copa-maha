@@ -32,6 +32,7 @@ const TYPE_OPTIONS = [
     { value: 'album_progress', label: 'Progresso do álbum' },
     { value: 'pack_opened', label: 'Último pacote aberto' },
     { value: 'sticker_unlocked', label: 'Última figurinha desbloqueada' },
+    { value: 'achievement_unlocked', label: 'Última conquista desbloqueada' },
     { value: 'social_mission_approved', label: 'Última missão aprovada' },
 ];
 
