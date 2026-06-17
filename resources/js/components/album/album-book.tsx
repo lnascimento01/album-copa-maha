@@ -248,17 +248,20 @@ export function AlbumBook({ coverImageUrl, albumName, season, teams, stickers }:
                     {isOpen ? (
                         <div className="album-book__controls">
                             <>
-                                <button type="button" onClick={() => goToPage('prev')} disabled={turnDirection !== null} className="album-book__button">
-                                    <ChevronLeft className="size-4" /> {canPrev ? 'Página anterior' : 'Voltar capa'}
+                                <button type="button" onClick={() => goToPage('prev')} disabled={turnDirection !== null} className="album-book__button" aria-label={canPrev ? 'Página anterior' : 'Voltar capa'}>
+                                    <ChevronLeft className="size-4" />
+                                    {!isMobile && <span>{canPrev ? 'Página anterior' : 'Voltar capa'}</span>}
                                 </button>
                                 <span className="album-book__page-indicator">
-                                    {isMobile ? `Página ${currentPage + 1} de ${totalPages}` : `Páginas ${leftPageIndex + 1}-${rightPageLabel} de ${totalPages}`}
+                                    {isMobile ? `${currentPage + 1} / ${totalPages}` : `Páginas ${leftPageIndex + 1}-${rightPageLabel} de ${totalPages}`}
                                 </span>
-                                <button type="button" onClick={() => goToPage('next')} disabled={!canNext || turnDirection !== null} className="album-book__button">
-                                    Próxima página <ChevronRight className="size-4" />
+                                <button type="button" onClick={() => goToPage('next')} disabled={!canNext || turnDirection !== null} className="album-book__button" aria-label="Próxima página">
+                                    {!isMobile && <span>Próxima página</span>}
+                                    <ChevronRight className="size-4" />
                                 </button>
-                                <button type="button" onClick={() => setIsOpen(false)} className="album-book__button album-book__button--ghost">
-                                    <BookMarked className="size-4" /> Fechar álbum
+                                <button type="button" onClick={() => setIsOpen(false)} className="album-book__button album-book__button--ghost" aria-label="Fechar álbum">
+                                    <BookMarked className="size-4" />
+                                    {!isMobile && <span>Fechar álbum</span>}
                                 </button>
                             </>
                         </div>
