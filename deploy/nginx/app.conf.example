@@ -1,3 +1,8 @@
+# Docker's embedded DNS server. Resolving the app hostname through it at
+# request time (instead of caching the IP at startup) lets `docker rollout`
+# replace the app container underneath nginx with no restart/reload.
+resolver 127.0.0.11 valid=5s ipv6=off;
+
 server {
     listen 80;
     server_name album.maha.example;
@@ -22,7 +27,11 @@ server {
         fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;
         fastcgi_param HTTP_X_FORWARDED_PROTO $scheme;
         fastcgi_param HTTP_X_REAL_IP $remote_addr;
-        fastcgi_pass app:9000;
+
+        # Use a variable so nginx re-resolves `app` via the resolver above on
+        # every request rather than pinning the IP at config-load time.
+        set $upstream_app app:9000;
+        fastcgi_pass $upstream_app;
         fastcgi_read_timeout 120s;
     }
 

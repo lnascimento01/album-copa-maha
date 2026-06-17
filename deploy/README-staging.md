@@ -8,7 +8,8 @@ Este guia prepara o projeto para **staging controlado**, sem alterar o fluxo loc
 - `deploy/Dockerfile.staging`
 - `deploy/nginx/app.conf.example`
 - `.env.staging.example`
-- `deploy/staging-build.sh`
+- `deploy/staging-build.sh` (primeira subida)
+- `deploy/deploy.sh` (rebuild + rollout zero-downtime)
 - `deploy/backup-db-example.sh`
 - `deploy/checklist-staging.md`
 
@@ -40,23 +41,51 @@ cp .env.staging.example .env
 - `APP_SEED_DEMO_DATA=false` para piloto mais limpo;
 - `APP_SEED_DEMO_DATA=true` para demonstração guiada.
 
-## Build e subida
+## Arquitetura de deploy (zero-downtime)
 
-Use o script:
+A imagem é **imutável**: `deploy/Dockerfile.staging` é multi-stage e assa o
+código, o `vendor` (Composer) e os assets do Vite dentro da imagem. O código
+**não** é mais bind-montado do host. Cada release é uma imagem nova que sobe
+ao lado da antiga e é trocada sem derrubar a aplicação.
+
+- O `entrypoint.sh` não builda nada: ele publica os assets no volume
+  compartilhado, roda `storage:link` e `optimize`, e sobe o `php-fpm`.
+- As migrations rodam **uma única vez** no `deploy.sh`, antes da troca.
+- O nginx serve os estáticos do volume `staging_app_public` e re-resolve o
+  host `app` por requisição (via DNS do Docker), então o swap não exige
+  restart do nginx.
+
+## Primeira subida
+
+Use o script (apenas na primeira vez):
 
 ```bash
 bash deploy/staging-build.sh
 ```
 
-Ele executa:
+Ele faz: build da imagem imutável → `up -d` → `migrate --force` →
+`storage:link`. O cache de config/rotas/views é gerado pelo entrypoint a
+cada start do container.
 
-1. build da imagem `app`
-2. `composer install --no-dev --optimize-autoloader`
-3. `npm ci && npm run build`
-4. `docker compose up -d`
-5. `php artisan migrate --force`
-6. `php artisan storage:link`
-7. `config:cache`, `route:cache`, `view:cache`
+## Atualizar / rebuildar (zero-downtime)
+
+Para cada novo release:
+
+```bash
+bash deploy/deploy.sh
+```
+
+Fluxo, sem tirar o site do ar:
+
+1. `git pull --ff-only` (não afeta o container em execução)
+2. `docker compose build app` — nova imagem, enquanto a antiga serve
+3. `php artisan migrate --force` em container descartável da nova imagem
+   (migrations precisam ser **backward-compatible / expand-contract**)
+4. `docker rollout app` — sobe o novo container, espera ficar healthy e só
+   então remove o antigo
+
+> Requer o plugin **docker-rollout** no host
+> (https://github.com/wowu/docker-rollout).
 
 ## Persistência
 
@@ -64,6 +93,7 @@ Ele executa:
 
 - MySQL (`staging_mysql_data`)
 - Redis (`staging_redis_data`)
+- `public/` compartilhado app↔nginx (`staging_app_public`)
 - `storage/app/public` (`staging_storage_public`)
 - `storage/logs` (`staging_storage_logs`)
 

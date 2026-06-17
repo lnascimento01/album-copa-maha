@@ -1,10 +1,41 @@
-FROM php:8.4-fpm-bookworm
+# syntax=docker/dockerfile:1
+#
+# Multi-stage, immutable image for staging.
+#
+# The application code, Composer dependencies and the compiled Vite assets
+# are baked into the final image at build time. Nothing is built at runtime
+# and the source is no longer bind-mounted from the host, so a new release is
+# a brand-new image that can be started next to the old one and swapped in
+# with zero downtime (see deploy/deploy.sh).
+
+# ---- Stage 1: frontend assets ----
+FROM node:22-bookworm-slim AS assets
+WORKDIR /app
+COPY package.json package-lock.json* pnpm-lock.yaml* pnpm-workspace.yaml* .npmrc* ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# ---- Stage 2: PHP dependencies ----
+FROM composer:2 AS vendor
+WORKDIR /app
+COPY composer.json composer.lock ./
+# Install without scripts first (artisan is not available until the full
+# source is copied), then dump an optimized autoloader.
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts --prefer-dist
+COPY . .
+RUN composer dump-autoload --no-dev --optimize --no-interaction
+
+# ---- Stage 3: runtime ----
+FROM php:8.4-fpm-bookworm AS runtime
 
 ARG WWWUSER=1000
 ARG WWWGROUP=1000
 
 WORKDIR /var/www/html
 
+# Runtime no longer needs Node/Composer to build: assets and vendor are
+# copied in from the previous stages.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         curl \
@@ -25,9 +56,6 @@ RUN apt-get update \
         zip \
     && pecl install redis \
     && docker-php-ext-enable redis \
-    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
-    && apt-get install -y --no-install-recommends nodejs \
-    && npm install -g pnpm \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -37,6 +65,18 @@ RUN groupadd --force -g "${WWWGROUP}" maha \
     && useradd -ms /bin/bash --no-user-group -g "${WWWGROUP}" -u "${WWWUSER}" maha || true
 
 COPY deploy/php/custom.ini /usr/local/etc/php/conf.d/99-custom.ini
+
+# Application code (immutable), then vendor and built assets from the
+# previous stages.
+COPY --chown=maha:maha . /var/www/html
+COPY --from=vendor --chown=maha:maha /app/vendor /var/www/html/vendor
+COPY --from=assets --chown=maha:maha /app/public/build /var/www/html/public/build
+
+# `public/` is exposed to nginx through a shared named volume. A named volume
+# mounted over an image directory starts empty, so we stash a pristine copy
+# that the entrypoint syncs into the volume on every start.
+RUN cp -a /var/www/html/public /usr/local/share/app-public
+
 COPY deploy/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
