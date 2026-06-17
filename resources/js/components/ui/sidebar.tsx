@@ -38,6 +38,11 @@ type SidebarContext = {
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
   toggleSidebar: () => void
+  // When true (e.g. during the onboarding tour) the mobile sheet becomes
+  // non-modal and won't close on outside interaction, so an overlay tour can
+  // highlight the menu items while the drawer stays open.
+  tourActive: boolean
+  setTourActive: (active: boolean) => void
 }
 
 const SidebarContext = React.createContext<SidebarContext | null>(null)
@@ -66,6 +71,7 @@ function SidebarProvider({
 }) {
   const isMobile = useIsMobile()
   const [openMobile, setOpenMobile] = React.useState(false)
+  const [tourActive, setTourActive] = React.useState(false)
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
@@ -120,8 +126,10 @@ function SidebarProvider({
       openMobile,
       setOpenMobile,
       toggleSidebar,
+      tourActive,
+      setTourActive,
     }),
-    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar, tourActive]
   )
 
   return (
@@ -159,7 +167,7 @@ function Sidebar({
   variant?: "sidebar" | "floating" | "inset"
   collapsible?: "offcanvas" | "icon" | "none"
 }) {
-  const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+  const { isMobile, state, openMobile, setOpenMobile, tourActive } = useSidebar()
 
   if (collapsible === "none") {
     return (
@@ -178,7 +186,7 @@ function Sidebar({
 
   if (isMobile) {
     return (
-      <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+      <Sheet open={openMobile} onOpenChange={setOpenMobile} modal={!tourActive} {...props}>
         <SheetHeader className="sr-only">
           <SheetTitle>Sidebar</SheetTitle>
           <SheetDescription>Displays the mobile sidebar.</SheetDescription>
@@ -194,6 +202,13 @@ function Sidebar({
             } as React.CSSProperties
           }
           side={side}
+          // Keep the drawer open while the tour highlights its items: clicking
+          // the tour controls (outside the sheet) must not dismiss it.
+          onInteractOutside={(event) => {
+            if (tourActive) {
+              event.preventDefault()
+            }
+          }}
         >
           <div className="flex h-full w-full flex-col">{children}</div>
         </SheetContent>
