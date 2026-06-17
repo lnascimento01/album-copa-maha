@@ -43,6 +43,10 @@ type TourUser = {
 const DRIVER_CONFIG: Config = {
     showProgress: true,
     allowClose: true,
+    // Block clicks on the highlighted item so the tour advances only via the
+    // controls (otherwise tapping a menu link would navigate away / close the
+    // mobile drawer mid-tour).
+    disableActiveInteraction: true,
     overlayColor: 'rgba(7, 17, 31, 0.72)',
     stagePadding: 6,
     stageRadius: 8,
@@ -58,14 +62,14 @@ const DRIVER_CONFIG: Config = {
  * replayed from the user menu. Mounted inside the sidebar provider so it can
  * read the mobile/desktop state.
  *
- * Desktop spotlights the real sidebar items. Mobile uses centered cards (the
- * menu lives inside an off-canvas Radix sheet, which does not play well with
- * an overlay tour), plus a spotlight on the ☰ trigger so users know where the
- * menu is.
+ * Both desktop and mobile spotlight the real menu items. On mobile the menu
+ * lives in an off-canvas Radix sheet, so the tour opens that drawer and marks
+ * it non-modal (via the sidebar's tourActive flag) so the items can be
+ * highlighted while the drawer stays open.
  */
 export function OnboardingTour() {
     const page = usePage<{ auth: { user?: TourUser | null } }>();
-    const { isMobile, setOpenMobile } = useSidebar();
+    const { isMobile, setOpenMobile, setTourActive } = useSidebar();
     const startedRef = useRef(false);
 
     const user = page.props.auth.user;
@@ -85,29 +89,26 @@ export function OnboardingTour() {
             },
         ];
 
-        if (isMobile) {
+        for (const item of items) {
+            const selector = `[data-tour="${item.tourId}"]`;
+
+            if (!document.querySelector(selector)) {
+                // Item not in the DOM (e.g. drawer not open yet) — fall back to
+                // a centered card so the step is never skipped silently.
+                steps.push({ popover: { title: item.title, description: item.description } });
+                continue;
+            }
+
             steps.push({
-                element: '[data-tour="menu-trigger"]',
+                element: selector,
                 popover: {
-                    title: 'Seu menu',
-                    description: 'Toque no ☰ a qualquer momento para abrir o menu de navegação.',
-                    side: 'bottom',
-                    align: 'start',
+                    title: item.title,
+                    description: item.description,
+                    // On the narrow mobile drawer let driver auto-place the
+                    // popover; on desktop anchor it to the right of the item.
+                    ...(isMobile ? {} : { side: 'right', align: 'center' }),
                 },
             });
-
-            for (const item of items) {
-                steps.push({ popover: { title: item.title, description: item.description } });
-            }
-        } else {
-            for (const item of items) {
-                const selector = `[data-tour="${item.tourId}"]`;
-                steps.push(
-                    document.querySelector(selector)
-                        ? { element: selector, popover: { title: item.title, description: item.description, side: 'right', align: 'center' } }
-                        : { popover: { title: item.title, description: item.description } },
-                );
-            }
         }
 
         steps.push({
@@ -121,10 +122,11 @@ export function OnboardingTour() {
     }, [isMobile, permissions]);
 
     const startTour = useCallback(() => {
-        // On mobile close the drawer first, so the centered cards and the ☰
-        // spotlight are not covered by the modal sheet.
+        // On mobile, open the drawer (non-modal, so the tour controls stay
+        // usable) and let its open animation finish before highlighting items.
         if (isMobile) {
-            setOpenMobile(false);
+            setTourActive(true);
+            setOpenMobile(true);
         }
 
         window.setTimeout(
@@ -133,14 +135,19 @@ export function OnboardingTour() {
                     ...DRIVER_CONFIG,
                     steps: buildSteps(),
                     onDestroyed: () => {
+                        if (isMobile) {
+                            setOpenMobile(false);
+                            setTourActive(false);
+                        }
+
                         router.post(`/onboarding/tour/${TOUR_KEY}/complete`, {}, { preserveScroll: true, preserveState: true });
                     },
                 });
                 instance.drive();
             },
-            isMobile ? 350 : 120,
+            isMobile ? 550 : 120,
         );
-    }, [buildSteps, isMobile, setOpenMobile]);
+    }, [buildSteps, isMobile, setOpenMobile, setTourActive]);
 
     // Auto-start once for eligible users who have not completed it yet.
     useEffect(() => {
