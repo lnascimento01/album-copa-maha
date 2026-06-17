@@ -25,6 +25,18 @@
 
 set -euo pipefail
 
+# ── Self-update guard ────────────────────────────────────────────────
+# This script updates itself through `git pull`. If the pull rewrote the
+# file mid-run, bash would keep reading the old file by byte offset and
+# execute a corrupted mix of old and new logic. So pull FIRST, then re-exec
+# the fresh copy. DEPLOY_REEXEC marks the second pass so it does not pull
+# (or re-exec) again.
+if [[ -z "${DEPLOY_REEXEC:-}" ]]; then
+    echo "[deploy] pulling latest code…"
+    git pull --ff-only
+    exec env DEPLOY_REEXEC=1 bash "$0" "$@"
+fi
+
 COMPOSE_FILE="deploy/docker-compose.staging.yml"
 COMPOSE="docker compose -f ${COMPOSE_FILE}"
 
@@ -33,9 +45,6 @@ if ! docker rollout --help >/dev/null 2>&1; then
     echo "         Install it from https://github.com/wowu/docker-rollout" >&2
     exit 1
 fi
-
-echo "[deploy] pulling latest code…"
-git pull --ff-only
 
 echo "[deploy] building new immutable image (old container keeps serving)…"
 $COMPOSE build app
