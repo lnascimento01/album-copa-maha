@@ -72,6 +72,14 @@ COPY --chown=maha:maha . /var/www/html
 COPY --from=vendor --chown=maha:maha /app/vendor /var/www/html/vendor
 COPY --from=assets --chown=maha:maha /app/public/build /var/www/html/public/build
 
+# php-fpm serves requests as www-data, so the paths Laravel writes to at
+# runtime (compiled views, framework caches, sessions, logs) must be owned by
+# www-data — not the build user. The entrypoint re-applies this for mounted
+# volumes; doing it here makes the image correct by construction too.
+RUN chown -R www-data:www-data \
+        /var/www/html/storage \
+        /var/www/html/bootstrap/cache
+
 # `public/` is exposed to nginx through a shared named volume. A named volume
 # mounted over an image directory starts empty, so we stash a pristine copy
 # that the entrypoint syncs into the volume on every start.
