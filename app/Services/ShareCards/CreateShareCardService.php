@@ -12,6 +12,37 @@ class CreateShareCardService
     public function __construct(private readonly AuditLogger $auditLogger) {}
 
     /**
+     * Build the card payload without persisting it. Used both to create a card
+     * and to render a live preview before the user commits.
+     *
+     * @param  array<string, mixed>  $related
+     * @return array<string, mixed>
+     */
+    public function buildPayload(
+        User $user,
+        string $type,
+        ?Album $album,
+        string $title,
+        ?string $subtitle = null,
+        int|string|null $metric = null,
+        array $related = [],
+        string $visualVariant = 'season-card'
+    ): array {
+        return [
+            'type' => $type,
+            'user_name' => $user->name,
+            'album_name' => $album?->name,
+            'title' => $title,
+            'subtitle' => $subtitle,
+            'metric' => $metric,
+            'date' => now()->toDateTimeString(),
+            'visual_variant' => $visualVariant,
+            'related' => $related,
+            'share_copy' => $this->buildShareCopy($type, $subtitle, $metric),
+        ];
+    }
+
+    /**
      * @param  array<string, mixed>  $related
      */
     public function createForUser(
@@ -24,18 +55,7 @@ class CreateShareCardService
         array $related = [],
         string $visualVariant = 'season-card'
     ): ShareCard {
-        $payload = [
-            'type' => $type,
-            'user_name' => $user->name,
-            'album_name' => $album?->name,
-            'title' => $title,
-            'subtitle' => $subtitle,
-            'metric' => $metric,
-            'date' => now()->toDateTimeString(),
-            'visual_variant' => $visualVariant,
-            'related' => $related,
-            'share_copy' => $this->buildShareCopy($type, $subtitle, $metric),
-        ];
+        $payload = $this->buildPayload($user, $type, $album, $title, $subtitle, $metric, $related, $visualVariant);
 
         $card = ShareCard::query()->create([
             'user_id' => $user->id,
