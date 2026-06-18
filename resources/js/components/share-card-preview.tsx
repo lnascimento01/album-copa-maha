@@ -2,15 +2,35 @@ import { Award, BarChart3, Package, Sparkles, Sticker, Trophy } from 'lucide-rea
 import { forwardRef   } from 'react';
 import type {ComponentType, ReactNode} from 'react';
 
+/** Export aspect ratios tuned per destination network. */
+export type ShareCardFormat = 'story' | 'square' | 'portrait';
+
 type Props = {
     payload: Record<string, unknown>;
     footer?: ReactNode;
+    format?: ShareCardFormat;
 };
 
 type Accent = {
     label: string;
     color: string;
     Icon: ComponentType<{ className?: string }>;
+};
+
+type FormatStyle = {
+    aspect: string;
+    maxW: string;
+    hero: string;
+    pad: string;
+};
+
+const FORMAT_STYLES: Record<ShareCardFormat, FormatStyle> = {
+    // Stories / status (Instagram Stories, WhatsApp Status, etc.).
+    story: { aspect: 'aspect-[9/16]', maxW: 'max-w-[340px]', hero: 'text-[26px]', pad: 'p-5' },
+    // Instagram feed (portrait — best feed real estate).
+    portrait: { aspect: 'aspect-[4/5]', maxW: 'max-w-[400px]', hero: 'text-[24px]', pad: 'p-5' },
+    // Instagram feed (square classic).
+    square: { aspect: 'aspect-square', maxW: 'max-w-[440px]', hero: 'text-[22px]', pad: 'p-4' },
 };
 
 const ACCENTS: Record<string, Accent> = {
@@ -24,12 +44,13 @@ const ACCENTS: Record<string, Accent> = {
 const DEFAULT_ACCENT: Accent = { label: 'Álbum da Copa AAPH', color: '#8aa842', Icon: Sparkles };
 
 /**
- * The visual 9:16 share card. Self-contained, fixed (theme-independent) colors
- * so the rasterized PNG always looks vibrant in feeds — regardless of the
- * user's light/dark setting. The forwarded ref points at the card surface so
- * it can be exported to an image (download / native share).
+ * The visual share card. Self-contained, fixed (theme-independent) colors so
+ * the rasterized PNG always looks vibrant in feeds — regardless of the user's
+ * light/dark setting. The `format` prop switches the aspect ratio (stories vs
+ * feed) while keeping the same layout. The forwarded ref points at the card
+ * surface so it can be exported to an image (download / native share).
  */
-const ShareCardPreview = forwardRef<HTMLDivElement, Props>(function ShareCardPreview({ payload, footer }, ref) {
+const ShareCardPreview = forwardRef<HTMLDivElement, Props>(function ShareCardPreview({ payload, footer, format = 'story' }, ref) {
     const type = String(payload.type ?? 'share_card');
     const userName = String(payload.user_name ?? 'Participante AAPH');
     const albumName = String(payload.album_name ?? 'Álbum da temporada');
@@ -39,6 +60,7 @@ const ShareCardPreview = forwardRef<HTMLDivElement, Props>(function ShareCardPre
     const date = String(payload.date ?? '');
     const seasonLabel = date ? `Temporada ${new Date(date).getFullYear()}` : 'Temporada AAPH';
 
+    const styles = FORMAT_STYLES[format];
     const accent = ACCENTS[type] ?? DEFAULT_ACCENT;
     const AccentIcon = accent.Icon;
     const related = (payload.related ?? {}) as Record<string, unknown>;
@@ -49,7 +71,7 @@ const ShareCardPreview = forwardRef<HTMLDivElement, Props>(function ShareCardPre
         <div className="rounded-md border border-border bg-card p-3 text-foreground">
             <div
                 ref={ref}
-                className="relative mx-auto aspect-[9/16] w-full max-w-[340px] overflow-hidden rounded-[20px]"
+                className={`relative mx-auto ${styles.aspect} w-full ${styles.maxW} overflow-hidden rounded-[20px]`}
                 style={{ background: 'linear-gradient(165deg, #102a4c 0%, #0a1a30 52%, #060f1d 100%)' }}
             >
                 {/* Brand swooshes (Brazil/sticker motif) — pure CSS so it rasterizes cleanly */}
@@ -62,7 +84,7 @@ const ShareCardPreview = forwardRef<HTMLDivElement, Props>(function ShareCardPre
                 {/* Accent top bar */}
                 <div className="absolute inset-x-0 top-0 h-1.5" style={{ background: accent.color }} />
 
-                <div className="relative z-10 flex h-full flex-col justify-between p-5 text-white">
+                <div className={`relative z-10 flex h-full flex-col justify-between ${styles.pad} text-white`}>
                     {/* Header */}
                     <div className="space-y-3">
                         <div className="flex items-start justify-between gap-2">
@@ -91,7 +113,7 @@ const ShareCardPreview = forwardRef<HTMLDivElement, Props>(function ShareCardPre
                     {/* Hero */}
                     <div className="space-y-3">
                         <div>
-                            <h2 className="text-[26px] font-black leading-[1.05] tracking-tight text-white">{title}</h2>
+                            <h2 className={`${styles.hero} font-black leading-[1.05] tracking-tight text-white`}>{title}</h2>
                             {subtitle ? <p className="mt-1.5 text-sm font-medium text-white/75">{subtitle}</p> : null}
                         </div>
 
