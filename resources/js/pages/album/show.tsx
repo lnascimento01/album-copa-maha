@@ -38,6 +38,8 @@ export default function AlbumStickerShow({ sticker, note }: { sticker: Sticker; 
         subtitle: sticker.subtitle ?? `Figurinha ${sticker.code}`,
         album_name: sticker.album.name,
         user_name: userName,
+        image_url: sticker.image_url ?? null,
+        sticker_code: sticker.code,
     };
     const shareCopy = `Desbloqueei "${sticker.title}" no Álbum da Copa AAPH! #CopaAAPH`;
 
@@ -86,7 +88,7 @@ export default function AlbumStickerShow({ sticker, note }: { sticker: Sticker; 
                         <div className="min-w-0 rounded-md border border-border bg-card p-4">
                             <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-dim">Descrição</div>
                             <p className="break-words text-sm text-foreground">
-                                {sticker.description ?? 'Descrição indisponível para figurinha bloqueada.'}
+                                {sticker.description ?? (sticker.is_full_visible ? 'Sem descrição cadastrada.' : 'Descrição indisponível para figurinha bloqueada.')}
                             </p>
                         </div>
 

@@ -59,6 +59,8 @@ const ShareCardPreview = forwardRef<HTMLDivElement, Props>(function ShareCardPre
     const metric = payload.metric as string | number | null | undefined;
     const date = String(payload.date ?? '');
     const seasonLabel = date ? `Temporada ${new Date(date).getFullYear()}` : 'Temporada AAPH';
+    const stickerImageUrl = type === 'sticker_unlocked' && payload.image_url ? String(payload.image_url) : null;
+    const stickerCode = payload.sticker_code ? String(payload.sticker_code) : null;
 
     const styles = FORMAT_STYLES[format];
     const accent = ACCENTS[type] ?? DEFAULT_ACCENT;
@@ -74,7 +76,7 @@ const ShareCardPreview = forwardRef<HTMLDivElement, Props>(function ShareCardPre
                 className={`relative mx-auto ${styles.aspect} w-full ${styles.maxW} overflow-hidden rounded-[20px]`}
                 style={{ background: 'linear-gradient(165deg, #102a4c 0%, #0a1a30 52%, #060f1d 100%)' }}
             >
-                {/* Brand swooshes (Brazil/sticker motif) — pure CSS so it rasterizes cleanly */}
+                {/* Brand swooshes */}
                 <div aria-hidden className="pointer-events-none absolute inset-0">
                     <div className="absolute -right-16 -top-10 h-72 w-72 rotate-[18deg] rounded-full" style={{ background: 'radial-gradient(circle, rgba(138,168,66,0.30) 0%, transparent 70%)' }} />
                     <div className="absolute -bottom-16 -left-10 h-72 w-72 rounded-full" style={{ background: 'radial-gradient(circle, rgba(41,93,148,0.45) 0%, transparent 70%)' }} />
@@ -84,11 +86,12 @@ const ShareCardPreview = forwardRef<HTMLDivElement, Props>(function ShareCardPre
                 {/* Accent top bar */}
                 <div className="absolute inset-x-0 top-0 h-1.5" style={{ background: accent.color }} />
 
-                <div className={`relative z-10 flex h-full flex-col justify-between ${styles.pad} text-white`}>
-                    {/* Header */}
-                    <div className="space-y-3">
+                {stickerImageUrl ? (
+                    /* ── Sticker card layout: image is the hero ── */
+                    <div className={`relative z-10 flex h-full flex-col ${styles.pad} text-white`}>
+                        {/* Header */}
                         <div className="flex items-start justify-between gap-2">
-                            <div className="space-y-1.5">
+                            <div className="space-y-1">
                                 <div className="inline-block rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-white/85">
                                     Álbum da Copa AAPH
                                 </div>
@@ -97,56 +100,130 @@ const ShareCardPreview = forwardRef<HTMLDivElement, Props>(function ShareCardPre
                             <img
                                 src="/favicon.svg"
                                 alt="AAPH"
-                                className="size-12 shrink-0 rounded-full border border-white/25 bg-white object-contain p-1"
+                                className="size-10 shrink-0 rounded-full border border-white/25 bg-white object-contain p-1"
                             />
                         </div>
 
                         <div
-                            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em]"
+                            className="mt-2 inline-flex items-center gap-1.5 self-start rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em]"
                             style={{ color: '#0a1a30', background: accent.color }}
                         >
                             <AccentIcon className="size-3.5" />
                             {accent.label}
                         </div>
-                    </div>
 
-                    {/* Hero */}
-                    <div className="space-y-3">
-                        <div>
-                            <h2 className={`${styles.hero} font-black leading-[1.05] tracking-tight text-white`}>{title}</h2>
-                            {subtitle ? <p className="mt-1.5 text-sm font-medium text-white/75">{subtitle}</p> : null}
+                        {/* Sticker image — fills the available space, framed like a card */}
+                        <div className="mx-auto mt-3 flex min-h-0 flex-1 items-center justify-center">
+                            <div
+                                className="relative overflow-hidden rounded-xl"
+                                style={{
+                                    boxShadow: `0 0 0 3px ${accent.color}, 0 8px 32px rgba(0,0,0,0.6)`,
+                                    maxHeight: '100%',
+                                }}
+                            >
+                                <img
+                                    src={stickerImageUrl}
+                                    alt={title}
+                                    className="block max-h-full w-auto object-contain"
+                                    style={{ maxHeight: format === 'story' ? '260px' : format === 'portrait' ? '220px' : '180px' }}
+                                    crossOrigin="anonymous"
+                                />
+                                {stickerCode ? (
+                                    <div
+                                        className="absolute bottom-0 inset-x-0 py-1 text-center text-[9px] font-bold uppercase tracking-widest"
+                                        style={{ background: `${accent.color}cc`, color: '#0a1a30' }}
+                                    >
+                                        {stickerCode}
+                                    </div>
+                                ) : null}
+                            </div>
                         </div>
 
-                        {percent !== null ? (
+                        {/* Title below image */}
+                        <div className="mt-3 text-center">
+                            <h2 className="text-xl font-black leading-tight tracking-tight text-white">{title}</h2>
+                            {subtitle ? <p className="mt-0.5 text-xs font-medium text-white/70">{subtitle}</p> : null}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="mt-3 space-y-2">
                             <div>
-                                <div className="flex items-end justify-between">
-                                    <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/60">Coleção completa</span>
-                                    <span className="text-4xl font-black leading-none" style={{ color: accent.color }}>{percent}%</span>
-                                </div>
-                                <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-white/15">
-                                    <div className="h-full rounded-full" style={{ width: `${percent}%`, background: accent.color }} />
-                                </div>
+                                <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/50">Colecionador</div>
+                                <div className="text-base font-bold leading-tight text-white">{userName}</div>
+                                <div className="text-[10px] text-white/55">{albumName}</div>
                             </div>
-                        ) : showMetric ? (
-                            <div className="inline-flex items-baseline gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5">
-                                <span className="text-4xl font-black leading-none" style={{ color: accent.color }}>{metric}</span>
+                            <div className="flex items-center justify-between border-t border-white/12 pt-2">
+                                <span className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: accent.color }}>#CopaAAPH</span>
+                                <span className="text-[10px] uppercase tracking-[0.12em] text-white/45">Presença · Coleção · Time</span>
                             </div>
-                        ) : null}
+                        </div>
                     </div>
+                ) : (
+                    /* ── Generic layout (no sticker image) ── */
+                    <div className={`relative z-10 flex h-full flex-col justify-between ${styles.pad} text-white`}>
+                        {/* Header */}
+                        <div className="space-y-3">
+                            <div className="flex items-start justify-between gap-2">
+                                <div className="space-y-1.5">
+                                    <div className="inline-block rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-white/85">
+                                        Álbum da Copa AAPH
+                                    </div>
+                                    <div className="text-[9px] font-semibold uppercase tracking-[0.16em] text-white/55">{seasonLabel}</div>
+                                </div>
+                                <img
+                                    src="/favicon.svg"
+                                    alt="AAPH"
+                                    className="size-12 shrink-0 rounded-full border border-white/25 bg-white object-contain p-1"
+                                />
+                            </div>
 
-                    {/* Footer */}
-                    <div className="space-y-3">
-                        <div>
-                            <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/50">Colecionador</div>
-                            <div className="text-lg font-bold leading-tight text-white">{userName}</div>
-                            <div className="text-[11px] text-white/55">{albumName}</div>
+                            <div
+                                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em]"
+                                style={{ color: '#0a1a30', background: accent.color }}
+                            >
+                                <AccentIcon className="size-3.5" />
+                                {accent.label}
+                            </div>
                         </div>
-                        <div className="flex items-center justify-between border-t border-white/12 pt-2.5">
-                            <span className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: accent.color }}>#CopaAAPH</span>
-                            <span className="text-[10px] uppercase tracking-[0.12em] text-white/45">Presença · Coleção · Time</span>
+
+                        {/* Hero */}
+                        <div className="space-y-3">
+                            <div>
+                                <h2 className={`${styles.hero} font-black leading-[1.05] tracking-tight text-white`}>{title}</h2>
+                                {subtitle ? <p className="mt-1.5 text-sm font-medium text-white/75">{subtitle}</p> : null}
+                            </div>
+
+                            {percent !== null ? (
+                                <div>
+                                    <div className="flex items-end justify-between">
+                                        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/60">Coleção completa</span>
+                                        <span className="text-4xl font-black leading-none" style={{ color: accent.color }}>{percent}%</span>
+                                    </div>
+                                    <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-white/15">
+                                        <div className="h-full rounded-full" style={{ width: `${percent}%`, background: accent.color }} />
+                                    </div>
+                                </div>
+                            ) : showMetric ? (
+                                <div className="inline-flex items-baseline gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5">
+                                    <span className="text-4xl font-black leading-none" style={{ color: accent.color }}>{metric}</span>
+                                </div>
+                            ) : null}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="space-y-3">
+                            <div>
+                                <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/50">Colecionador</div>
+                                <div className="text-lg font-bold leading-tight text-white">{userName}</div>
+                                <div className="text-[11px] text-white/55">{albumName}</div>
+                            </div>
+                            <div className="flex items-center justify-between border-t border-white/12 pt-2.5">
+                                <span className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: accent.color }}>#CopaAAPH</span>
+                                <span className="text-[10px] uppercase tracking-[0.12em] text-white/45">Presença · Coleção · Time</span>
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
             </div>
 
             {footer ? <div className="mt-3">{footer}</div> : null}
