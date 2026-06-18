@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RejectUserRequest;
+use App\Mail\UserApprovedMail;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use App\Services\Stickers\GrantSignupBonusService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 class UserApprovalController extends Controller
 {
@@ -45,6 +48,10 @@ class UserApprovalController extends Controller
         // Welcome bonus: a sticker pack for the active album. Best-effort and
         // idempotent — it never blocks approval and never stacks on re-approval.
         $bonusPackIds = $this->signupBonus->grant($user, $actor);
+
+        // Let the user know they are in. Best-effort, just like the bonus above:
+        // a mail failure must never block approval.
+        $this->sendApprovalNotification($user);
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -128,5 +135,22 @@ class UserApprovalController extends Controller
         }
 
         return back()->with('success', 'Usuário suspenso.');
+    }
+
+    /**
+     * Notify the freshly approved user by email. Best-effort: failures are
+     * reported but never bubble up, so a mail outage cannot block approval.
+     */
+    private function sendApprovalNotification(User $user): void
+    {
+        if (blank($user->email)) {
+            return;
+        }
+
+        try {
+            Mail::to($user->email, $user->name)->send(new UserApprovedMail($user));
+        } catch (Throwable $exception) {
+            report($exception);
+        }
     }
 }
