@@ -1,7 +1,16 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import type { DriveStep } from 'driver.js';
 import { PageTour, TourReplayButton } from '@/components/page-tour';
+import ShareExportPanel from '@/components/share-export-panel';
 import { DataTableShell } from '@/components/ui/data-table-shell';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { MetricCard } from '@/components/ui/metric-card';
 import { OriginBadge } from '@/components/ui/origin-badge';
@@ -78,7 +87,41 @@ function sourceLabel(pack: PackRow): string {
     return 'Manual';
 }
 
+/**
+ * Inline "export as a post-ready image" for an opened pack — opens the share
+ * panel in a dialog straight from the list, no extra navigation or record.
+ */
+function PackShareButton({ pack, userName, className }: { pack: PackRow; userName: string; className: string }) {
+    const count = pack.size;
+    const plural = count !== 1 ? 's' : '';
+    const payload = {
+        type: 'pack_opened',
+        title: 'Abri um pacote!',
+        subtitle: `${count} figurinha${plural} no Álbum da Copa AAPH`,
+        metric: count,
+        album_name: pack.album.name,
+        user_name: userName,
+        date: pack.opened_at ?? '',
+    };
+    const shareCopy = `Abri um pacote no Álbum da Copa AAPH e consegui ${count} figurinha${plural}! #CopaAAPH`;
+
+    return (
+        <Dialog>
+            <DialogTrigger className={className}>Compartilhar</DialogTrigger>
+            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Compartilhar pacote #{pack.id}</DialogTitle>
+                    <DialogDescription>Gere uma imagem pronta para postar nas suas redes.</DialogDescription>
+                </DialogHeader>
+                <ShareExportPanel payload={payload} shareCopy={shareCopy} fileBase={`pacote-${pack.id}`} />
+            </DialogContent>
+        </Dialog>
+    );
+}
+
 export default function PacksIndex({ pendingPacks, historyPacks, stats, can }: Props) {
+    const page = usePage<{ auth?: { user?: { name?: string } } }>();
+    const userName = page.props.auth?.user?.name ?? 'Participante AAPH';
     const percentage = stats.albumTotal > 0 ? Math.round((stats.unlocked / stats.albumTotal) * 100) : 0;
 
     return (
@@ -173,6 +216,9 @@ export default function PacksIndex({ pendingPacks, historyPacks, stats, can }: P
                                 </div>
                                 <div className="flex flex-wrap gap-2 pt-1">
                                     <Link href={`/packs/${pack.id}`} className="app-link-chip">Detalhes</Link>
+                                    {pack.status === 'opened' ? (
+                                        <PackShareButton pack={pack} userName={userName} className="app-link-chip" />
+                                    ) : null}
                                     {can?.createShareCard && pack.status === 'opened' ? (
                                         <Link
                                             href="/share-cards"
@@ -220,6 +266,9 @@ export default function PacksIndex({ pendingPacks, historyPacks, stats, can }: P
                                         <td className="px-4 py-2 text-dim">{pack.opened_at ?? '-'}</td>
                                         <td className="space-x-2 px-4 py-2">
                                             <Link href={`/packs/${pack.id}`} className="text-xs underline">Detalhes</Link>
+                                            {pack.status === 'opened' ? (
+                                                <PackShareButton pack={pack} userName={userName} className="text-xs underline" />
+                                            ) : null}
                                             {can?.createShareCard && pack.status === 'opened' ? (
                                                 <Link
                                                     href="/share-cards"
