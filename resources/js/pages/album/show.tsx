@@ -1,4 +1,5 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
+import ShareExportPanel from '@/components/share-export-panel';
 import { PageHeader } from '@/components/ui/page-header';
 
 type Sticker = {
@@ -26,7 +27,19 @@ function DetailField({ label, value }: { label: string; value: string }) {
 }
 
 export default function AlbumStickerShow({ sticker, note }: { sticker: Sticker; note: string }) {
+    const page = usePage<{ auth?: { user?: { name?: string } } }>();
+    const userName = page.props.auth?.user?.name ?? 'Participante AAPH';
     const teams = sticker.album.teams.map((team) => team.name).join(', ') || '-';
+
+    // Only collected stickers can be shared (you flaunt what you own).
+    const sharePayload = {
+        type: 'sticker_unlocked',
+        title: sticker.title,
+        subtitle: sticker.subtitle ?? `Figurinha ${sticker.code}`,
+        album_name: sticker.album.name,
+        user_name: userName,
+    };
+    const shareCopy = `Desbloqueei "${sticker.title}" no Álbum da Copa AAPH! #CopaAAPH`;
 
     return (
         <>
@@ -86,6 +99,17 @@ export default function AlbumStickerShow({ sticker, note }: { sticker: Sticker; 
                         ) : null}
                     </div>
                 </div>
+
+                {/* Share — only for collected stickers */}
+                {sticker.is_unlocked ? (
+                    <section className="album-paper space-y-2 p-4">
+                        <div>
+                            <h2 className="text-sm font-semibold text-foreground">Compartilhar figurinha</h2>
+                            <p className="text-xs text-dim">Gere uma imagem pronta para postar nas suas redes.</p>
+                        </div>
+                        <ShareExportPanel payload={sharePayload} shareCopy={shareCopy} fileBase={`figurinha-${sticker.code}`} />
+                    </section>
+                ) : null}
             </div>
         </>
     );
