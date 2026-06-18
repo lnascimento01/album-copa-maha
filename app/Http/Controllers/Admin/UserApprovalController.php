@@ -6,13 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\RejectUserRequest;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
+use App\Services\Stickers\GrantSignupBonusService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class UserApprovalController extends Controller
 {
-    public function __construct(private readonly AuditLogger $auditLogger) {}
+    public function __construct(
+        private readonly AuditLogger $auditLogger,
+        private readonly GrantSignupBonusService $signupBonus,
+    ) {}
 
     public function approve(Request $request, User $user): RedirectResponse|JsonResponse
     {
@@ -38,15 +42,24 @@ class UserApprovalController extends Controller
             entityId: $user->id,
         );
 
+        // Welcome bonus: a sticker pack for the active album. Best-effort and
+        // idempotent — it never blocks approval and never stacks on re-approval.
+        $bonusPackIds = $this->signupBonus->grant($user, $actor);
+
         if ($request->expectsJson()) {
             return response()->json([
                 'id' => $user->id,
                 'approval_status' => $user->approval_status,
                 'approved_at' => optional($user->approved_at)?->toDateTimeString(),
+                'bonus_pack_ids' => $bonusPackIds,
             ]);
         }
 
-        return back()->with('success', 'Usuário aprovado com sucesso.');
+        $message = $bonusPackIds === []
+            ? 'Usuário aprovado com sucesso.'
+            : 'Usuário aprovado e pacote de boas-vindas concedido.';
+
+        return back()->with('success', $message);
     }
 
     public function reject(RejectUserRequest $request, User $user): RedirectResponse|JsonResponse
