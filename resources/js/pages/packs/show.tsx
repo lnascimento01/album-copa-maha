@@ -3,6 +3,7 @@ import type { DriveStep } from 'driver.js';
 import { Sparkles, Star } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { PackRevealCinema } from '@/components/packs/pack-reveal-cinema';
+import ShareExportPanel from '@/components/share-export-panel';
 import { PageTour } from '@/components/page-tour';
 import { EmptyState } from '@/components/ui/empty-state';
 import { OriginBadge } from '@/components/ui/origin-badge';
@@ -94,8 +95,9 @@ const TOUR_STEPS: DriveStep[] = [
 ];
 
 export default function PackShow({ pack }: { pack: Pack }) {
-    const page = usePage<{ flash?: Flash }>();
+    const page = usePage<{ flash?: Flash; auth?: { user?: { name?: string } } }>();
     const revealedIds = page.props.flash?.revealedStickerIds ?? EMPTY_IDS;
+    const shareUserName = page.props.auth?.user?.name ?? 'Participante AAPH';
     const [isOpening, setIsOpening] = useState(false);
     const [showCinema, setShowCinema] = useState(() => revealedIds.length > 0);
 
@@ -150,6 +152,18 @@ export default function PackShow({ pack }: { pack: Pack }) {
             .filter(item => order.has(item.sticker.id))
             .sort((a, b) => (order.get(a.sticker.id) ?? 0) - (order.get(b.sticker.id) ?? 0));
     }, [pack.items, revealedIds]);
+
+    // Post-ready share card for an opened pack (used by the export panel below).
+    const sharePayload = {
+        type: 'pack_opened',
+        title: 'Abri um pacote!',
+        subtitle: `${pack.items.length} figurinha${pack.items.length !== 1 ? 's' : ''} no Álbum da Copa AAPH`,
+        metric: pack.items.length,
+        album_name: pack.album.name,
+        user_name: shareUserName,
+        date: pack.opened_at ?? '',
+    };
+    const shareCopy = `Abri um pacote no Álbum da Copa AAPH e consegui ${pack.items.length} figurinha${pack.items.length !== 1 ? 's' : ''}! #CopaAAPH`;
 
     const openPack = () => {
         if (isOpening) return;
@@ -473,6 +487,15 @@ export default function PackShow({ pack }: { pack: Pack }) {
                                 })}
                             </div>
                         )}
+
+                        {/* Share the opened pack as a post-ready image */}
+                        <section className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                            <div className="mb-2">
+                                <h3 className="text-sm font-semibold text-white">Compartilhar</h3>
+                                <p className="text-xs text-white/40">Gere uma imagem pronta para postar nas suas redes.</p>
+                            </div>
+                            <ShareExportPanel payload={sharePayload} shareCopy={shareCopy} fileBase={`pacote-${pack.id}`} />
+                        </section>
                     </section>
                 ) : null}
             </div>
