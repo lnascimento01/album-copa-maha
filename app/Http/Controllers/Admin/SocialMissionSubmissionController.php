@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ApproveSocialMissionSubmissionRequest;
 use App\Http\Requests\RejectSocialMissionSubmissionRequest;
+use App\Mail\SocialMissionApprovedMail;
 use App\Models\AuditLog;
 use App\Models\SocialMission;
 use App\Models\SocialMissionSubmission;
@@ -15,8 +16,10 @@ use App\Services\SocialMissions\Exceptions\SocialMissionException;
 use App\Services\SocialMissions\ReviewSocialMissionSubmissionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class SocialMissionSubmissionController extends Controller
 {
@@ -132,9 +135,9 @@ class SocialMissionSubmissionController extends Controller
         try {
             $result = $this->reviewService->approve($submission->id, $request->user(), $request->validated('note'));
 
-            try {
-                $submissionModel = $result['submission']->loadMissing(['mission.album', 'user']);
+            $submissionModel = $result['submission']->loadMissing(['mission.album', 'user']);
 
+            try {
                 if ($submissionModel->mission?->album) {
                     $this->createShareCardService->createForUser(
                         user: $submissionModel->user,
@@ -152,9 +155,13 @@ class SocialMissionSubmissionController extends Controller
 
                     $this->evaluateUserAchievementsService->evaluate($submissionModel->user, $submissionModel->mission->album);
                 }
-            } catch (\Throwable) {
+            } catch (Throwable) {
                 // Non-critical side effect: do not interrupt social mission approval flow.
             }
+
+            // Notify the participant their mission was approved. Best-effort, like
+            // the side effects above: a mail failure must never block approval.
+            $this->sendApprovalNotification($submissionModel, count($result['pack_ids']));
 
             return back()->with('success', 'Submissão aprovada com sucesso.');
         } catch (SocialMissionException $exception) {
@@ -176,6 +183,26 @@ class SocialMissionSubmissionController extends Controller
             return back()->withErrors([
                 'submission' => $exception->getMessage(),
             ]);
+        }
+    }
+
+    /**
+     * Notify the participant that their social mission submission was approved.
+     * Best-effort: failures are reported but never bubble up to block approval.
+     */
+    private function sendApprovalNotification(SocialMissionSubmission $submission, int $rewardPackCount): void
+    {
+        $email = $submission->user?->email;
+
+        if (blank($email)) {
+            return;
+        }
+
+        try {
+            Mail::to($email, $submission->user?->name)
+                ->send(new SocialMissionApprovedMail($submission, $rewardPackCount));
+        } catch (Throwable $exception) {
+            report($exception);
         }
     }
 }
