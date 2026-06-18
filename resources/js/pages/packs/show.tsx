@@ -105,6 +105,29 @@ export default function PackShow({ pack }: { pack: Pack }) {
         return 'idle';
     });
 
+    // Track the previous external (prop-derived) values so we can adjust state
+    // during render when they change — the React-recommended alternative to
+    // syncing in an effect (see "You Might Not Need an Effect"). Inertia updates
+    // these props in place (no remount), so we react to the transition only.
+    const [prevRevealedCount, setPrevRevealedCount] = useState(revealedIds.length);
+    const [prevStatus, setPrevStatus] = useState(pack.status);
+
+    if (revealedIds.length !== prevRevealedCount) {
+        setPrevRevealedCount(revealedIds.length);
+        // A reveal arrived via flash → surface the cinema (still dismissable).
+        if (revealedIds.length > 0) {
+            setShowCinema(true);
+        }
+    }
+
+    if (pack.status !== prevStatus) {
+        setPrevStatus(pack.status);
+        // Pack opened while curtains are still closing → advance to reveal.
+        if (pack.status === 'opened' && curtain === 'closing') {
+            setCurtain('revealing');
+        }
+    }
+
     const reducedMotion = useMemo(
         () => (typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false),
         [],
@@ -116,20 +139,6 @@ export default function PackShow({ pack }: { pack: Pack }) {
         const t = setTimeout(() => setCurtain('idle'), 800);
         return () => clearTimeout(t);
     }, [curtain]);
-
-    // In-place update: when revealedIds arrives from flash, show cinema
-    useEffect(() => {
-        if (revealedIds.length > 0) {
-            setShowCinema(true);
-        }
-    }, [revealedIds]);
-
-    // In-place update: when pack opens while curtains are still closing, advance to reveal
-    useEffect(() => {
-        if (pack.status === 'opened' && curtain === 'closing') {
-            setCurtain('revealing');
-        }
-    }, [pack.status, curtain]);
 
     // Order items by the reveal sequence from flash
     const cinemaItems = useMemo(() => {
