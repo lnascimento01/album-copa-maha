@@ -37,7 +37,7 @@ type AuditLog = {
     target: UserRef | null;
 };
 
-export default function AdminStickerPackShow({ pack, auditLogs, canCancel }: { pack: Pack; auditLogs: AuditLog[]; canCancel: boolean }) {
+export default function AdminStickerPackShow({ pack, auditLogs, canCancel, canRevoke }: { pack: Pack; auditLogs: AuditLog[]; canCancel: boolean; canRevoke: boolean }) {
     const cancel = () => {
         const reason = window.prompt('Motivo do cancelamento:');
 
@@ -50,15 +50,38 @@ export default function AdminStickerPackShow({ pack, auditLogs, canCancel }: { p
         });
     };
 
+    const revoke = () => {
+        const reason = window.prompt(
+            `Revogar pacote #${pack.id} (status: ${pack.status})?\n\nIsso irá:\n- Remover as figurinhas do álbum do usuário\n- Recalcular conquistas\n- Cancelar o pacote\n\nMotivo:`,
+        );
+
+        if (!reason) {
+            return;
+        }
+
+        if (!window.confirm(`Confirmar revogação do pacote #${pack.id}? Esta ação não pode ser desfeita.`)) {
+            return;
+        }
+
+        router.delete(`/admin/sticker-packs/${pack.id}`, {
+            data: { cancellation_reason: reason },
+        });
+    };
+
     return (
         <>
             <Head title={`Pacote #${pack.id}`} />
             <div className="space-y-4 p-4">
                 <div className="flex items-center justify-between gap-4">
                     <h1 className="text-xl font-semibold tracking-tight">Pacote #{pack.id}</h1>
-                    {canCancel && pack.status === 'pending' ? (
-                        <button type="button" className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent" onClick={cancel}>Cancelar pacote</button>
-                    ) : null}
+                    <div className="flex gap-2">
+                        {canCancel && pack.status === 'pending' ? (
+                            <button type="button" className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent" onClick={cancel}>Cancelar pacote</button>
+                        ) : null}
+                        {canRevoke && pack.status !== 'cancelled' ? (
+                            <button type="button" className="cursor-pointer rounded-sm border border-red-600 px-3 py-2 text-xs text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-950" onClick={revoke}>Revogar pacote</button>
+                        ) : null}
+                    </div>
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-3">

@@ -10,6 +10,7 @@ use App\Models\AuditLog;
 use App\Models\StickerPack;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
+use App\Services\Stickers\RevokePackService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -17,7 +18,10 @@ use Inertia\Response;
 
 class StickerPackController extends Controller
 {
-    public function __construct(private readonly AuditLogger $auditLogger) {}
+    public function __construct(
+        private readonly AuditLogger $auditLogger,
+        private readonly RevokePackService $revokePackService,
+    ) {}
 
     public function index(Request $request): Response
     {
@@ -204,6 +208,7 @@ class StickerPackController extends Controller
             ],
             'auditLogs' => $auditLogs,
             'canCancel' => $request->user()?->can('cancel', $stickerPack) ?? false,
+            'canRevoke' => $request->user()?->can('revoke', $stickerPack) ?? false,
         ]);
     }
 
@@ -236,5 +241,22 @@ class StickerPackController extends Controller
         );
 
         return back()->with('success', 'Pacote cancelado com sucesso.');
+    }
+
+    public function revoke(CancelStickerPackRequest $request, StickerPack $stickerPack): RedirectResponse
+    {
+        $this->authorize('revoke', $stickerPack);
+
+        if ($stickerPack->status === StickerPack::STATUS_CANCELLED) {
+            return back()->withErrors(['pack' => 'O pacote já está cancelado.']);
+        }
+
+        $this->revokePackService->revoke(
+            pack: $stickerPack,
+            actor: $request->user(),
+            reason: $request->validated('cancellation_reason'),
+        );
+
+        return back()->with('success', 'Pacote revogado e figurinhas removidas do álbum do usuário.');
     }
 }

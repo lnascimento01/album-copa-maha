@@ -31,6 +31,11 @@ class StickerPackPolicy
         return $user->hasPermission('stickerPacks.cancel');
     }
 
+    public function revoke(User $user, StickerPack $stickerPack): bool
+    {
+        return $user->hasPermission('stickerPacks.revoke');
+    }
+
     public function open(User $user, StickerPack $stickerPack): bool
     {
         return $user->hasPermission('stickerPacks.openOwn') && $stickerPack->user_id === $user->id;

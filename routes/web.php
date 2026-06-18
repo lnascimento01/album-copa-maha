@@ -381,6 +381,10 @@ Route::middleware(['auth'])->group(function () {
             ->middleware('permission:stickerPacks.cancel')
             ->name('sticker-packs.cancel');
 
+        Route::delete('/sticker-packs/{stickerPack}', [AdminStickerPackController::class, 'revoke'])
+            ->middleware('permission:stickerPacks.revoke')
+            ->name('sticker-packs.revoke');
+
         Route::get('/teams', [TeamController::class, 'index'])
             ->middleware('permission:teams.viewAny')
             ->name('teams.index');

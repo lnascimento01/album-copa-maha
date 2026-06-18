@@ -53,6 +53,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'View sticker pack', 'slug' => 'stickerPacks.view', 'group' => 'stickerPacks'],
             ['name' => 'Create sticker pack', 'slug' => 'stickerPacks.create', 'group' => 'stickerPacks'],
             ['name' => 'Cancel sticker pack', 'slug' => 'stickerPacks.cancel', 'group' => 'stickerPacks'],
+            ['name' => 'Revoke sticker pack (any status)', 'slug' => 'stickerPacks.revoke', 'group' => 'stickerPacks'],
             ['name' => 'View own sticker packs', 'slug' => 'stickerPacks.viewOwn', 'group' => 'stickerPacks'],
             ['name' => 'Open own sticker packs', 'slug' => 'stickerPacks.openOwn', 'group' => 'stickerPacks'],
             ['name' => 'List activities', 'slug' => 'activities.viewAny', 'group' => 'activities'],
