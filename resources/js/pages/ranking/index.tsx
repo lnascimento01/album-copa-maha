@@ -1,11 +1,20 @@
 import { Head } from '@inertiajs/react';
-import { Crown, Medal, Trophy } from 'lucide-react';
+import { Award, CheckCircle2, Crown, Medal, Package, QrCode, Sticker, Target, Trophy } from 'lucide-react';
 import { DataTableShell } from '@/components/ui/data-table-shell';
 import { EmptyState } from '@/components/ui/empty-state';
 import { MetricCard } from '@/components/ui/metric-card';
 import { PageHeader } from '@/components/ui/page-header';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { ResponsiveDataList } from '@/components/ui/responsive-data-list';
+
+const SCORE_FACTORS = [
+    { label: 'Figurinha desbloqueada', Icon: Sticker,      pts: 10, color: '#fbbf24' },
+    { label: 'Pacote aberto',          Icon: Package,      pts: 3,  color: '#a78bfa' },
+    { label: 'Check-in confirmado',    Icon: CheckCircle2, pts: 5,  color: '#34d399' },
+    { label: 'Código resgatado',       Icon: QrCode,       pts: 2,  color: '#60a5fa' },
+    { label: 'Missão aprovada',        Icon: Target,       pts: 5,  color: '#f97316' },
+    { label: 'Conquista',              Icon: Award,        pts: 8,  color: '#fcd34d' },
+] as const;
 
 type RankingRow = {
     position: number;
@@ -67,9 +76,9 @@ export default function RankingIndex({ album, top, me, formula }: Props) {
                                 <p className="mt-2 text-xs font-medium text-dim">Ainda não há pontuações registradas para esta visão.</p>
                             ) : null}
                         </div>
-                        <div className="rounded-md border border-[color:var(--primary-200)] bg-[color:var(--primary-50)] px-3 py-2 text-right">
-                            <p className="text-[10px] tracking-[0.13em] text-[color:var(--primary-600)] uppercase">Top da rodada</p>
-                            <p className="text-lg font-semibold text-[color:var(--primary-700)]">{top.length}</p>
+                        <div className="rounded-md border border-border bg-card px-3 py-2 text-right">
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.13em] text-muted-foreground">Top da rodada</p>
+                            <p className="text-lg font-semibold text-foreground">{top.length}</p>
                         </div>
                     </div>
                 </section>
@@ -83,10 +92,17 @@ export default function RankingIndex({ album, top, me, formula }: Props) {
                     </div>
                 ) : null}
 
-                <section className="album-paper p-3">
-                    <p className="text-xs leading-relaxed text-dim">
-                        <span className="font-semibold text-foreground">Fórmula de score:</span> <span className="font-mono">{formula}</span>
-                    </p>
+                <section className="album-paper p-4">
+                    <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Como o score é calculado</p>
+                    <div className="flex flex-wrap gap-2">
+                        {SCORE_FACTORS.map(({ label, Icon, pts, color }) => (
+                            <div key={label} className="flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1.5">
+                                <Icon className="size-3.5 shrink-0" style={{ color }} />
+                                <span className="text-[11px] text-muted-foreground">{label}</span>
+                                <span className="text-[11px] font-bold" style={{ color }}>×{pts}</span>
+                            </div>
+                        ))}
+                    </div>
                 </section>
 
                 {top.length > 0 ? (
