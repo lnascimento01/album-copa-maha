@@ -1,24 +1,33 @@
-import { forwardRef  } from 'react';
-import type {ReactNode} from 'react';
+import { Award, BarChart3, Package, Sparkles, Sticker, Trophy } from 'lucide-react';
+import { forwardRef   } from 'react';
+import type {ComponentType, ReactNode} from 'react';
 
 type Props = {
     payload: Record<string, unknown>;
     footer?: ReactNode;
 };
 
-const TYPE_LABELS: Record<string, string> = {
-    album_progress: 'Progresso do álbum',
-    pack_opened: 'Pacote aberto',
-    sticker_unlocked: 'Figurinha desbloqueada',
-    achievement_unlocked: 'Conquista desbloqueada',
-    social_mission_approved: 'Missão aprovada',
-    checkin_confirmed: 'Presença confirmada',
+type Accent = {
+    label: string;
+    color: string;
+    Icon: ComponentType<{ className?: string }>;
 };
 
+const ACCENTS: Record<string, Accent> = {
+    album_progress: { label: 'Progresso do álbum', color: '#60a5fa', Icon: BarChart3 },
+    pack_opened: { label: 'Pacote aberto', color: '#a78bfa', Icon: Package },
+    sticker_unlocked: { label: 'Figurinha desbloqueada', color: '#fbbf24', Icon: Sticker },
+    achievement_unlocked: { label: 'Conquista desbloqueada', color: '#fcd34d', Icon: Award },
+    social_mission_approved: { label: 'Missão aprovada', color: '#34d399', Icon: Trophy },
+};
+
+const DEFAULT_ACCENT: Accent = { label: 'Álbum da Copa AAPH', color: '#8aa842', Icon: Sparkles };
+
 /**
- * The visual 9:16 share card. The forwarded ref points at the card surface
- * itself (not the outer wrapper/footer) so it can be rasterized to a PNG for
- * download / native share.
+ * The visual 9:16 share card. Self-contained, fixed (theme-independent) colors
+ * so the rasterized PNG always looks vibrant in feeds — regardless of the
+ * user's light/dark setting. The forwarded ref points at the card surface so
+ * it can be exported to an image (download / native share).
  */
 const ShareCardPreview = forwardRef<HTMLDivElement, Props>(function ShareCardPreview({ payload, footer }, ref) {
     const type = String(payload.type ?? 'share_card');
@@ -29,83 +38,90 @@ const ShareCardPreview = forwardRef<HTMLDivElement, Props>(function ShareCardPre
     const metric = payload.metric as string | number | null | undefined;
     const date = String(payload.date ?? '');
     const seasonLabel = date ? `Temporada ${new Date(date).getFullYear()}` : 'Temporada AAPH';
-    const typeLabel = TYPE_LABELS[type] ?? type.replace(/_/g, ' ');
 
+    const accent = ACCENTS[type] ?? DEFAULT_ACCENT;
+    const AccentIcon = accent.Icon;
     const related = (payload.related ?? {}) as Record<string, unknown>;
-    const percent = type === 'album_progress' ? Number(related.percent ?? metric ?? 0) : null;
-    const hasMetric = metric !== null && metric !== undefined && metric !== '';
+    const percent = type === 'album_progress' ? Math.max(0, Math.min(100, Number(related.percent ?? metric ?? 0))) : null;
+    const showMetric = percent === null && metric !== null && metric !== undefined && metric !== '';
 
     return (
         <div className="rounded-md border border-border bg-card p-3 text-foreground">
             <div
                 ref={ref}
-                className="mx-auto aspect-[9/16] w-full max-w-[340px] overflow-hidden rounded-md border border-[color:var(--pack-border)] bg-[color:var(--album-paper)]"
+                className="relative mx-auto aspect-[9/16] w-full max-w-[340px] overflow-hidden rounded-[20px]"
+                style={{ background: 'linear-gradient(165deg, #102a4c 0%, #0a1a30 52%, #060f1d 100%)' }}
             >
-                <div className="relative h-full p-5">
-                    <div className="absolute inset-0 opacity-40 brand-grid" />
-                    <div className="pointer-events-none absolute inset-x-0 top-0 h-1.5 bg-primary" />
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1.5 bg-[color:var(--brand-secondary)]" />
+                {/* Brand swooshes (Brazil/sticker motif) — pure CSS so it rasterizes cleanly */}
+                <div aria-hidden className="pointer-events-none absolute inset-0">
+                    <div className="absolute -right-16 -top-10 h-72 w-72 rotate-[18deg] rounded-full" style={{ background: 'radial-gradient(circle, rgba(138,168,66,0.30) 0%, transparent 70%)' }} />
+                    <div className="absolute -bottom-16 -left-10 h-72 w-72 rounded-full" style={{ background: 'radial-gradient(circle, rgba(41,93,148,0.45) 0%, transparent 70%)' }} />
+                    <div className="absolute inset-x-0 top-1/3 h-24 -skew-y-6" style={{ background: 'linear-gradient(90deg, transparent, rgba(251,191,36,0.10), transparent)' }} />
+                </div>
 
-                    <div className="relative z-10 flex h-full flex-col justify-between text-foreground">
-                        <div className="space-y-4">
-                            <div className="flex items-start justify-between gap-2">
-                                <div className="space-y-1.5">
-                                    <div className="inline-block rounded-sm border border-primary/35 bg-primary/10 px-2 py-1 text-[10px] uppercase tracking-[0.2em] text-primary">
-                                        Álbum da Copa AAPH
-                                    </div>
-                                    <div className="inline-block rounded-sm border border-[color:var(--brand-secondary)]/35 bg-[color:var(--brand-secondary)]/14 px-2 py-1 text-[10px] uppercase tracking-[0.18em] text-[color:var(--success)]">
-                                        {seasonLabel}
-                                    </div>
+                {/* Accent top bar */}
+                <div className="absolute inset-x-0 top-0 h-1.5" style={{ background: accent.color }} />
+
+                <div className="relative z-10 flex h-full flex-col justify-between p-5 text-white">
+                    {/* Header */}
+                    <div className="space-y-3">
+                        <div className="flex items-start justify-between gap-2">
+                            <div className="space-y-1.5">
+                                <div className="inline-block rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-white/85">
+                                    Álbum da Copa AAPH
                                 </div>
-                                <img
-                                    src="/favicon.svg"
-                                    alt="AAPH"
-                                    className="size-12 shrink-0 rounded-full border border-[color:var(--sticker-frame)] bg-white object-contain p-0.5"
-                                />
+                                <div className="text-[9px] font-semibold uppercase tracking-[0.16em] text-white/55">{seasonLabel}</div>
                             </div>
-
-                            <div className="space-y-1">
-                                <div className="text-[10px] uppercase tracking-[0.16em] text-dim">Participante</div>
-                                <div className="text-xl font-semibold leading-tight text-foreground">{userName}</div>
-                            </div>
-
-                            <div className="space-y-1">
-                                <div className="text-[10px] uppercase tracking-[0.16em] text-dim">Álbum</div>
-                                <div className="text-sm font-medium text-foreground">{albumName}</div>
-                            </div>
-
-                            <div className="rounded-sm border border-[color:var(--sticker-frame)] bg-[color:var(--sticker-surface)] p-3">
-                                <div className="text-[10px] uppercase tracking-[0.16em] text-dim">Destaque</div>
-                                <div className="mt-1 text-base font-semibold leading-tight text-foreground">{title}</div>
-                                {subtitle ? <div className="mt-2 text-xs text-dim">{subtitle}</div> : null}
-                            </div>
+                            <img
+                                src="/favicon.svg"
+                                alt="AAPH"
+                                className="size-12 shrink-0 rounded-full border border-white/25 bg-white object-contain p-1"
+                            />
                         </div>
 
-                        <div className="space-y-2">
-                            {percent !== null ? (
-                                <div className="rounded-sm border border-[color:var(--aaph-blue)]/35 bg-primary/8 p-3">
-                                    <div className="flex items-baseline justify-between">
-                                        <span className="text-[10px] uppercase tracking-[0.16em] text-dim">Progresso</span>
-                                        <span className="text-3xl font-bold leading-none text-foreground">{percent}%</span>
-                                    </div>
-                                    <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[color:var(--sticker-frame)]">
-                                        <div
-                                            className="h-full rounded-full bg-primary"
-                                            style={{ width: `${Math.min(100, Math.max(0, percent))}%` }}
-                                        />
-                                    </div>
-                                </div>
-                            ) : hasMetric ? (
-                                <div className="rounded-sm border border-[color:var(--aaph-blue)]/35 bg-primary/8 p-3">
-                                    <div className="text-[10px] uppercase tracking-[0.16em] text-dim">Métrica</div>
-                                    <div className="text-3xl font-bold leading-none text-foreground">{metric}</div>
-                                </div>
-                            ) : null}
+                        <div
+                            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em]"
+                            style={{ color: '#0a1a30', background: accent.color }}
+                        >
+                            <AccentIcon className="size-3.5" />
+                            {accent.label}
+                        </div>
+                    </div>
 
-                            <div className="flex items-center justify-between border-t border-border pt-2 text-[10px] uppercase tracking-[0.16em] text-dim">
-                                <span>Presença, coleção e time.</span>
-                                <span>{typeLabel}</span>
+                    {/* Hero */}
+                    <div className="space-y-3">
+                        <div>
+                            <h2 className="text-[26px] font-black leading-[1.05] tracking-tight text-white">{title}</h2>
+                            {subtitle ? <p className="mt-1.5 text-sm font-medium text-white/75">{subtitle}</p> : null}
+                        </div>
+
+                        {percent !== null ? (
+                            <div>
+                                <div className="flex items-end justify-between">
+                                    <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/60">Coleção completa</span>
+                                    <span className="text-4xl font-black leading-none" style={{ color: accent.color }}>{percent}%</span>
+                                </div>
+                                <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-white/15">
+                                    <div className="h-full rounded-full" style={{ width: `${percent}%`, background: accent.color }} />
+                                </div>
                             </div>
+                        ) : showMetric ? (
+                            <div className="inline-flex items-baseline gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5">
+                                <span className="text-4xl font-black leading-none" style={{ color: accent.color }}>{metric}</span>
+                            </div>
+                        ) : null}
+                    </div>
+
+                    {/* Footer */}
+                    <div className="space-y-3">
+                        <div>
+                            <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/50">Colecionador</div>
+                            <div className="text-lg font-bold leading-tight text-white">{userName}</div>
+                            <div className="text-[11px] text-white/55">{albumName}</div>
+                        </div>
+                        <div className="flex items-center justify-between border-t border-white/12 pt-2.5">
+                            <span className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: accent.color }}>#CopaAAPH</span>
+                            <span className="text-[10px] uppercase tracking-[0.12em] text-white/45">Presença · Coleção · Time</span>
                         </div>
                     </div>
                 </div>
