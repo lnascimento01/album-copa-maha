@@ -1,7 +1,17 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Ban, Check, Eye, MoreVertical, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { Button } from '@/components/ui/button';
 import { DataTableShell } from '@/components/ui/data-table-shell';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
 import { ResponsiveDataList } from '@/components/ui/responsive-data-list';
@@ -40,6 +50,82 @@ type Props = {
         search: string;
     };
 };
+
+type RowActions = {
+    canApprove: boolean;
+    canReject: boolean;
+    canSuspend: boolean;
+    onApprove: (id: number) => void;
+    onReject: (id: number) => void;
+    onSuspend: (id: number) => void;
+};
+
+function initials(name: string): string {
+    return name
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((part) => part.charAt(0).toUpperCase())
+        .join('');
+}
+
+/**
+ * Per-row actions: a one-tap primary button for the common case (approving a
+ * pending user) plus a dropdown with the full set — proper click targets
+ * instead of cramped text links.
+ */
+function UserRowActions({ user, actions }: { user: UserItem; actions: RowActions }) {
+    const { canApprove, canReject, canSuspend, onApprove, onReject, onSuspend } = actions;
+    const isApproved = user.approval_status === 'approved';
+    const isRejected = user.approval_status === 'rejected';
+    const isSuspended = user.approval_status === 'suspended';
+
+    return (
+        <div className="flex items-center justify-end gap-2">
+            {canApprove && !isApproved ? (
+                <Button type="button" size="sm" variant="success" onClick={() => onApprove(user.id)}>
+                    <Check />
+                    Aprovar
+                </Button>
+            ) : null}
+
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button type="button" size="icon" variant="outline" aria-label={`Ações para ${user.name}`}>
+                        <MoreVertical />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                    <DropdownMenuItem asChild>
+                        <Link href={`/admin/users/${user.id}`}>
+                            <Eye />
+                            Detalhes
+                        </Link>
+                    </DropdownMenuItem>
+                    {canApprove ? (
+                        <DropdownMenuItem disabled={isApproved} onSelect={() => onApprove(user.id)}>
+                            <Check />
+                            {isApproved ? 'Aprovado' : 'Aprovar'}
+                        </DropdownMenuItem>
+                    ) : null}
+                    {canReject ? (
+                        <DropdownMenuItem variant="destructive" disabled={isRejected} onSelect={() => onReject(user.id)}>
+                            <XCircle />
+                            {isRejected ? 'Rejeitado' : 'Rejeitar'}
+                        </DropdownMenuItem>
+                    ) : null}
+                    {canSuspend ? (
+                        <DropdownMenuItem variant="destructive" disabled={isSuspended} onSelect={() => onSuspend(user.id)}>
+                            <Ban />
+                            {isSuspended ? 'Suspenso' : 'Suspender'}
+                        </DropdownMenuItem>
+                    ) : null}
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </div>
+    );
+}
 
 export default function AdminUsersIndex({ users, filters }: Props) {
     const page = usePage().props as { auth: { user?: { permissions?: string[] } } };
@@ -96,17 +182,26 @@ export default function AdminUsersIndex({ users, filters }: Props) {
         });
     };
 
+    const rowActions: RowActions = {
+        canApprove,
+        canReject,
+        canSuspend,
+        onApprove: approve,
+        onReject: reject,
+        onSuspend: suspend,
+    };
+
     return (
         <>
             <Head title="Usuários" />
             <div className="brand-app-bg space-y-4 p-4 sm:p-5">
                 <PageHeader title="Usuários" subtitle="Aprovação de cadastro, papéis e acesso operacional." />
 
-                <form onSubmit={submitFilters} className="album-paper grid gap-3 p-4 md:grid-cols-4">
+                <form onSubmit={submitFilters} className="album-paper grid items-end gap-3 p-4 md:grid-cols-4">
                     <div>
                         <label className="text-xs uppercase tracking-wide text-dim">Status</label>
                         <select
-                            className="mt-1 w-full rounded-sm border bg-card border-border px-2 py-2 text-sm"
+                            className="mt-1 h-9 w-full rounded-sm border bg-card border-border px-2 text-sm"
                             value={status}
                             onChange={(event) => setStatus(event.target.value)}
                         >
@@ -120,17 +215,15 @@ export default function AdminUsersIndex({ users, filters }: Props) {
                     <div className="md:col-span-2">
                         <label className="text-xs uppercase tracking-wide text-dim">Busca</label>
                         <input
-                            className="mt-1 w-full rounded-sm border bg-card border-border px-2 py-2 text-sm"
+                            className="mt-1 h-9 w-full rounded-sm border bg-card border-border px-2 text-sm"
                             value={search}
                             onChange={(event) => setSearch(event.target.value)}
                             placeholder="Nome ou e-mail"
                         />
                     </div>
-                    <div className="flex items-end">
-                        <button className="cursor-pointer w-full rounded-sm border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110" type="submit">
-                            Filtrar
-                        </button>
-                    </div>
+                    <Button type="submit" className="w-full">
+                        Filtrar
+                    </Button>
                 </form>
 
                 <DataTableShell title="Lista de usuários" subtitle="Ações disponíveis conforme permissões do operador.">
@@ -139,62 +232,37 @@ export default function AdminUsersIndex({ users, filters }: Props) {
                         getKey={(user) => user.id}
                         empty={<EmptyState title="Nenhum usuário encontrado." description="Ajuste os filtros para ampliar a busca." />}
                         renderItem={(user) => (
-                            <div className="space-y-2">
+                            <div className="space-y-3">
                                 <div className="flex items-start justify-between gap-3">
-                                    <div className="min-w-0">
-                                        <p className="text-sm font-semibold text-foreground">{user.name}</p>
-                                        <p className="mt-1 truncate font-mono text-xs text-dim">{user.email}</p>
+                                    <div className="flex min-w-0 items-center gap-3">
+                                        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[color:var(--primary-100)] text-xs font-bold text-[color:var(--primary-600)]">
+                                            {initials(user.name)}
+                                        </span>
+                                        <div className="min-w-0">
+                                            <p className="truncate text-sm font-semibold text-foreground">{user.name}</p>
+                                            <p className="truncate font-mono text-xs text-dim">{user.email}</p>
+                                        </div>
                                     </div>
                                     <StatusBadge value={user.approval_status} />
                                 </div>
-                                <div>
-                                    <p className="responsive-data-key">Roles</p>
-                                    <p className="responsive-data-value">{user.roles.map((role) => role.slug).join(', ') || '-'}</p>
-                                </div>
-                                <div className="flex flex-wrap gap-2 pt-1">
-                                    <Link className="app-link-chip" href={`/admin/users/${user.id}`}>Detalhes</Link>
-                                    {canApprove ? (
-                                        <button
-                                            type="button"
-                                            className="app-link-chip disabled:cursor-not-allowed disabled:opacity-55"
-                                            onClick={() => approve(user.id)}
-                                            disabled={user.approval_status === 'approved'}
-                                        >
-                                            {user.approval_status === 'approved' ? 'Aprovado' : 'Aprovar'}
-                                        </button>
-                                    ) : null}
-                                    {canReject ? (
-                                        <button
-                                            type="button"
-                                            className="app-link-chip disabled:cursor-not-allowed disabled:opacity-55"
-                                            onClick={() => reject(user.id)}
-                                            disabled={user.approval_status === 'rejected'}
-                                        >
-                                            {user.approval_status === 'rejected' ? 'Rejeitado' : 'Rejeitar'}
-                                        </button>
-                                    ) : null}
-                                    {canSuspend ? (
-                                        <button
-                                            type="button"
-                                            className="app-link-chip disabled:cursor-not-allowed disabled:opacity-55"
-                                            onClick={() => suspend(user.id)}
-                                            disabled={user.approval_status === 'suspended'}
-                                        >
-                                            {user.approval_status === 'suspended' ? 'Suspenso' : 'Suspender'}
-                                        </button>
-                                    ) : null}
+                                <div className="flex items-center justify-between gap-3">
+                                    <div className="min-w-0">
+                                        <p className="responsive-data-key">Roles</p>
+                                        <p className="responsive-data-value">{user.roles.map((role) => role.slug).join(', ') || '-'}</p>
+                                    </div>
+                                    <UserRowActions user={user} actions={rowActions} />
                                 </div>
                             </div>
                         )}
                     />
                     <table className="hidden min-w-full text-sm md:table">
                         <thead>
-                            <tr className="border-b border-border text-left">
-                                <th className="px-4 py-2">Nome</th>
-                                <th className="px-4 py-2">E-mail</th>
-                                <th className="px-4 py-2">Status</th>
-                                <th className="px-4 py-2">Roles</th>
-                                <th className="px-4 py-2">Ações</th>
+                            <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-dim">
+                                <th className="px-4 py-2 font-semibold">Nome</th>
+                                <th className="px-4 py-2 font-semibold">E-mail</th>
+                                <th className="px-4 py-2 font-semibold">Status</th>
+                                <th className="px-4 py-2 font-semibold">Roles</th>
+                                <th className="px-4 py-2 text-right font-semibold">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -206,47 +274,22 @@ export default function AdminUsersIndex({ users, filters }: Props) {
                                 </tr>
                             ) : (
                                 users.data.map((user) => (
-                                    <tr key={user.id} className="admin-table-row align-top">
-                                        <td className="px-4 py-2 text-foreground">{user.name}</td>
-                                        <td className="px-4 py-2 font-mono text-xs text-dim">{user.email}</td>
-                                        <td className="px-4 py-2"><StatusBadge value={user.approval_status} /></td>
-                                        <td className="px-4 py-2 text-dim">
+                                    <tr key={user.id} className="admin-table-row align-middle">
+                                        <td className="px-4 py-2.5">
+                                            <div className="flex items-center gap-3">
+                                                <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[color:var(--primary-100)] text-[11px] font-bold text-[color:var(--primary-600)]">
+                                                    {initials(user.name)}
+                                                </span>
+                                                <span className="font-medium text-foreground">{user.name}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-2.5 font-mono text-xs text-dim">{user.email}</td>
+                                        <td className="px-4 py-2.5"><StatusBadge value={user.approval_status} /></td>
+                                        <td className="px-4 py-2.5 text-dim">
                                             {user.roles.map((role) => role.slug).join(', ') || '-'}
                                         </td>
-                                        <td className="space-x-2 px-4 py-2">
-                                            <Link className="text-xs underline" href={`/admin/users/${user.id}`}>
-                                                Detalhes
-                                            </Link>
-                                            {canApprove ? (
-                                                <button
-                                                    type="button"
-                                                    className="text-xs underline disabled:cursor-not-allowed disabled:no-underline disabled:opacity-60"
-                                                    onClick={() => approve(user.id)}
-                                                    disabled={user.approval_status === 'approved'}
-                                                >
-                                                    {user.approval_status === 'approved' ? 'Aprovado' : 'Aprovar'}
-                                                </button>
-                                            ) : null}
-                                            {canReject ? (
-                                                <button
-                                                    type="button"
-                                                    className="text-xs underline disabled:cursor-not-allowed disabled:no-underline disabled:opacity-60"
-                                                    onClick={() => reject(user.id)}
-                                                    disabled={user.approval_status === 'rejected'}
-                                                >
-                                                    {user.approval_status === 'rejected' ? 'Rejeitado' : 'Rejeitar'}
-                                                </button>
-                                            ) : null}
-                                            {canSuspend ? (
-                                                <button
-                                                    type="button"
-                                                    className="text-xs underline disabled:cursor-not-allowed disabled:no-underline disabled:opacity-60"
-                                                    onClick={() => suspend(user.id)}
-                                                    disabled={user.approval_status === 'suspended'}
-                                                >
-                                                    {user.approval_status === 'suspended' ? 'Suspenso' : 'Suspender'}
-                                                </button>
-                                            ) : null}
+                                        <td className="px-4 py-2.5">
+                                            <UserRowActions user={user} actions={rowActions} />
                                         </td>
                                     </tr>
                                 ))
@@ -266,7 +309,7 @@ export default function AdminUsersIndex({ users, filters }: Props) {
                                 }
                             }}
                             disabled={!link.url}
-                            className={`rounded-sm border px-2 py-1 text-xs font-semibold ${link.active ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-dim'}`}
+                            className={`cursor-pointer rounded-sm border px-2.5 py-1.5 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50 ${link.active ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-dim hover:bg-accent'}`}
                         >
                             <span dangerouslySetInnerHTML={{ __html: link.label }} />
                         </button>
