@@ -1,0 +1,27 @@
+# Build context lives at the repo root (compose `context: ..`) and three
+# stages do `COPY . .`, so without this file the whole tree (incl. .git and a
+# host .env) is shipped to the daemon and baked into the image. Trim it.
+
+# Version control / CI / editors — biggest context bloat, never needed in the image
+.git
+.github
+.idea
+.vscode
+
+# Dependencies and build outputs are rebuilt inside the image stages
+node_modules
+vendor
+public/build
+public/hot
+
+# Secrets are injected at runtime via compose `env_file`; must NOT be baked in
+.env
+.env.*
+
+# Tests / local QA tooling are not part of the prod runtime image
+tests
+phpunit.xml
+.phpunit.cache
+
+# Markdown docs
+*.md
