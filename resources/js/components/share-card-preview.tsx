@@ -1,4 +1,4 @@
-import { Award, BarChart3, Package, Sparkles, Sticker, Trophy } from 'lucide-react';
+import { Award, BarChart3, Megaphone, Package, Sparkles, Sticker, Trophy } from 'lucide-react';
 import { forwardRef   } from 'react';
 import type {ComponentType, ReactNode} from 'react';
 
@@ -41,6 +41,7 @@ const ACCENTS: Record<string, Accent> = {
     sticker_unlocked: { label: 'Figurinha desbloqueada', color: '#fbbf24', Icon: Sticker },
     achievement_unlocked: { label: 'Conquista desbloqueada', color: '#fcd34d', Icon: Award },
     social_mission_approved: { label: 'Missão aprovada', color: '#34d399', Icon: Trophy },
+    social_mission: { label: 'Missão social', color: '#f59e0b', Icon: Megaphone },
 };
 
 const DEFAULT_ACCENT: Accent = { label: 'Álbum da Copa AAPH', color: '#8aa842', Icon: Sparkles };
@@ -62,6 +63,7 @@ const ShareCardPreview = forwardRef<HTMLDivElement, Props>(function ShareCardPre
     const date = String(payload.date ?? '');
     const seasonLabel = date ? `Temporada ${new Date(date).getFullYear()}` : 'Temporada AAPH';
     const stickerImageUrl = type === 'sticker_unlocked' && payload.image_url ? String(payload.image_url) : null;
+    const isMission = type === 'social_mission';
 
     const styles = FORMAT_STYLES[format];
     const accent = ACCENTS[type] ?? DEFAULT_ACCENT;
@@ -200,11 +202,19 @@ const ShareCardPreview = forwardRef<HTMLDivElement, Props>(function ShareCardPre
 
                         {/* Footer */}
                         <div className="space-y-3">
-                            <div>
-                                <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/50">Colecionador</div>
-                                <div className="text-lg font-bold leading-tight text-white">{userName}</div>
-                                <div className="text-[11px] text-white/55">{albumName}</div>
-                            </div>
+                            {isMission ? (
+                                <div>
+                                    <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/50">Como participar</div>
+                                    <div className="text-lg font-bold leading-tight text-white">Envie sua evidência no app</div>
+                                    <div className="text-[11px] text-white/55">{albumName}</div>
+                                </div>
+                            ) : (
+                                <div>
+                                    <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/50">Colecionador</div>
+                                    <div className="text-lg font-bold leading-tight text-white">{userName}</div>
+                                    <div className="text-[11px] text-white/55">{albumName}</div>
+                                </div>
+                            )}
                             <div className="flex items-center justify-between border-t border-white/12 pt-2.5">
                                 <span className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: accent.color }}>#CopaAAPH</span>
                                 <span className="text-[10px] uppercase tracking-[0.12em] text-white/45">Presença · Coleção · Time</span>
