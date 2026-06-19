@@ -35,7 +35,6 @@ type Props = {
     album: { id: number; name: string; slug: string; season: string | null } | null;
     top: RankingRow[];
     me: RankingRow | null;
-    formula: string;
 };
 
 function podiumIcon(position: number) {
@@ -54,7 +53,7 @@ function podiumIcon(position: number) {
     return null;
 }
 
-export default function RankingIndex({ album, top, me, formula }: Props) {
+export default function RankingIndex({ album, top, me }: Props) {
     return (
         <>
             <Head title="Ranking" />
