@@ -63,7 +63,9 @@ export default function AdminSocialMissionShow({ mission, shareText, auditLogs }
                 <div className="flex flex-wrap items-center justify-between gap-2">
                     <h1 className="text-xl font-semibold tracking-tight">{mission.title}</h1>
                     <div className="flex gap-2">
-                        <Link href={`/admin/social-missions/${mission.id}/edit`} className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent">Editar</Link>
+                        {mission.status === 'draft' && (
+                            <Link href={`/admin/social-missions/${mission.id}/edit`} className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent">Editar</Link>
+                        )}
                         <button type="button" onClick={activate} className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent">Ativar</button>
                         <button type="button" onClick={closeMission} className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent">Fechar</button>
                         <button type="button" onClick={cancel} className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent">Cancelar</button>
