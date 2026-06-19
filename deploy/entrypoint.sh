@@ -29,10 +29,16 @@ php artisan optimize
 # www-data — which must be able to write compiled views, framework caches and
 # sessions at runtime (e.g. tempnam() when compiling inline Blade components).
 # Hand those paths to www-data AFTER the root-run artisan steps above so every
-# generated file ends up owned by the worker. storage/app (uploads) is left
-# untouched to keep startup fast.
+# generated file ends up owned by the worker.
+#
+# storage/logs is a named volume that grows unbounded, so a recursive chown
+# over it gets slower on every boot (it delays the rollout's time-to-healthy).
+# The volume is created from the image, where storage is already chowned to
+# www-data, so a non-recursive chown of the mount point is enough to keep it
+# writable. storage/app (uploads) is left untouched to keep startup fast.
 echo "[entrypoint] fixing writable permissions for www-data"
-chown -R www-data:www-data storage/framework storage/logs bootstrap/cache
+chown -R www-data:www-data storage/framework bootstrap/cache
+chown www-data:www-data storage/logs
 
 echo "[entrypoint] starting php-fpm"
 exec php-fpm -F

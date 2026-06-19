@@ -15,7 +15,14 @@ COPY package.json package-lock.json* pnpm-lock.yaml* pnpm-workspace.yaml* .npmrc
 # Cache ~/.npm across builds — avoids re-downloading packages when lock file is unchanged.
 RUN --mount=type=cache,target=/root/.npm \
     npm ci
-COPY . .
+# Copy ONLY the inputs that `vite build` reads, instead of the whole tree.
+# This way a backend-only change (app/, routes/, config/, a migration…) does
+# NOT invalidate this layer, so the Vite build is skipped entirely (cache hit)
+# on the most common deploys. The wayfinder plugin runs only on `serve`
+# (see vite.config.ts), so the production build needs no artisan step — the
+# generated route files are already committed under resources/.
+COPY resources ./resources
+COPY vite.config.ts tsconfig*.json ./
 RUN npm run build
 
 # ---- Stage 2: PHP dependencies ----

@@ -49,15 +49,18 @@ fi
 echo "[deploy] building new immutable image (old container keeps serving)…"
 $COMPOSE build app
 
-echo "[deploy] running migrations on the new image (expand/contract)…"
-# One-off container of the freshly built image; --no-deps avoids touching the
-# running services. The DB stays shared, so migrations apply before the swap.
-$COMPOSE run --rm --no-deps app php artisan migrate --force
-
-echo "[deploy] syncing roles and permissions…"
-# Idempotent: updateOrCreate for each permission, then sync all to the admin role.
-# Must run after every deploy so new permission slugs added to the seeder take effect.
-$COMPOSE run --rm --no-deps app php artisan db:seed --class=RolePermissionSeeder --force
+# Migrations and the permission sync run in a SINGLE throw-away container of
+# the freshly built image, before any traffic is swapped. Folding them into
+# one `run` saves a full container boot (each boot also runs the entrypoint:
+# asset sync + optimize + chown). --no-deps avoids touching running services;
+# the DB stays shared so both apply before the swap.
+#   - migrate: expand/contract, backward-compatible (old container still serves).
+#   - db:seed RolePermissionSeeder: idempotent (updateOrCreate + sync to admin);
+#     must run every deploy so new permission slugs take effect.
+echo "[deploy] running migrations + permission sync on the new image…"
+$COMPOSE run --rm --no-deps app sh -lc '
+    php artisan migrate --force \
+    && php artisan db:seed --class=RolePermissionSeeder --force'
 
 echo "[deploy] zero-downtime rollout of app…"
 # Starts the new container, waits for its healthcheck, then retires the old.
