@@ -1,4 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import { fmtDateTimeBr } from '@/lib/date';
 import type { DriveStep } from 'driver.js';
 import { PageTour, TourReplayButton } from '@/components/page-tour';
 import ShareExportPanel from '@/components/share-export-panel';
@@ -207,11 +208,11 @@ export default function PacksIndex({ pendingPacks, historyPacks, stats, can }: P
                                 <div className="grid grid-cols-2 gap-2">
                                     <div>
                                         <p className="responsive-data-key">Criado em</p>
-                                        <p className="responsive-data-value">{pack.created_at ?? '-'}</p>
+                                        <p className="responsive-data-value">{fmtDateTimeBr(pack.created_at)}</p>
                                     </div>
                                     <div>
                                         <p className="responsive-data-key">Aberto em</p>
-                                        <p className="responsive-data-value">{pack.opened_at ?? '-'}</p>
+                                        <p className="responsive-data-value">{fmtDateTimeBr(pack.opened_at)}</p>
                                     </div>
                                 </div>
                                 <div className="flex flex-wrap gap-2 pt-1">
@@ -262,8 +263,8 @@ export default function PacksIndex({ pendingPacks, historyPacks, stats, can }: P
                                         <td className="px-4 py-2"><OriginBadge source={pack.source} label={sourceLabel(pack)} /></td>
                                         <td className="px-4 py-2"><StatusBadge value={pack.status} /></td>
                                         <td className="px-4 py-2 text-dim">{pack.size}</td>
-                                        <td className="px-4 py-2 text-dim">{pack.created_at ?? '-'}</td>
-                                        <td className="px-4 py-2 text-dim">{pack.opened_at ?? '-'}</td>
+                                        <td className="px-4 py-2 text-dim">{fmtDateTimeBr(pack.created_at)}</td>
+                                        <td className="px-4 py-2 text-dim">{fmtDateTimeBr(pack.opened_at)}</td>
                                         <td className="space-x-2 px-4 py-2">
                                             <Link href={`/packs/${pack.id}`} className="text-xs underline">Detalhes</Link>
                                             {pack.status === 'opened' ? (

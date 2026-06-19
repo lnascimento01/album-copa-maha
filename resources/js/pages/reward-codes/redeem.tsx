@@ -1,4 +1,5 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { fmtDateTimeBr } from '@/lib/date';
 import type { DriveStep } from 'driver.js';
 import type { FormEvent } from 'react';
 import { PageTour, TourReplayButton } from '@/components/page-tour';
@@ -127,7 +128,7 @@ export default function RewardCodeRedeemPage({ recentRedemptions, activeAlbum }:
                                     </div>
                                     <div>
                                         <p className="responsive-data-key">Data</p>
-                                        <p className="responsive-data-value">{item.redeemed_at ?? '-'}</p>
+                                        <p className="responsive-data-value">{fmtDateTimeBr(item.redeemed_at)}</p>
                                     </div>
                                 </div>
                             </div>
@@ -155,7 +156,7 @@ export default function RewardCodeRedeemPage({ recentRedemptions, activeAlbum }:
                                         <td className="px-4 py-2 font-mono text-xs text-dim">{item.reward_code.code}</td>
                                         <td className="px-4 py-2 text-foreground">{item.reward_code.title}</td>
                                         <td className="px-4 py-2 text-dim">{item.reward_code.source_channel}</td>
-                                        <td className="px-4 py-2 text-dim">{item.redeemed_at ?? '-'}</td>
+                                        <td className="px-4 py-2 text-dim">{fmtDateTimeBr(item.redeemed_at)}</td>
                                     </tr>
                                 ))
                             )}

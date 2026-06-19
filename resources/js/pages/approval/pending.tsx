@@ -36,7 +36,7 @@ export default function PendingApprovalPage() {
                 }
 
                 setStatus(currentStatus);
-                setLastCheckAt(new Date().toLocaleTimeString());
+                setLastCheckAt(new Date().toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo' }));
 
                 if (currentStatus === 'approved') {
                     router.visit('/dashboard');

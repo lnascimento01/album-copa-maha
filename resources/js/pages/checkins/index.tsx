@@ -1,4 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { fmtDateTimeBr } from '@/lib/date';
 import { DataTableShell } from '@/components/ui/data-table-shell';
 import { EmptyState } from '@/components/ui/empty-state';
 import { OriginBadge } from '@/components/ui/origin-badge';
@@ -75,7 +76,7 @@ export default function CheckinsIndex({ checkins }: { checkins: { data: Checkin[
                                     </div>
                                     <div className="col-span-2">
                                         <p className="responsive-data-key">Data</p>
-                                        <p className="responsive-data-value">{checkin.checked_at ?? '-'}</p>
+                                        <p className="responsive-data-value">{fmtDateTimeBr(checkin.checked_at)}</p>
                                     </div>
                                 </div>
                                 <div className="pt-1">
@@ -118,7 +119,7 @@ export default function CheckinsIndex({ checkins }: { checkins: { data: Checkin[
                                                 <OriginBadge source="admin" label="Administração" />
                                             )}
                                         </td>
-                                        <td className="px-4 py-2 text-dim">{checkin.checked_at ?? '-'}</td>
+                                        <td className="px-4 py-2 text-dim">{fmtDateTimeBr(checkin.checked_at)}</td>
                                         <td className="px-4 py-2 text-dim">{checkin.sticker_packs_count}</td>
                                         <td className="px-4 py-2">
                                             <Link href={`/checkins/${checkin.id}`} className="text-xs underline">Detalhes</Link>

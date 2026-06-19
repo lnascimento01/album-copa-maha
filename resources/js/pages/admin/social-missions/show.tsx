@@ -1,4 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
+import { fmtDateTimeBr } from '@/lib/date';
+import { PromptDialog } from '@/components/ui/action-dialog';
 
 type Submission = {
     id: number;
@@ -36,18 +39,12 @@ type Mission = {
 type AuditLog = { id: number; action: string; created_at: string | null; metadata: Record<string, unknown> | null; actor: { email: string } | null };
 
 export default function AdminSocialMissionShow({ mission, shareText, auditLogs }: { mission: Mission; shareText: string; auditLogs: AuditLog[] }) {
+    const [cancelOpen, setCancelOpen] = useState(false);
+
     const activate = () => router.patch(`/admin/social-missions/${mission.id}/activate`);
     const closeMission = () => router.patch(`/admin/social-missions/${mission.id}/close`);
     const cancel = () => {
-        const reason = window.prompt('Motivo do cancelamento:');
-
-        if (!reason) {
-            return;
-        }
-
-        router.patch(`/admin/social-missions/${mission.id}/cancel`, {
-            cancellation_reason: reason,
-        });
+        setCancelOpen(true);
     };
 
     return (
@@ -102,7 +99,7 @@ export default function AdminSocialMissionShow({ mission, shareText, auditLogs }
                                         <td className="px-4 py-2">#{submission.id}</td>
                                         <td className="px-4 py-2">{submission.user.email}</td>
                                         <td className="px-4 py-2">{submission.status}</td>
-                                        <td className="px-4 py-2">{submission.submitted_at ?? '-'}</td>
+                                        <td className="px-4 py-2">{fmtDateTimeBr(submission.submitted_at)}</td>
                                         <td className="px-4 py-2">
                                             <Link href={`/admin/social-mission-submissions/${submission.id}`} className="text-xs underline">Analisar</Link>
                                         </td>
@@ -130,7 +127,7 @@ export default function AdminSocialMissionShow({ mission, shareText, auditLogs }
                                     <tr key={log.id} className="border-b align-top">
                                         <td className="px-4 py-2 font-mono text-xs">{log.action}</td>
                                         <td className="px-4 py-2">{log.actor?.email ?? '-'}</td>
-                                        <td className="px-4 py-2">{log.created_at ?? '-'}</td>
+                                        <td className="px-4 py-2">{fmtDateTimeBr(log.created_at)}</td>
                                         <td className="px-4 py-2"><pre className="max-w-[420px] overflow-x-auto text-xs">{JSON.stringify(log.metadata ?? {}, null, 2)}</pre></td>
                                     </tr>
                                 ))}
@@ -139,6 +136,20 @@ export default function AdminSocialMissionShow({ mission, shareText, auditLogs }
                     </div>
                 </div>
             </div>
+
+            <PromptDialog
+                open={cancelOpen}
+                title="Cancelar missão"
+                label="Motivo do cancelamento"
+                required={true}
+                destructive={true}
+                confirmLabel="Cancelar missão"
+                onConfirm={(reason) => {
+                    setCancelOpen(false);
+                    router.patch(`/admin/social-missions/${mission.id}/cancel`, { cancellation_reason: reason });
+                }}
+                onCancel={() => setCancelOpen(false)}
+            />
         </>
     );
 }

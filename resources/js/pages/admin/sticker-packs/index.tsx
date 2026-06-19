@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { fmtDateTimeBr } from '@/lib/date';
 import { DataTableShell } from '@/components/ui/data-table-shell';
 import { EmptyState } from '@/components/ui/empty-state';
 import { OriginBadge } from '@/components/ui/origin-badge';
@@ -166,11 +167,11 @@ export default function AdminStickerPacksIndex({ packs, filters, users, albums, 
                                     </div>
                                     <div>
                                         <p className="responsive-data-key">Criado em</p>
-                                        <p className="responsive-data-value">{pack.created_at ?? '-'}</p>
+                                        <p className="responsive-data-value">{fmtDateTimeBr(pack.created_at)}</p>
                                     </div>
                                     <div>
                                         <p className="responsive-data-key">Aberto em</p>
-                                        <p className="responsive-data-value">{pack.opened_at ?? '-'}</p>
+                                        <p className="responsive-data-value">{fmtDateTimeBr(pack.opened_at)}</p>
                                     </div>
                                 </div>
                                 <div className="pt-1">
@@ -211,8 +212,8 @@ export default function AdminStickerPacksIndex({ packs, filters, users, albums, 
                                         <td className="px-4 py-2 text-dim">{pack.size}</td>
                                         <td className="px-4 py-2"><OriginBadge source={pack.source} label={sourceLabel(pack)} /></td>
                                         <td className="px-4 py-2 text-dim">{pack.granted_by_user?.email ?? '-'}</td>
-                                        <td className="px-4 py-2 text-dim">{pack.created_at ?? '-'}</td>
-                                        <td className="px-4 py-2 text-dim">{pack.opened_at ?? '-'}</td>
+                                        <td className="px-4 py-2 text-dim">{fmtDateTimeBr(pack.created_at)}</td>
+                                        <td className="px-4 py-2 text-dim">{fmtDateTimeBr(pack.opened_at)}</td>
                                         <td className="px-4 py-2">
                                             <Link href={`/admin/sticker-packs/${pack.id}`} className="text-xs underline">Detalhes</Link>
                                         </td>

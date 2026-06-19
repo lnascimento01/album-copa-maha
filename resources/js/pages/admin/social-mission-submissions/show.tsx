@@ -1,4 +1,7 @@
 import { Head, router } from '@inertiajs/react';
+import { useState } from 'react';
+import { fmtDateTimeBr } from '@/lib/date';
+import { PromptDialog } from '@/components/ui/action-dialog';
 
 type Submission = {
     id: number;
@@ -17,24 +20,15 @@ type Submission = {
 type AuditLog = { id: number; action: string; metadata: Record<string, unknown> | null; created_at: string | null; actor: { email: string } | null };
 
 export default function AdminSocialMissionSubmissionShow({ submission, auditLogs, can }: { submission: Submission; auditLogs: AuditLog[]; can: { approve: boolean; reject: boolean } }) {
-    const approve = () => {
-        const note = window.prompt('Nota da aprovação (opcional):') ?? '';
+    const [approveOpen, setApproveOpen] = useState(false);
+    const [rejectOpen, setRejectOpen] = useState(false);
 
-        router.patch(`/admin/social-mission-submissions/${submission.id}/approve`, {
-            note,
-        });
+    const approve = () => {
+        setApproveOpen(true);
     };
 
     const reject = () => {
-        const reason = window.prompt('Motivo da rejeição:');
-
-        if (!reason) {
-            return;
-        }
-
-        router.patch(`/admin/social-mission-submissions/${submission.id}/reject`, {
-            rejection_reason: reason,
-        });
+        setRejectOpen(true);
     };
 
     return (
@@ -53,8 +47,8 @@ export default function AdminSocialMissionSubmissionShow({ submission, auditLogs
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Missão:</span> {submission.mission.title}</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Participante:</span> {submission.user.email}</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Status:</span> {submission.status}</div>
-                    <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Enviado em:</span> {submission.submitted_at ?? '-'}</div>
-                    <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Revisado em:</span> {submission.reviewed_at ?? '-'}</div>
+                    <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Enviado em:</span> {fmtDateTimeBr(submission.submitted_at)}</div>
+                    <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Revisado em:</span> {fmtDateTimeBr(submission.reviewed_at)}</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Revisor:</span> {submission.reviewer?.email ?? '-'}</div>
                 </div>
 
@@ -111,7 +105,7 @@ export default function AdminSocialMissionSubmissionShow({ submission, auditLogs
                                     <tr key={log.id} className="border-b align-top">
                                         <td className="px-4 py-2 font-mono text-xs">{log.action}</td>
                                         <td className="px-4 py-2">{log.actor?.email ?? '-'}</td>
-                                        <td className="px-4 py-2">{log.created_at ?? '-'}</td>
+                                        <td className="px-4 py-2">{fmtDateTimeBr(log.created_at)}</td>
                                         <td className="px-4 py-2"><pre className="max-w-[420px] overflow-x-auto text-xs">{JSON.stringify(log.metadata ?? {}, null, 2)}</pre></td>
                                     </tr>
                                 ))}
@@ -120,6 +114,33 @@ export default function AdminSocialMissionSubmissionShow({ submission, auditLogs
                     </div>
                 </div>
             </div>
+
+            <PromptDialog
+                open={approveOpen}
+                title="Aprovar submissão"
+                label="Nota da aprovação (opcional)"
+                required={false}
+                confirmLabel="Aprovar"
+                onConfirm={(note) => {
+                    setApproveOpen(false);
+                    router.patch(`/admin/social-mission-submissions/${submission.id}/approve`, { note });
+                }}
+                onCancel={() => setApproveOpen(false)}
+            />
+
+            <PromptDialog
+                open={rejectOpen}
+                title="Rejeitar submissão"
+                label="Motivo da rejeição"
+                required={true}
+                destructive={true}
+                confirmLabel="Rejeitar"
+                onConfirm={(reason) => {
+                    setRejectOpen(false);
+                    router.patch(`/admin/social-mission-submissions/${submission.id}/reject`, { rejection_reason: reason });
+                }}
+                onCancel={() => setRejectOpen(false)}
+            />
         </>
     );
 }

@@ -1,4 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { fmtDateTimeBr } from '@/lib/date';
 import { PageHeader } from '@/components/ui/page-header';
 
 type Flash = {
@@ -64,7 +65,7 @@ export default function CheckinTokenPage({ session, activity, status, message, a
                             <div className="album-paper p-4 text-sm"><span className="text-dim">Tipo:</span> {activity.type}</div>
                             <div className="album-paper p-4 text-sm"><span className="text-dim">Status:</span> {activity.status}</div>
                             <div className="album-paper p-4 text-sm"><span className="text-dim">Recompensa:</span> {activity.reward_pack_quantity} pacote(s) de {activity.reward_pack_size}</div>
-                            <div className="album-paper p-4 text-sm"><span className="text-dim">Expira em:</span> {session.expires_at ?? '-'}</div>
+                            <div className="album-paper p-4 text-sm"><span className="text-dim">Expira em:</span> {fmtDateTimeBr(session.expires_at)}</div>
                             <div className="album-paper p-4 text-sm"><span className="text-dim">Usos:</span> {session.used_count}{session.max_uses ? `/${session.max_uses}` : ''}</div>
                         </div>
 

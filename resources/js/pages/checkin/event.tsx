@@ -1,5 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { fmtDateTimeBr } from '@/lib/date';
 import { PageHeader } from '@/components/ui/page-header';
 
 type Flash = {
@@ -34,27 +35,6 @@ type Props = {
     message: string;
     alreadyCheckedIn: boolean;
 };
-
-function formatDateTimeBr(value: string | null, timezone: string): string {
-    if (!value) {
-        return '-';
-    }
-
-    const date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) {
-        return value;
-    }
-
-    return new Intl.DateTimeFormat('pt-BR', {
-        timeZone: timezone || 'America/Sao_Paulo',
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    }).format(date);
-}
 
 export default function EventCheckinPage({ token, event, status, message, alreadyCheckedIn }: Props) {
     const page = usePage<{ flash?: Flash; errors: Record<string, string> }>();
@@ -118,7 +98,7 @@ export default function EventCheckinPage({ token, event, status, message, alread
                             <div className="album-paper p-4 text-sm"><span className="text-dim">Local:</span> {event.location_name ?? '-'}</div>
                             <div className="album-paper p-4 text-sm">
                                 <span className="text-dim">Janela:</span>{' '}
-                                {formatDateTimeBr(event.starts_at, event.event_timezone)} até {formatDateTimeBr(event.ends_at, event.event_timezone)}
+                                {fmtDateTimeBr(event.starts_at, event.event_timezone)} até {fmtDateTimeBr(event.ends_at, event.event_timezone)}
                             </div>
                             <div className="album-paper p-4 text-sm"><span className="text-dim">Raio permitido:</span> {event.radius_meters}m</div>
                             <div className="album-paper p-4 text-sm"><span className="text-dim">Precisão máxima:</span> {event.max_accuracy_meters}m</div>

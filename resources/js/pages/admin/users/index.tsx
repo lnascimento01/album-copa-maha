@@ -2,6 +2,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Ban, Check, Eye, MoreVertical, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { ConfirmDialog, PromptDialog } from '@/components/ui/action-dialog';
 import { Button } from '@/components/ui/button';
 import { DataTableShell } from '@/components/ui/data-table-shell';
 import {
@@ -132,6 +133,8 @@ export default function AdminUsersIndex({ users, filters }: Props) {
 
     const [status, setStatus] = useState(filters.status ?? '');
     const [search, setSearch] = useState(filters.search ?? '');
+    const [rejectTarget, setRejectTarget] = useState<number | null>(null);
+    const [suspendTarget, setSuspendTarget] = useState<number | null>(null);
 
     const canApprove = permissions.includes('users.approve');
     const canReject = permissions.includes('users.reject');
@@ -158,27 +161,11 @@ export default function AdminUsersIndex({ users, filters }: Props) {
     };
 
     const reject = (id: number) => {
-        const reason = window.prompt('Motivo da rejeição:');
-
-        if (!reason) {
-            return;
-        }
-
-        router.patch(`/admin/users/${id}/reject`, { rejection_reason: reason }, {
-            preserveScroll: true,
-            onSuccess: () => router.reload({ only: ['users'] }),
-        });
+        setRejectTarget(id);
     };
 
     const suspend = (id: number) => {
-        if (!window.confirm('Confirma suspender este usuário?')) {
-            return;
-        }
-
-        router.patch(`/admin/users/${id}/suspend`, {}, {
-            preserveScroll: true,
-            onSuccess: () => router.reload({ only: ['users'] }),
-        });
+        setSuspendTarget(id);
     };
 
     const rowActions: RowActions = {
@@ -315,6 +302,45 @@ export default function AdminUsersIndex({ users, filters }: Props) {
                     ))}
                 </div>
             </div>
+
+            <PromptDialog
+                open={rejectTarget !== null}
+                title="Rejeitar usuário"
+                label="Motivo da rejeição"
+                required={true}
+                destructive={true}
+                confirmLabel="Rejeitar"
+                onConfirm={(reason) => {
+                    const id = rejectTarget;
+                    setRejectTarget(null);
+                    if (id !== null) {
+                        router.patch(`/admin/users/${id}/reject`, { rejection_reason: reason }, {
+                            preserveScroll: true,
+                            onSuccess: () => router.reload({ only: ['users'] }),
+                        });
+                    }
+                }}
+                onCancel={() => setRejectTarget(null)}
+            />
+
+            <ConfirmDialog
+                open={suspendTarget !== null}
+                title="Suspender usuário"
+                message="Confirma suspender este usuário?"
+                destructive={true}
+                confirmLabel="Suspender"
+                onConfirm={() => {
+                    const id = suspendTarget;
+                    setSuspendTarget(null);
+                    if (id !== null) {
+                        router.patch(`/admin/users/${id}/suspend`, {}, {
+                            preserveScroll: true,
+                            onSuccess: () => router.reload({ only: ['users'] }),
+                        });
+                    }
+                }}
+                onCancel={() => setSuspendTarget(null)}
+            />
         </>
     );
 }

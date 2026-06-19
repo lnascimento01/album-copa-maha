@@ -1,4 +1,7 @@
 import { Head, router } from '@inertiajs/react';
+import { useState } from 'react';
+import { fmtDateTimeBr } from '@/lib/date';
+import { PromptDialog } from '@/components/ui/action-dialog';
 
 type Sticker = { id: number; code: string; title: string; type: string; rarity: string };
 
@@ -38,34 +41,15 @@ type AuditLog = {
 };
 
 export default function AdminStickerPackShow({ pack, auditLogs, canCancel, canRevoke }: { pack: Pack; auditLogs: AuditLog[]; canCancel: boolean; canRevoke: boolean }) {
+    const [cancelOpen, setCancelOpen] = useState(false);
+    const [revokeOpen, setRevokeOpen] = useState(false);
+
     const cancel = () => {
-        const reason = window.prompt('Motivo do cancelamento:');
-
-        if (!reason) {
-            return;
-        }
-
-        router.patch(`/admin/sticker-packs/${pack.id}/cancel`, {
-            cancellation_reason: reason,
-        });
+        setCancelOpen(true);
     };
 
     const revoke = () => {
-        const reason = window.prompt(
-            `Revogar pacote #${pack.id} (status: ${pack.status})?\n\nIsso irá:\n- Remover as figurinhas do álbum do usuário\n- Recalcular conquistas\n- Cancelar o pacote\n\nMotivo:`,
-        );
-
-        if (!reason) {
-            return;
-        }
-
-        if (!window.confirm(`Confirmar revogação do pacote #${pack.id}? Esta ação não pode ser desfeita.`)) {
-            return;
-        }
-
-        router.delete(`/admin/sticker-packs/${pack.id}`, {
-            data: { cancellation_reason: reason },
-        });
+        setRevokeOpen(true);
     };
 
     return (
@@ -97,9 +81,9 @@ export default function AdminStickerPackShow({ pack, auditLogs, canCancel, canRe
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Missão social:</span> {pack.social_mission?.title ?? '-'}</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Submissão social:</span> {pack.social_mission_submission_id ? `#${pack.social_mission_submission_id}` : '-'}</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Concedido por:</span> {pack.granted_by_user?.email ?? '-'}</div>
-                    <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Criado em:</span> {pack.created_at ?? '-'}</div>
-                    <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Aberto em:</span> {pack.opened_at ?? '-'}</div>
-                    <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Cancelado em:</span> {pack.cancelled_at ?? '-'}</div>
+                    <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Criado em:</span> {fmtDateTimeBr(pack.created_at)}</div>
+                    <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Aberto em:</span> {fmtDateTimeBr(pack.opened_at)}</div>
+                    <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Cancelado em:</span> {fmtDateTimeBr(pack.cancelled_at)}</div>
                 </div>
 
                 <div className="rounded-sm border p-4">
@@ -152,7 +136,7 @@ export default function AdminStickerPackShow({ pack, auditLogs, canCancel, canRe
                                     <tr key={log.id} className="border-b align-top">
                                         <td className="px-4 py-2 font-mono text-xs">{log.action}</td>
                                         <td className="px-4 py-2">{log.actor?.email ?? '-'}</td>
-                                        <td className="px-4 py-2">{log.created_at ?? '-'}</td>
+                                        <td className="px-4 py-2">{fmtDateTimeBr(log.created_at)}</td>
                                         <td className="px-4 py-2"><pre className="max-w-[420px] overflow-x-auto text-xs">{JSON.stringify(log.metadata ?? {}, null, 2)}</pre></td>
                                     </tr>
                                 ))}
@@ -161,6 +145,35 @@ export default function AdminStickerPackShow({ pack, auditLogs, canCancel, canRe
                     </div>
                 </div>
             </div>
+
+            <PromptDialog
+                open={cancelOpen}
+                title="Cancelar pacote"
+                label="Motivo do cancelamento"
+                required={true}
+                destructive={true}
+                confirmLabel="Cancelar pacote"
+                onConfirm={(reason) => {
+                    setCancelOpen(false);
+                    router.patch(`/admin/sticker-packs/${pack.id}/cancel`, { cancellation_reason: reason });
+                }}
+                onCancel={() => setCancelOpen(false)}
+            />
+
+            <PromptDialog
+                open={revokeOpen}
+                title={`Revogar pacote #${pack.id}`}
+                label="Motivo da revogação"
+                description={`Isso irá remover as figurinhas do álbum do usuário, recalcular conquistas e cancelar o pacote. Status atual: ${pack.status}. Esta ação não pode ser desfeita.`}
+                required={true}
+                destructive={true}
+                confirmLabel="Revogar pacote"
+                onConfirm={(reason) => {
+                    setRevokeOpen(false);
+                    router.delete(`/admin/sticker-packs/${pack.id}`, { data: { cancellation_reason: reason } });
+                }}
+                onCancel={() => setRevokeOpen(false)}
+            />
         </>
     );
 }

@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { fmtDateTimeBr } from '@/lib/date';
 import { DataTableShell } from '@/components/ui/data-table-shell';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
@@ -155,7 +156,7 @@ export default function AdminActivitiesIndex({ activities, filters, statuses, ty
                                         <td className="px-4 py-2 text-dim">{activity.album.name}</td>
                                         <td className="px-4 py-2 text-dim">{activity.type}</td>
                                         <td className="px-4 py-2"><StatusBadge value={activity.status} /></td>
-                                        <td className="px-4 py-2 text-dim">{activity.starts_at ?? '-'}</td>
+                                        <td className="px-4 py-2 text-dim">{fmtDateTimeBr(activity.starts_at)}</td>
                                         <td className="px-4 py-2 text-dim">{activity.reward_pack_quantity}x{activity.reward_pack_size}</td>
                                         <td className="px-4 py-2 text-dim">{activity.checkins_count}</td>
                                         <td className="px-4 py-2 text-dim">{activity.sticker_packs_count}</td>

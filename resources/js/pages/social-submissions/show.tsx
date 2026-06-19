@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import { fmtDateTimeBr } from '@/lib/date';
 
 type Submission = {
     id: number;
@@ -24,8 +25,8 @@ export default function SocialSubmissionShow({ submission }: { submission: Submi
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Missão:</span> {submission.mission.title}</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Status:</span> {submission.status}</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Revisor:</span> {submission.reviewer?.email ?? '-'}</div>
-                    <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Enviado:</span> {submission.submitted_at ?? '-'}</div>
-                    <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Revisado:</span> {submission.reviewed_at ?? '-'}</div>
+                    <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Enviado:</span> {fmtDateTimeBr(submission.submitted_at)}</div>
+                    <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Revisado:</span> {fmtDateTimeBr(submission.reviewed_at)}</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Motivo rejeição:</span> {submission.rejection_reason ?? '-'}</div>
                 </div>
 

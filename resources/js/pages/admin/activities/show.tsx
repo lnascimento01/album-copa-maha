@@ -1,6 +1,8 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { lazy, Suspense, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
+import { fmtDateTimeBr } from '@/lib/date';
+import { ConfirmDialog, PromptDialog } from '@/components/ui/action-dialog';
 
 type UserRef = { id: number; name: string; email: string };
 
@@ -87,27 +89,6 @@ type Props = {
     };
 };
 
-function formatDateTimeBr(value: string | null, timezone?: string): string {
-    if (!value) {
-        return '-';
-    }
-
-    const date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) {
-        return value;
-    }
-
-    return new Intl.DateTimeFormat('pt-BR', {
-        timeZone: timezone || 'America/Sao_Paulo',
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    }).format(date);
-}
-
 const LazyQRCodeSVG = lazy(async () => {
     const module = await import('qrcode.react');
 
@@ -120,6 +101,10 @@ export default function AdminActivityShow({ activity, checkins, checkinSessions,
 
     const [userId, setUserId] = useState('');
     const [notes, setNotes] = useState('');
+
+    const [cancelActivityOpen, setCancelActivityOpen] = useState(false);
+    const [revokeCheckinTarget, setRevokeCheckinTarget] = useState<number | null>(null);
+    const [revokeSessionTarget, setRevokeSessionTarget] = useState<number | null>(null);
 
     const [durationMinutes, setDurationMinutes] = useState(15);
     const [maxUses, setMaxUses] = useState('');
@@ -167,39 +152,15 @@ export default function AdminActivityShow({ activity, checkins, checkinSessions,
     };
 
     const cancelActivity = () => {
-        const reason = window.prompt('Motivo do cancelamento da atividade:');
-
-        if (!reason) {
-            return;
-        }
-
-        router.patch(`/admin/activities/${activity.id}/cancel`, {
-            cancellation_reason: reason,
-        });
+        setCancelActivityOpen(true);
     };
 
     const revokeCheckin = (checkinId: number) => {
-        const reason = window.prompt('Motivo da revogação:');
-
-        if (!reason) {
-            return;
-        }
-
-        router.patch(`/admin/activity-checkins/${checkinId}/revoke`, {
-            revoke_reason: reason,
-        });
+        setRevokeCheckinTarget(checkinId);
     };
 
     const revokeSession = (sessionId: number) => {
-        const reason = window.prompt('Motivo da revogação da sessão:');
-
-        if (!reason) {
-            return;
-        }
-
-        router.patch(`/admin/activity-checkin-sessions/${sessionId}/revoke`, {
-            revoke_reason: reason,
-        });
+        setRevokeSessionTarget(sessionId);
     };
 
     return (
@@ -223,11 +184,11 @@ export default function AdminActivityShow({ activity, checkins, checkinSessions,
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Tipo:</span> {activity.type}</div>
                     <div className="rounded-sm border p-4 text-sm">
                         <span className="text-muted-foreground">Início:</span>{' '}
-                        {activity.starts_at_display ?? formatDateTimeBr(activity.starts_at, activity.event_timezone)}
+                        {activity.starts_at_display ?? fmtDateTimeBr(activity.starts_at, activity.event_timezone)}
                     </div>
                     <div className="rounded-sm border p-4 text-sm">
                         <span className="text-muted-foreground">Fim:</span>{' '}
-                        {activity.ends_at_display ?? formatDateTimeBr(activity.ends_at, activity.event_timezone)}
+                        {activity.ends_at_display ?? fmtDateTimeBr(activity.ends_at, activity.event_timezone)}
                     </div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Recompensa:</span> {activity.reward_pack_quantity} pacote(s) de {activity.reward_pack_size} figurinhas</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Check-ins confirmados:</span> {activity.checkins_count}</div>
@@ -277,7 +238,7 @@ export default function AdminActivityShow({ activity, checkins, checkinSessions,
                         <div className="mt-3 rounded-sm border p-3 text-sm">
                             <div><span className="text-muted-foreground">Sessão ativa:</span> #{activeSession.id}</div>
                             <div><span className="text-muted-foreground">Código:</span> {activeSession.public_code ?? '-'}</div>
-                            <div><span className="text-muted-foreground">Expira em:</span> {activeSession.expires_at ?? '-'}</div>
+                            <div><span className="text-muted-foreground">Expira em:</span> {fmtDateTimeBr(activeSession.expires_at)}</div>
                             <div><span className="text-muted-foreground">Usos:</span> {activeSession.used_count}{activeSession.max_uses ? `/${activeSession.max_uses}` : ''}</div>
                             {can.sessionRevoke ? (
                                 <button type="button" onClick={() => revokeSession(activeSession.id)} className="mt-2 rounded-sm border px-3 py-2 text-xs">
@@ -358,7 +319,7 @@ export default function AdminActivityShow({ activity, checkins, checkinSessions,
                                     <td className="px-4 py-2 font-mono text-xs">#{checkin.id}</td>
                                     <td className="px-4 py-2">{checkin.user.email}</td>
                                     <td className="px-4 py-2">{checkin.status}</td>
-                                    <td className="px-4 py-2">{checkin.checked_at ?? '-'}</td>
+                                    <td className="px-4 py-2">{fmtDateTimeBr(checkin.checked_at)}</td>
                                     <td className="px-4 py-2">{checkin.sticker_packs_count}</td>
                                     <td className="px-4 py-2">
                                         {can.checkinRevoke && checkin.status === 'confirmed' ? (
@@ -390,7 +351,7 @@ export default function AdminActivityShow({ activity, checkins, checkinSessions,
                                     <tr key={log.id} className="border-b align-top">
                                         <td className="px-4 py-2 font-mono text-xs">{log.action}</td>
                                         <td className="px-4 py-2">{log.actor?.email ?? '-'}</td>
-                                        <td className="px-4 py-2">{log.created_at ?? '-'}</td>
+                                        <td className="px-4 py-2">{fmtDateTimeBr(log.created_at)}</td>
                                         <td className="px-4 py-2"><pre className="max-w-[420px] overflow-x-auto text-xs">{JSON.stringify(log.metadata ?? {}, null, 2)}</pre></td>
                                     </tr>
                                 ))}
@@ -399,6 +360,54 @@ export default function AdminActivityShow({ activity, checkins, checkinSessions,
                     </div>
                 </div>
             </div>
+
+            <PromptDialog
+                open={cancelActivityOpen}
+                title="Cancelar atividade"
+                label="Motivo do cancelamento da atividade"
+                required={true}
+                destructive={true}
+                confirmLabel="Cancelar atividade"
+                onConfirm={(reason) => {
+                    setCancelActivityOpen(false);
+                    router.patch(`/admin/activities/${activity.id}/cancel`, { cancellation_reason: reason });
+                }}
+                onCancel={() => setCancelActivityOpen(false)}
+            />
+
+            <PromptDialog
+                open={revokeCheckinTarget !== null}
+                title="Revogar check-in"
+                label="Motivo da revogação"
+                required={true}
+                destructive={true}
+                confirmLabel="Revogar"
+                onConfirm={(reason) => {
+                    const id = revokeCheckinTarget;
+                    setRevokeCheckinTarget(null);
+                    if (id !== null) {
+                        router.patch(`/admin/activity-checkins/${id}/revoke`, { revoke_reason: reason });
+                    }
+                }}
+                onCancel={() => setRevokeCheckinTarget(null)}
+            />
+
+            <PromptDialog
+                open={revokeSessionTarget !== null}
+                title="Revogar sessão de check-in"
+                label="Motivo da revogação da sessão"
+                required={true}
+                destructive={true}
+                confirmLabel="Revogar"
+                onConfirm={(reason) => {
+                    const id = revokeSessionTarget;
+                    setRevokeSessionTarget(null);
+                    if (id !== null) {
+                        router.patch(`/admin/activity-checkin-sessions/${id}/revoke`, { revoke_reason: reason });
+                    }
+                }}
+                onCancel={() => setRevokeSessionTarget(null)}
+            />
         </>
     );
 }

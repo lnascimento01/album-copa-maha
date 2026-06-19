@@ -1,4 +1,5 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { fmtDateTimeBr } from '@/lib/date';
 import type { FormEvent } from 'react';
 
 type Mission = {
@@ -48,7 +49,7 @@ export default function SocialMissionShow({ mission, ownSubmissions }: { mission
                 <div className="rounded-sm border p-4 text-sm">
                     <div><span className="text-muted-foreground">Tipo:</span> {mission.type}</div>
                     <div><span className="text-muted-foreground">Recompensa:</span> {mission.reward_pack_quantity} pacote(s) de {mission.reward_pack_size}</div>
-                    <div><span className="text-muted-foreground">Prazo:</span> {mission.ends_at ?? 'indefinido'}</div>
+                    <div><span className="text-muted-foreground">Prazo:</span> {mission.ends_at ? fmtDateTimeBr(mission.ends_at) : 'indefinido'}</div>
                 </div>
 
                 <div className="rounded-sm border p-4">
@@ -92,7 +93,7 @@ export default function SocialMissionShow({ mission, ownSubmissions }: { mission
                                     <tr key={submission.id} className="border-b">
                                         <td className="px-4 py-2">#{submission.id}</td>
                                         <td className="px-4 py-2">{submission.status}</td>
-                                        <td className="px-4 py-2">{submission.submitted_at ?? '-'}</td>
+                                        <td className="px-4 py-2">{fmtDateTimeBr(submission.submitted_at)}</td>
                                         <td className="px-4 py-2">{submission.rejection_reason ?? '-'}</td>
                                         <td className="px-4 py-2"><Link href={`/social-submissions/${submission.id}`} className="text-xs underline">Detalhes</Link></td>
                                     </tr>

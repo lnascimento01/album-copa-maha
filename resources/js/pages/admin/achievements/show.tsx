@@ -1,5 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import type { FormEvent } from 'react';
+import { fmtDateTimeBr } from '@/lib/date';
 
 type UserRef = { id: number; name: string; email: string };
 
@@ -133,7 +134,7 @@ export default function AdminAchievementsShow({ achievement, users, auditLogs, c
                                     <tr key={log.id} className="border-b align-top">
                                         <td className="px-4 py-2 font-mono text-xs">{log.action}</td>
                                         <td className="px-4 py-2">{log.actor?.email ?? '-'}</td>
-                                        <td className="px-4 py-2">{log.created_at ?? '-'}</td>
+                                        <td className="px-4 py-2">{fmtDateTimeBr(log.created_at)}</td>
                                         <td className="px-4 py-2"><pre className="max-w-lg overflow-x-auto text-[11px]">{JSON.stringify(log.metadata ?? {}, null, 2)}</pre></td>
                                     </tr>
                                 ))}

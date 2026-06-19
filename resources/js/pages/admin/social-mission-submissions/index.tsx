@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { fmtDateTimeBr } from '@/lib/date';
 import { DataTableShell } from '@/components/ui/data-table-shell';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
@@ -112,7 +113,7 @@ export default function AdminSocialMissionSubmissionsIndex({ submissions, filter
                                         <td className="px-4 py-2 text-foreground">{submission.mission.title}</td>
                                         <td className="px-4 py-2 text-dim">{submission.user.email}</td>
                                         <td className="px-4 py-2"><StatusBadge value={submission.status} /></td>
-                                        <td className="px-4 py-2 text-dim">{submission.submitted_at ?? '-'}</td>
+                                        <td className="px-4 py-2 text-dim">{fmtDateTimeBr(submission.submitted_at)}</td>
                                         <td className="px-4 py-2"><Link href={`/admin/social-mission-submissions/${submission.id}`} className="text-xs underline">Detalhes</Link></td>
                                     </tr>
                                 ))

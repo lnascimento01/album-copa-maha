@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { fmtDateTimeBr } from '@/lib/date';
 import { DataTableShell } from '@/components/ui/data-table-shell';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
@@ -135,7 +136,7 @@ export default function AuditLogsIndex({ auditLogs, filters, actors, targets, ac
                             <div className="space-y-2">
                                 <div className="flex items-start justify-between gap-2">
                                     <p className="font-mono text-xs text-foreground">{log.action}</p>
-                                    <p className="text-xs text-dim">{log.created_at ?? '-'}</p>
+                                    <p className="text-xs text-dim">{fmtDateTimeBr(log.created_at)}</p>
                                 </div>
                                 <div className="grid grid-cols-2 gap-2">
                                     <div>
@@ -179,7 +180,7 @@ export default function AuditLogsIndex({ auditLogs, filters, actors, targets, ac
                                         <td className="px-4 py-2 font-mono text-xs text-foreground">{log.action}</td>
                                         <td className="px-4 py-2 text-dim">{log.actor?.email ?? '-'}</td>
                                         <td className="px-4 py-2 text-dim">{log.target?.email ?? '-'}</td>
-                                        <td className="px-4 py-2 text-dim">{log.created_at ?? '-'}</td>
+                                        <td className="px-4 py-2 text-dim">{fmtDateTimeBr(log.created_at)}</td>
                                         <td className="px-4 py-2">
                                             <pre className="max-w-[360px] overflow-x-auto whitespace-pre-wrap text-xs text-dim">
                                                 {JSON.stringify(log.metadata ?? {}, null, 2)}

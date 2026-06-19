@@ -1,4 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
+import { fmtDateTimeBr } from '@/lib/date';
+import { PromptDialog } from '@/components/ui/action-dialog';
 
 type RewardCode = {
     id: number;
@@ -24,20 +27,14 @@ type RewardCode = {
 type AuditLog = { id: number; action: string; metadata: Record<string, unknown> | null; created_at: string | null; actor: { email: string } | null };
 
 export default function AdminRewardCodeShow({ rewardCode, shareText, auditLogs }: { rewardCode: RewardCode; shareText: string; auditLogs: AuditLog[] }) {
+    const [revokeOpen, setRevokeOpen] = useState(false);
+
     const activate = () => {
         router.patch(`/admin/reward-codes/${rewardCode.id}/activate`);
     };
 
     const revoke = () => {
-        const reason = window.prompt('Motivo da revogação:');
-
-        if (!reason) {
-            return;
-        }
-
-        router.patch(`/admin/reward-codes/${rewardCode.id}/revoke`, {
-            revoke_reason: reason,
-        });
+        setRevokeOpen(true);
     };
 
     return (
@@ -83,7 +80,7 @@ export default function AdminRewardCodeShow({ rewardCode, shareText, auditLogs }
                                     <tr key={redemption.id} className="border-b">
                                         <td className="px-4 py-2">#{redemption.id}</td>
                                         <td className="px-4 py-2">{redemption.user.email}</td>
-                                        <td className="px-4 py-2">{redemption.redeemed_at ?? '-'}</td>
+                                        <td className="px-4 py-2">{fmtDateTimeBr(redemption.redeemed_at)}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -108,7 +105,7 @@ export default function AdminRewardCodeShow({ rewardCode, shareText, auditLogs }
                                     <tr key={log.id} className="border-b align-top">
                                         <td className="px-4 py-2 font-mono text-xs">{log.action}</td>
                                         <td className="px-4 py-2">{log.actor?.email ?? '-'}</td>
-                                        <td className="px-4 py-2">{log.created_at ?? '-'}</td>
+                                        <td className="px-4 py-2">{fmtDateTimeBr(log.created_at)}</td>
                                         <td className="px-4 py-2"><pre className="max-w-[420px] overflow-x-auto text-xs">{JSON.stringify(log.metadata ?? {}, null, 2)}</pre></td>
                                     </tr>
                                 ))}
@@ -117,6 +114,19 @@ export default function AdminRewardCodeShow({ rewardCode, shareText, auditLogs }
                     </div>
                 </div>
             </div>
+            <PromptDialog
+                open={revokeOpen}
+                title="Revogar código"
+                label="Motivo da revogação"
+                required={true}
+                destructive={true}
+                confirmLabel="Revogar"
+                onConfirm={(reason) => {
+                    setRevokeOpen(false);
+                    router.patch(`/admin/reward-codes/${rewardCode.id}/revoke`, { revoke_reason: reason });
+                }}
+                onCancel={() => setRevokeOpen(false)}
+            />
         </>
     );
 }

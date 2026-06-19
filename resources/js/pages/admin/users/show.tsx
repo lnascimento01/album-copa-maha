@@ -1,4 +1,7 @@
 import { Head, router } from '@inertiajs/react';
+import { useState } from 'react';
+import { fmtDateTimeBr } from '@/lib/date';
+import { ConfirmDialog, PromptDialog } from '@/components/ui/action-dialog';
 
 type Role = {
     id: number;
@@ -46,34 +49,24 @@ type Props = {
 };
 
 export default function AdminUserShow({ userDetail, auditLogs, canApprove, canReject, canSuspend, canResetStickers }: Props) {
+    const [rejectOpen, setRejectOpen] = useState(false);
+    const [suspendOpen, setSuspendOpen] = useState(false);
+    const [resetStickersOpen, setResetStickersOpen] = useState(false);
+
     const approve = () => {
         router.patch(`/admin/users/${userDetail.id}/approve`);
     };
 
     const reject = () => {
-        const reason = window.prompt('Motivo da rejeição:');
-
-        if (!reason) {
-            return;
-        }
-
-        router.patch(`/admin/users/${userDetail.id}/reject`, { rejection_reason: reason });
+        setRejectOpen(true);
     };
 
     const suspend = () => {
-        if (!window.confirm('Confirma suspender este usuário?')) {
-            return;
-        }
-
-        router.patch(`/admin/users/${userDetail.id}/suspend`);
+        setSuspendOpen(true);
     };
 
     const resetStickers = () => {
-        if (!window.confirm(`Resetar todo o histórico de figurinhas de ${userDetail.name}? Os registros serão mantidos com soft delete.`)) {
-            return;
-        }
-
-        router.delete(`/admin/users/${userDetail.id}/stickers/reset`);
+        setResetStickersOpen(true);
     };
 
     return (
@@ -163,7 +156,7 @@ export default function AdminUserShow({ userDetail, auditLogs, canApprove, canRe
                                     <tr key={log.id} className="border-b align-top">
                                         <td className="px-4 py-2 font-mono text-xs">{log.action}</td>
                                         <td className="px-4 py-2">{log.actor?.email ?? '-'}</td>
-                                        <td className="px-4 py-2">{log.created_at ?? '-'}</td>
+                                        <td className="px-4 py-2">{fmtDateTimeBr(log.created_at)}</td>
                                         <td className="px-4 py-2">
                                             <pre className="max-w-[360px] overflow-x-auto whitespace-pre-wrap text-xs">
                                                 {JSON.stringify(log.metadata ?? {}, null, 2)}
@@ -176,6 +169,46 @@ export default function AdminUserShow({ userDetail, auditLogs, canApprove, canRe
                     </div>
                 </div>
             </div>
+
+            <PromptDialog
+                open={rejectOpen}
+                title="Rejeitar usuário"
+                label="Motivo da rejeição"
+                required={true}
+                destructive={true}
+                confirmLabel="Rejeitar"
+                onConfirm={(reason) => {
+                    setRejectOpen(false);
+                    router.patch(`/admin/users/${userDetail.id}/reject`, { rejection_reason: reason });
+                }}
+                onCancel={() => setRejectOpen(false)}
+            />
+
+            <ConfirmDialog
+                open={suspendOpen}
+                title="Suspender usuário"
+                message="Confirma suspender este usuário?"
+                destructive={true}
+                confirmLabel="Suspender"
+                onConfirm={() => {
+                    setSuspendOpen(false);
+                    router.patch(`/admin/users/${userDetail.id}/suspend`);
+                }}
+                onCancel={() => setSuspendOpen(false)}
+            />
+
+            <ConfirmDialog
+                open={resetStickersOpen}
+                title="Resetar figurinhas"
+                message={`Resetar todo o histórico de figurinhas de ${userDetail.name}? Os registros serão mantidos com soft delete.`}
+                destructive={true}
+                confirmLabel="Resetar"
+                onConfirm={() => {
+                    setResetStickersOpen(false);
+                    router.delete(`/admin/users/${userDetail.id}/stickers/reset`);
+                }}
+                onCancel={() => setResetStickersOpen(false)}
+            />
         </>
     );
 }

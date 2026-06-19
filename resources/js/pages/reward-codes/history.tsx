@@ -1,4 +1,5 @@
 import { Head, router } from '@inertiajs/react';
+import { fmtDateTimeBr } from '@/lib/date';
 
 type Redemption = {
     id: number;
@@ -43,7 +44,7 @@ export default function RewardCodeHistory({ redemptions }: { redemptions: { data
                                     <td className="px-4 py-2">{redemption.reward_code.source_channel}</td>
                                     <td className="px-4 py-2">{redemption.reward_code.reward_pack_quantity}x{redemption.reward_code.reward_pack_size}</td>
                                     <td className="px-4 py-2">{redemption.pack_count}</td>
-                                    <td className="px-4 py-2">{redemption.redeemed_at ?? '-'}</td>
+                                    <td className="px-4 py-2">{fmtDateTimeBr(redemption.redeemed_at)}</td>
                                 </tr>
                             ))}
                         </tbody>

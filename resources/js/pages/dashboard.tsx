@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
+import { fmtDateTimeBr } from '@/lib/date';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { MetricCard } from '@/components/ui/metric-card';
@@ -374,7 +375,7 @@ export default function Dashboard(props: DashboardProps) {
                                                     </td>
                                                     <td className="px-4 py-2 text-dim">{log.actor?.email ?? '-'}</td>
                                                     <td className="px-4 py-2 text-dim">{log.target?.email ?? '-'}</td>
-                                                    <td className="px-4 py-2 text-dim">{log.created_at ?? '-'}</td>
+                                                    <td className="px-4 py-2 text-dim">{fmtDateTimeBr(log.created_at)}</td>
                                                 </tr>
                                             ))}
                                         </tbody>

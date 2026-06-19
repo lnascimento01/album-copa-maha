@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { fmtDateTimeBr } from '@/lib/date';
 
 type RefItem = { id: number; name: string; email?: string };
 type PaginationLink = { url: string | null; label: string; active: boolean };
@@ -95,7 +96,7 @@ export default function AdminShareCardsIndex({ cards, filters, types, users, alb
                                     <td className="px-4 py-2">{card.type}</td>
                                     <td className="px-4 py-2">{card.title}</td>
                                     <td className="px-4 py-2">{card.album?.name ?? '-'}</td>
-                                    <td className="px-4 py-2">{card.created_at ?? '-'}</td>
+                                    <td className="px-4 py-2">{fmtDateTimeBr(card.created_at)}</td>
                                     <td className="px-4 py-2"><Link href={`/admin/share-cards/${card.id}`} className="text-xs underline">Ver</Link></td>
                                 </tr>
                             ))}

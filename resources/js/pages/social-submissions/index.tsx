@@ -1,4 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { fmtDateTimeBr } from '@/lib/date';
 
 type Submission = {
     id: number;
@@ -38,7 +39,7 @@ export default function SocialSubmissionsIndex({ submissions }: { submissions: {
                                 <tr key={submission.id} className="border-b">
                                     <td className="px-4 py-2">{submission.mission.title}</td>
                                     <td className="px-4 py-2">{submission.status}</td>
-                                    <td className="px-4 py-2">{submission.submitted_at ?? '-'}</td>
+                                    <td className="px-4 py-2">{fmtDateTimeBr(submission.submitted_at)}</td>
                                     <td className="px-4 py-2">{submission.sticker_packs_count}</td>
                                     <td className="px-4 py-2">{submission.rejection_reason ?? '-'}</td>
                                     <td className="px-4 py-2"><Link href={`/social-submissions/${submission.id}`} className="text-xs underline">Detalhes</Link></td>

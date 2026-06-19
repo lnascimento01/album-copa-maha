@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import { fmtDateTimeBr } from '@/lib/date';
 import { DataTableShell } from '@/components/ui/data-table-shell';
 import { EmptyState } from '@/components/ui/empty-state';
 import { OriginBadge } from '@/components/ui/origin-badge';
@@ -72,11 +73,11 @@ export default function CheckinShow({ checkin }: { checkin: Checkin }) {
                     </div>
                     <div className="rounded-md border border-border bg-card p-4 text-sm">
                         <div className="text-xs uppercase tracking-wide text-dim">Marcado em</div>
-                        <div className="mt-2 text-foreground">{checkin.checked_at ?? '-'}</div>
+                        <div className="mt-2 text-foreground">{fmtDateTimeBr(checkin.checked_at)}</div>
                     </div>
                     <div className="rounded-md border border-border bg-card p-4 text-sm">
                         <div className="text-xs uppercase tracking-wide text-dim">Revogado em</div>
-                        <div className="mt-2 text-foreground">{checkin.revoked_at ?? '-'}</div>
+                        <div className="mt-2 text-foreground">{fmtDateTimeBr(checkin.revoked_at)}</div>
                     </div>
                 </div>
 
@@ -123,7 +124,7 @@ export default function CheckinShow({ checkin }: { checkin: Checkin }) {
                                         <td className="px-4 py-2"><OriginBadge source={pack.source} /></td>
                                         <td className="px-4 py-2"><StatusBadge value={pack.status} /></td>
                                         <td className="px-4 py-2 text-dim">{pack.size}</td>
-                                        <td className="px-4 py-2 text-dim">{pack.opened_at ?? '-'}</td>
+                                        <td className="px-4 py-2 text-dim">{fmtDateTimeBr(pack.opened_at)}</td>
                                         <td className="px-4 py-2"><Link className="text-xs underline" href={`/packs/${pack.id}`}>Ver pacote</Link></td>
                                     </tr>
                                 ))

@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 import ShareCardPreview from '@/components/share-card-preview';
+import { fmtDateTimeBr } from '@/lib/date';
 
 type Props = {
     card: {
@@ -26,7 +27,7 @@ export default function AdminShareCardsShow({ card }: Props) {
                     <div><span className="text-xs uppercase text-muted-foreground">Usuário</span><div>{card.user.email}</div></div>
                     <div><span className="text-xs uppercase text-muted-foreground">Tipo</span><div>{card.type}</div></div>
                     <div><span className="text-xs uppercase text-muted-foreground">Álbum</span><div>{card.album?.name ?? '-'}</div></div>
-                    <div><span className="text-xs uppercase text-muted-foreground">Criado em</span><div>{card.created_at ?? '-'}</div></div>
+                    <div><span className="text-xs uppercase text-muted-foreground">Criado em</span><div>{fmtDateTimeBr(card.created_at)}</div></div>
                 </div>
 
                 <ShareCardPreview payload={card.payload} />

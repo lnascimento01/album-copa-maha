@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import { fmtDateTimeBr } from '@/lib/date';
 import type { DriveStep } from 'driver.js';
 import { PageTour, TourReplayButton } from '@/components/page-tour';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -112,7 +113,7 @@ export default function SocialMissionsIndex({ missions }: { missions: Mission[] 
                                 </div>
                                 <div className="mt-3 flex items-center justify-between gap-2 text-xs">
                                     <span className="rounded-sm border border-border bg-card/65 px-2 py-1 text-dim">
-                                        Prazo: {mission.ends_at ?? 'indefinido'}
+                                        Prazo: {mission.ends_at ? fmtDateTimeBr(mission.ends_at) : 'indefinido'}
                                     </span>
                                     <OriginBadge source="social_mission" label="Missão oficial" />
                                 </div>
