@@ -2,7 +2,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { lazy, Suspense, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import { fmtDateTimeBr } from '@/lib/date';
-import { ConfirmDialog, PromptDialog } from '@/components/ui/action-dialog';
+import { PromptDialog } from '@/components/ui/action-dialog';
 
 type UserRef = { id: number; name: string; email: string };
 
