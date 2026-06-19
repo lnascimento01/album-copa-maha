@@ -54,6 +54,11 @@ echo "[deploy] running migrations on the new image (expand/contract)…"
 # running services. The DB stays shared, so migrations apply before the swap.
 $COMPOSE run --rm --no-deps app php artisan migrate --force
 
+echo "[deploy] syncing roles and permissions…"
+# Idempotent: updateOrCreate for each permission, then sync all to the admin role.
+# Must run after every deploy so new permission slugs added to the seeder take effect.
+$COMPOSE run --rm --no-deps app php artisan db:seed --class=RolePermissionSeeder --force
+
 echo "[deploy] zero-downtime rollout of app…"
 # Starts the new container, waits for its healthcheck, then retires the old.
 docker rollout -f "${COMPOSE_FILE}" app
