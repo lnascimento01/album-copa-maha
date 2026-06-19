@@ -22,15 +22,17 @@ type FormatStyle = {
     maxW: string;
     hero: string;
     pad: string;
+    gap: string;
+    logo: string;
 };
 
 const FORMAT_STYLES: Record<ShareCardFormat, FormatStyle> = {
     // Stories / status (Instagram Stories, WhatsApp Status, etc.).
-    story: { aspect: 'aspect-[9/16]', maxW: 'max-w-[340px]', hero: 'text-[26px]', pad: 'p-5' },
+    story: { aspect: 'aspect-[9/16]', maxW: 'max-w-[340px]', hero: 'text-[26px]', pad: 'p-5', gap: 'gap-3', logo: 'size-10' },
     // Instagram feed (portrait — best feed real estate).
-    portrait: { aspect: 'aspect-[4/5]', maxW: 'max-w-[400px]', hero: 'text-[24px]', pad: 'p-5' },
+    portrait: { aspect: 'aspect-[4/5]', maxW: 'max-w-[400px]', hero: 'text-[24px]', pad: 'p-4', gap: 'gap-2', logo: 'size-9' },
     // Instagram feed (square classic).
-    square: { aspect: 'aspect-square', maxW: 'max-w-[440px]', hero: 'text-[22px]', pad: 'p-4' },
+    square: { aspect: 'aspect-square', maxW: 'max-w-[440px]', hero: 'text-[22px]', pad: 'p-3', gap: 'gap-2', logo: 'size-8' },
 };
 
 const ACCENTS: Record<string, Accent> = {
@@ -60,7 +62,6 @@ const ShareCardPreview = forwardRef<HTMLDivElement, Props>(function ShareCardPre
     const date = String(payload.date ?? '');
     const seasonLabel = date ? `Temporada ${new Date(date).getFullYear()}` : 'Temporada AAPH';
     const stickerImageUrl = type === 'sticker_unlocked' && payload.image_url ? String(payload.image_url) : null;
-    const stickerCode = payload.sticker_code ? String(payload.sticker_code) : null;
 
     const styles = FORMAT_STYLES[format];
     const accent = ACCENTS[type] ?? DEFAULT_ACCENT;
@@ -88,71 +89,58 @@ const ShareCardPreview = forwardRef<HTMLDivElement, Props>(function ShareCardPre
 
                 {stickerImageUrl ? (
                     /* ── Sticker card layout: image is the hero ── */
-                    <div className={`relative z-10 flex h-full flex-col ${styles.pad} text-white`}>
-                        {/* Header */}
-                        <div className="flex items-start justify-between gap-2">
-                            <div className="space-y-1">
+                    <div className={`relative z-10 flex h-full flex-col ${styles.gap} ${styles.pad} text-white`}>
+                        {/* Header — never shrinks */}
+                        <div className="flex shrink-0 items-start justify-between gap-2">
+                            <div>
                                 <div className="inline-block rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-white/85">
                                     Álbum da Copa AAPH
                                 </div>
-                                <div className="text-[9px] font-semibold uppercase tracking-[0.16em] text-white/55">{seasonLabel}</div>
+                                <div className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-white/55">{seasonLabel}</div>
                             </div>
                             <img
                                 src="/favicon.svg"
                                 alt="AAPH"
-                                className="size-10 shrink-0 rounded-full border border-white/25 bg-white object-contain p-1"
+                                className={`${styles.logo} shrink-0 rounded-full border border-white/25 bg-white object-contain p-1`}
                             />
                         </div>
 
+                        {/* Accent badge — never shrinks */}
                         <div
-                            className="mt-2 inline-flex items-center gap-1.5 self-start rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em]"
+                            className="shrink-0 inline-flex items-center gap-1.5 self-start rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em]"
                             style={{ color: '#0a1a30', background: accent.color }}
                         >
                             <AccentIcon className="size-3.5" />
                             {accent.label}
                         </div>
 
-                        {/* Sticker image — fills the available space, framed like a card */}
-                        <div className="mx-auto mt-3 flex min-h-0 flex-1 items-center justify-center">
-                            <div
-                                className="relative overflow-hidden rounded-xl"
+                        {/* Sticker image — flex takes remaining space; image fills without clipping */}
+                        <div className="flex min-h-0 flex-1 items-center justify-center">
+                            <img
+                                src={stickerImageUrl}
+                                alt={title}
+                                className="block max-h-full w-auto max-w-full rounded-2xl object-contain"
                                 style={{
-                                    boxShadow: `0 0 0 3px ${accent.color}, 0 8px 32px rgba(0,0,0,0.6)`,
-                                    maxHeight: '100%',
+                                    boxShadow: `0 0 0 3px ${accent.color}, 0 12px 40px rgba(0,0,0,0.55)`,
                                 }}
-                            >
-                                <img
-                                    src={stickerImageUrl}
-                                    alt={title}
-                                    className="block max-h-full w-auto object-contain"
-                                    style={{ maxHeight: format === 'story' ? '260px' : format === 'portrait' ? '220px' : '180px' }}
-                                    crossOrigin="anonymous"
-                                />
-                                {stickerCode ? (
-                                    <div
-                                        className="absolute bottom-0 inset-x-0 py-1 text-center text-[9px] font-bold uppercase tracking-widest"
-                                        style={{ background: `${accent.color}cc`, color: '#0a1a30' }}
-                                    >
-                                        {stickerCode}
-                                    </div>
-                                ) : null}
-                            </div>
+                                crossOrigin="anonymous"
+                            />
                         </div>
 
-                        {/* Title below image */}
-                        <div className="mt-3 text-center">
-                            <h2 className="text-xl font-black leading-tight tracking-tight text-white">{title}</h2>
-                            {subtitle ? <p className="mt-0.5 text-xs font-medium text-white/70">{subtitle}</p> : null}
+                        {/* Title below image — never shrinks */}
+                        <div className="shrink-0 text-center">
+                            <h2 className="text-lg font-black leading-tight tracking-tight text-white">{title}</h2>
+                            {subtitle ? <p className="mt-0.5 text-[11px] font-medium text-white/70">{subtitle}</p> : null}
                         </div>
 
-                        {/* Footer */}
-                        <div className="mt-3 space-y-2">
+                        {/* Footer — never shrinks */}
+                        <div className="shrink-0 space-y-1.5">
                             <div>
                                 <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/50">Colecionador</div>
-                                <div className="text-base font-bold leading-tight text-white">{userName}</div>
+                                <div className="text-sm font-bold leading-tight text-white">{userName}</div>
                                 <div className="text-[10px] text-white/55">{albumName}</div>
                             </div>
-                            <div className="flex items-center justify-between border-t border-white/12 pt-2">
+                            <div className="flex items-center justify-between border-t border-white/12 pt-1.5">
                                 <span className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: accent.color }}>#CopaAAPH</span>
                                 <span className="text-[10px] uppercase tracking-[0.12em] text-white/45">Presença · Coleção · Time</span>
                             </div>

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\ResetPasswordNotification;
 use App\Services\Audit\AuditLogger;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -219,6 +220,11 @@ class User extends Authenticatable implements PasskeyUser
                 entityId: $this->id,
             );
         }
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 
     public function detachRole(Role $role, ?User $actor = null): void
