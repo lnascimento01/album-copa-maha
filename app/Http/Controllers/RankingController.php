@@ -31,7 +31,7 @@ class RankingController extends Controller
                 'slug' => $result['album']->slug,
                 'season' => $result['album']->season,
             ] : null,
-            'top' => $rows->take(20)->values()->all(),
+            'top' => $rows->values()->all(),
             'me' => $myPosition,
             'formula' => $result['formula'],
         ]);
