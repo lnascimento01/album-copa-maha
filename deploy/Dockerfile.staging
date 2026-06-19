@@ -102,3 +102,7 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 EXPOSE 9000
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+# Default command. The entrypoint runs runtime prep only for this command and
+# execs anything else verbatim, so `docker compose run app php artisan …`
+# actually runs the artisan command instead of booting php-fpm.
+CMD ["php-fpm", "-F"]
