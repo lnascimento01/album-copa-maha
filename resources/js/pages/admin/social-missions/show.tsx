@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { fmtDateTimeBr } from '@/lib/date';
 import { PromptDialog } from '@/components/ui/action-dialog';
 
+const AUDIT_PREVIEW_LIMIT = 40;
+
 type Submission = {
     id: number;
     status: string;
@@ -40,6 +42,13 @@ type AuditLog = { id: number; action: string; created_at: string | null; metadat
 
 export default function AdminSocialMissionShow({ mission, shareText, auditLogs }: { mission: Mission; shareText: string; auditLogs: AuditLog[] }) {
     const [cancelOpen, setCancelOpen] = useState(false);
+
+    const totalSubmissions =
+        mission.submissions_pending_count +
+        mission.submissions_approved_count +
+        mission.submissions_rejected_count;
+    const submissionsTruncated = mission.submissions.length < totalSubmissions;
+    const auditTruncated = auditLogs.length >= AUDIT_PREVIEW_LIMIT;
 
     const activate = () => router.patch(`/admin/social-missions/${mission.id}/activate`);
     const closeMission = () => router.patch(`/admin/social-missions/${mission.id}/close`);
@@ -81,7 +90,20 @@ export default function AdminSocialMissionShow({ mission, shareText, auditLogs }
                 </div>
 
                 <div className="rounded-sm border">
-                    <div className="border-b px-4 py-3 text-sm font-medium">Submissões</div>
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3">
+                        <span className="text-sm font-medium">Submissões</span>
+                        <Link
+                            href={`/admin/social-mission-submissions?mission_id=${mission.id}`}
+                            className="text-xs underline"
+                        >
+                            Ver todas ({totalSubmissions})
+                        </Link>
+                    </div>
+                    {submissionsTruncated && (
+                        <div className="border-b bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
+                            Mostrando as {mission.submissions.length} submissões mais recentes de {totalSubmissions}. Use o botão Ver todas para a lista completa.
+                        </div>
+                    )}
                     <div className="overflow-x-auto">
                         <table className="min-w-full text-sm">
                             <thead>
@@ -112,6 +134,11 @@ export default function AdminSocialMissionShow({ mission, shareText, auditLogs }
 
                 <div className="rounded-sm border">
                     <div className="border-b px-4 py-3 text-sm font-medium">Auditoria</div>
+                    {auditTruncated && (
+                        <div className="border-b bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
+                            Mostrando os {AUDIT_PREVIEW_LIMIT} eventos mais recentes (missão + submissões).
+                        </div>
+                    )}
                     <div className="overflow-x-auto">
                         <table className="min-w-full text-sm">
                             <thead>
