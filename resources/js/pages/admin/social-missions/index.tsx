@@ -1,6 +1,15 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import ShareExportPanel from '@/components/share-export-panel';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 
 type Mission = {
     id: number;
@@ -28,6 +37,37 @@ type Props = {
     teams: { id: number; name: string }[];
     albums: { id: number; name: string }[];
 };
+
+/**
+ * Inline share for a social mission — opens a post-ready card (same visual as
+ * the sticker/progress share cards) in a dialog straight from the admin list.
+ */
+function MissionShareButton({ mission, className }: { mission: Mission; className: string }) {
+    const qty = mission.reward_pack_quantity;
+    const size = mission.reward_pack_size;
+    const packWord = qty !== 1 ? 'pacotes' : 'pacote';
+    const payload = {
+        type: 'social_mission',
+        title: mission.title,
+        subtitle: `Recompensa: ${qty} ${packWord} de ${size} figurinhas`,
+        album_name: mission.album.name,
+        date: mission.starts_at ?? '',
+    };
+    const shareCopy = `⚽ Missão "${mission.title}" no Álbum da Copa AAPH! Participe pelo app, envie sua evidência e ganhe ${qty} ${packWord} de ${size} figurinhas. #CopaAAPH`;
+
+    return (
+        <Dialog>
+            <DialogTrigger className={className}>Compartilhar</DialogTrigger>
+            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Compartilhar missão</DialogTitle>
+                    <DialogDescription>Gere uma imagem pronta para divulgar a missão nas redes.</DialogDescription>
+                </DialogHeader>
+                <ShareExportPanel payload={payload} shareCopy={shareCopy} fileBase={`missao-${mission.slug}`} />
+            </DialogContent>
+        </Dialog>
+    );
+}
 
 export default function AdminSocialMissionsIndex({ missions, filters, statuses, types, teams, albums }: Props) {
     const [search, setSearch] = useState(filters.search ?? '');
@@ -120,7 +160,10 @@ export default function AdminSocialMissionsIndex({ missions, filters, statuses, 
                                     <td className="px-4 py-2">{mission.reward_pack_quantity}x{mission.reward_pack_size}</td>
                                     <td className="px-4 py-2">{mission.submissions_pending_count}</td>
                                     <td className="px-4 py-2">{mission.submissions_approved_count}</td>
-                                    <td className="px-4 py-2"><Link href={`/admin/social-missions/${mission.id}`} className="text-xs underline">Detalhes</Link></td>
+                                    <td className="space-x-2 px-4 py-2">
+                                        <Link href={`/admin/social-missions/${mission.id}`} className="text-xs underline">Detalhes</Link>
+                                        <MissionShareButton mission={mission} className="text-xs underline" />
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
