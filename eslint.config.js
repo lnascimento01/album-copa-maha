@@ -104,6 +104,7 @@ export default [
     },
     {
         ignores: [
+            '.claude',
             'vendor',
             'node_modules',
             'public',

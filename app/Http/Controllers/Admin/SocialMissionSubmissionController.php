@@ -17,6 +17,7 @@ use App\Services\SocialMissions\ReviewSocialMissionSubmissionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 use Throwable;
@@ -112,6 +113,7 @@ class SocialMissionSubmissionController extends Controller
                 'status' => $submission->status,
                 'evidence_text' => $submission->evidence_text,
                 'evidence_url' => $submission->evidence_url,
+                'evidence_image_urls' => collect($submission->evidence_images ?? [])->map(fn (string $path) => Storage::disk('public')->url($path))->values()->all(),
                 'submitted_at' => optional($submission->submitted_at)?->toDateTimeString(),
                 'reviewed_at' => optional($submission->reviewed_at)?->toDateTimeString(),
                 'rejection_reason' => $submission->rejection_reason,

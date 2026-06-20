@@ -10,6 +10,7 @@ use App\Services\Audit\AuditLogger;
 use App\Services\SocialMissions\Exceptions\SocialMissionException;
 use App\Services\SocialMissions\SubmitSocialMissionService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -66,6 +67,7 @@ class SocialMissionSubmissionController extends Controller
                 'status' => $submission->status,
                 'evidence_text' => $submission->evidence_text,
                 'evidence_url' => $submission->evidence_url,
+                'evidence_image_urls' => collect($submission->evidence_images ?? [])->map(fn (string $path) => Storage::disk('public')->url($path))->values()->all(),
                 'submitted_at' => optional($submission->submitted_at)?->toDateTimeString(),
                 'reviewed_at' => optional($submission->reviewed_at)?->toDateTimeString(),
                 'rejection_reason' => $submission->rejection_reason,
@@ -89,6 +91,7 @@ class SocialMissionSubmissionController extends Controller
                 actor: $user,
                 evidenceText: $request->validated('evidence_text'),
                 evidenceUrl: $request->validated('evidence_url'),
+                evidenceImages: $request->file('evidence_images') ?? [],
             );
 
             return redirect()->route('social-submissions.show', $submission)

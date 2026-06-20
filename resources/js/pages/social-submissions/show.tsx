@@ -6,6 +6,7 @@ type Submission = {
     status: string;
     evidence_text: string | null;
     evidence_url: string | null;
+    evidence_image_urls: string[];
     submitted_at: string | null;
     reviewed_at: string | null;
     rejection_reason: string | null;
@@ -32,9 +33,21 @@ export default function SocialSubmissionShow({ submission }: { submission: Submi
 
                 <div className="rounded-sm border p-4">
                     <div className="text-xs uppercase text-muted-foreground">Evidência</div>
-                    <div className="mt-2 text-sm">
+                    <div className="mt-2 space-y-2 text-sm">
                         <div><span className="text-muted-foreground">Texto:</span> {submission.evidence_text ?? '-'}</div>
-                        <div className="mt-1"><span className="text-muted-foreground">URL:</span> {submission.evidence_url ? <a href={submission.evidence_url} className="underline" target="_blank" rel="noreferrer">{submission.evidence_url}</a> : '-'}</div>
+                        <div><span className="text-muted-foreground">URL:</span> {submission.evidence_url ? <a href={submission.evidence_url} className="underline" target="_blank" rel="noreferrer">{submission.evidence_url}</a> : '-'}</div>
+                        {submission.evidence_image_urls.length > 0 ? (
+                            <div>
+                                <span className="text-muted-foreground">Imagens:</span>
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                    {submission.evidence_image_urls.map((url, index) => (
+                                        <a key={index} href={url} target="_blank" rel="noreferrer">
+                                            <img src={url} alt={`evidência ${index + 1}`} className="h-28 w-28 rounded-sm border object-cover" />
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : null}
                     </div>
                 </div>
 
