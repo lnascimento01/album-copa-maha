@@ -72,6 +72,11 @@ class SocialMissionController extends Controller
 
         $socialMission->load(['team:id,name', 'album:id,name']);
 
+        $isActive = $socialMission->status === SocialMission::STATUS_ACTIVE;
+        $notStarted = $socialMission->starts_at !== null && now()->lt($socialMission->starts_at);
+        $ended = $socialMission->ends_at !== null && now()->gt($socialMission->ends_at);
+        $acceptsSubmissions = $isActive && ! $notStarted && ! $ended;
+
         return Inertia::render('social-missions/show', [
             'mission' => [
                 'id' => $socialMission->id,
@@ -87,6 +92,7 @@ class SocialMissionController extends Controller
                 'ends_at' => optional($socialMission->ends_at)?->toDateTimeString(),
                 'team' => $socialMission->team,
                 'album' => $socialMission->album,
+                'accepts_submissions' => $acceptsSubmissions,
             ],
             'ownSubmissions' => $ownSubmissions->map(fn (SocialMissionSubmission $submission): array => [
                 'id' => $submission->id,

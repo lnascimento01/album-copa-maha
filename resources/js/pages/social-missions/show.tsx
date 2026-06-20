@@ -16,6 +16,7 @@ type Mission = {
     ends_at: string | null;
     team: { id: number; name: string };
     album: { id: number; name: string };
+    accepts_submissions: boolean;
 };
 
 type OwnSubmission = {
@@ -57,23 +58,29 @@ export default function SocialMissionShow({ mission, ownSubmissions }: { mission
                     <p className="mt-2 whitespace-pre-wrap text-sm">{mission.instructions ?? mission.description ?? '-'}</p>
                 </div>
 
-                <form onSubmit={submit} className="space-y-3 rounded-sm border p-4">
-                    <h2 className="text-sm font-medium">Enviar submissão</h2>
-                    <div>
-                        <label className="text-xs uppercase text-muted-foreground">Evidência em texto</label>
-                        <textarea value={form.data.evidence_text} onChange={(event) => form.setData('evidence_text', event.target.value)} className="mt-1 min-h-24 w-full rounded-sm border px-2 py-2 text-sm" />
-                        {form.errors.evidence_text ? <div className="mt-1 text-xs text-red-700">{form.errors.evidence_text}</div> : null}
+                {mission.accepts_submissions ? (
+                    <form onSubmit={submit} className="space-y-3 rounded-sm border p-4">
+                        <h2 className="text-sm font-medium">Enviar submissão</h2>
+                        <div>
+                            <label className="text-xs uppercase text-muted-foreground">Evidência em texto</label>
+                            <textarea value={form.data.evidence_text} onChange={(event) => form.setData('evidence_text', event.target.value)} className="mt-1 min-h-24 w-full rounded-sm border px-2 py-2 text-sm" />
+                            {form.errors.evidence_text ? <div className="mt-1 text-xs text-red-700">{form.errors.evidence_text}</div> : null}
+                        </div>
+                        <div>
+                            <label className="text-xs uppercase text-muted-foreground">URL de evidência</label>
+                            <input value={form.data.evidence_url} onChange={(event) => form.setData('evidence_url', event.target.value)} className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" placeholder="https://..." />
+                            {form.errors.evidence_url ? <div className="mt-1 text-xs text-red-700">{form.errors.evidence_url}</div> : null}
+                        </div>
+                        {page.props.errors?.submission ? <div className="text-xs text-red-700">{page.props.errors.submission}</div> : null}
+                        <div className="flex justify-end">
+                            <button type="submit" disabled={form.processing} className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground">Enviar para análise</button>
+                        </div>
+                    </form>
+                ) : (
+                    <div className="rounded-sm border p-4 text-sm text-muted-foreground">
+                        Esta missão não aceita novas submissões.
                     </div>
-                    <div>
-                        <label className="text-xs uppercase text-muted-foreground">URL de evidência</label>
-                        <input value={form.data.evidence_url} onChange={(event) => form.setData('evidence_url', event.target.value)} className="mt-1 w-full rounded-sm border px-2 py-2 text-sm" placeholder="https://..." />
-                        {form.errors.evidence_url ? <div className="mt-1 text-xs text-red-700">{form.errors.evidence_url}</div> : null}
-                    </div>
-                    {page.props.errors?.submission ? <div className="text-xs text-red-700">{page.props.errors.submission}</div> : null}
-                    <div className="flex justify-end">
-                        <button type="submit" disabled={form.processing} className="rounded-sm border bg-primary px-3 py-2 text-sm text-primary-foreground">Enviar para análise</button>
-                    </div>
-                </form>
+                )}
 
                 <div className="rounded-sm border">
                     <div className="border-b px-4 py-3 text-sm font-medium">Suas submissões</div>
