@@ -146,7 +146,7 @@ it('granting packs writes sticker pack granted audit log', function (): void {
     expect($log?->target_user_id)->toBe($participant->id);
     expect($log?->metadata['quantity'])->toBe(2);
 
-    Mail::assertSent(StickerPackGrantedMail::class, function (StickerPackGrantedMail $mail) use ($participant): bool {
+    Mail::assertQueued(StickerPackGrantedMail::class, function (StickerPackGrantedMail $mail) use ($participant): bool {
         return $mail->recipient->id === $participant->id
             && $mail->quantity === 2
             && $mail->size === 3;
