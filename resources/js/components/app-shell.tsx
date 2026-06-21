@@ -1,9 +1,15 @@
 import { usePage } from '@inertiajs/react';
-import type { ReactNode } from 'react';
+import { createContext, useContext, type ReactNode } from 'react';
 import { OnboardingTour } from '@/components/onboarding-tour';
-import { useOneSignal } from '@/hooks/use-onesignal';
+import { useOneSignal, type PushPermission } from '@/hooks/use-onesignal';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import type { AppVariant } from '@/types';
+
+const PushPermissionContext = createContext<PushPermission>('loading');
+
+export function usePushPermission(): PushPermission {
+    return useContext(PushPermissionContext);
+}
 
 type Props = {
     children: ReactNode;
@@ -12,18 +18,22 @@ type Props = {
 
 export function AppShell({ children, variant = 'sidebar' }: Props) {
     const isOpen = usePage().props.sidebarOpen;
-    useOneSignal();
+    const { permissionStatus } = useOneSignal();
 
     if (variant === 'header') {
         return (
-            <div className="flex min-h-screen w-full flex-col">{children}</div>
+            <PushPermissionContext.Provider value={permissionStatus}>
+                <div className="flex min-h-screen w-full flex-col">{children}</div>
+            </PushPermissionContext.Provider>
         );
     }
 
     return (
-        <SidebarProvider defaultOpen={isOpen}>
-            {children}
-            <OnboardingTour />
-        </SidebarProvider>
+        <PushPermissionContext.Provider value={permissionStatus}>
+            <SidebarProvider defaultOpen={isOpen}>
+                {children}
+                <OnboardingTour />
+            </SidebarProvider>
+        </PushPermissionContext.Provider>
     );
 }
