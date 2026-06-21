@@ -41,6 +41,12 @@ if [ "${1:-}" = "php-fpm" ]; then
     echo "[entrypoint] fixing writable permissions for www-data"
     chown -R www-data:www-data storage/framework bootstrap/cache
     chown www-data:www-data storage/logs
+
+    # Run the Laravel scheduler as a background daemon. schedule:work loops
+    # internally (sleeps 60s between runs) so no host cron is needed.
+    # It is killed automatically when php-fpm (PID 1) exits.
+    echo "[entrypoint] starting schedule:work in background"
+    su -s /bin/sh www-data -c 'php artisan schedule:work' &
 fi
 
 echo "[entrypoint] exec: $*"
