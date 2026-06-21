@@ -11,6 +11,7 @@ use App\Models\SocialMission;
 use App\Models\SocialMissionSubmission;
 use App\Models\User;
 use App\Services\Achievements\EvaluateUserAchievementsService;
+use App\Services\Push\OneSignalService;
 use App\Services\ShareCards\CreateShareCardService;
 use App\Services\SocialMissions\Exceptions\SocialMissionException;
 use App\Services\SocialMissions\ReviewSocialMissionSubmissionService;
@@ -28,6 +29,7 @@ class SocialMissionSubmissionController extends Controller
         private readonly ReviewSocialMissionSubmissionService $reviewService,
         private readonly EvaluateUserAchievementsService $evaluateUserAchievementsService,
         private readonly CreateShareCardService $createShareCardService,
+        private readonly OneSignalService $push,
     ) {}
 
     public function index(Request $request): Response
@@ -165,6 +167,15 @@ class SocialMissionSubmissionController extends Controller
             // the side effects above: a mail failure must never block approval.
             $this->sendApprovalNotification($submissionModel, count($result['pack_ids']));
 
+            if ($submissionModel->user_id !== null) {
+                $this->push->notifyUser(
+                    $submissionModel->user_id,
+                    '🎉 Missão aprovada!',
+                    "Sua participação em \"{$submissionModel->mission?->title}\" foi aprovada. Abra seus pacotes!",
+                    url(route('social-submissions.show', $submissionModel, false)),
+                );
+            }
+
             return back()->with('success', 'Submissão aprovada com sucesso.');
         } catch (SocialMissionException $exception) {
             return back()->withErrors([
@@ -179,6 +190,18 @@ class SocialMissionSubmissionController extends Controller
 
         try {
             $this->reviewService->reject($submission->id, $request->user(), (string) $request->validated('rejection_reason'));
+
+            $reason = (string) $request->validated('rejection_reason');
+            $submission->loadMissing(['mission:id,title', 'user:id']);
+
+            if ($submission->user_id !== null) {
+                $this->push->notifyUser(
+                    $submission->user_id,
+                    'Submissão não aprovada',
+                    "Sua participação em \"{$submission->mission?->title}\" não foi aprovada. Motivo: {$reason}",
+                    url(route('social-submissions.show', $submission, false)),
+                );
+            }
 
             return back()->with('success', 'Submissão rejeitada com sucesso.');
         } catch (SocialMissionException $exception) {

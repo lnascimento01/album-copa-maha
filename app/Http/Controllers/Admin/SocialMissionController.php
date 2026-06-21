@@ -11,15 +11,21 @@ use App\Models\AuditLog;
 use App\Models\SocialMission;
 use App\Models\SocialMissionSubmission;
 use App\Models\Team;
+use App\Models\User;
 use App\Services\Audit\AuditLogger;
+use App\Services\Push\OneSignalService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class SocialMissionController extends Controller
 {
-    public function __construct(private readonly AuditLogger $auditLogger) {}
+    public function __construct(
+        private readonly AuditLogger $auditLogger,
+        private readonly OneSignalService $push,
+    ) {}
 
     public function index(Request $request): Response
     {
@@ -307,6 +313,22 @@ class SocialMissionController extends Controller
                 'social_mission_id' => $socialMission->id,
             ],
         );
+
+        try {
+            $userIds = User::query()
+                ->where('approval_status', User::APPROVAL_APPROVED)
+                ->pluck('id')
+                ->all();
+
+            $this->push->notifyUsers(
+                $userIds,
+                '🎯 Nova missão disponível!',
+                "\"{$socialMission->title}\" — participe agora e ganhe pacotes de figurinhas!",
+                url(route('social-missions.show', $socialMission, false)),
+            );
+        } catch (Throwable $e) {
+            report($e);
+        }
 
         return back()->with('success', 'Missão ativada com sucesso.');
     }
