@@ -28,6 +28,8 @@ class StickerPack extends Model
 
     public const SOURCE_FUTURE_MISSION = 'future_mission';
 
+    public const SOURCE_POOL = 'pool';
+
     public const SOURCES = [
         self::SOURCE_ADMIN,
         self::SOURCE_SEED,
@@ -37,6 +39,7 @@ class StickerPack extends Model
         self::SOURCE_SOCIAL_MISSION,
         self::SOURCE_FUTURE_CHECKIN,
         self::SOURCE_FUTURE_MISSION,
+        self::SOURCE_POOL,
     ];
 
     public const STATUS_PENDING = 'pending';

@@ -12,6 +12,7 @@ use App\Models\Player;
 use App\Models\PushNotification;
 use App\Models\RewardCode;
 use App\Models\RewardCodeRedemption;
+use App\Models\PoolMatch;
 use App\Models\Role;
 use App\Models\ShareCard;
 use App\Models\SocialMission;
@@ -32,6 +33,7 @@ use App\Policies\PlayerPolicy;
 use App\Policies\PushNotificationPolicy;
 use App\Policies\RewardCodePolicy;
 use App\Policies\RewardCodeRedemptionPolicy;
+use App\Policies\PoolPolicy;
 use App\Policies\RolePolicy;
 use App\Policies\ShareCardPolicy;
 use App\Policies\SocialMissionPolicy;
@@ -66,6 +68,7 @@ class AuthServiceProvider extends ServiceProvider
         ActivityCheckinSession::class => ActivityCheckinSessionPolicy::class,
         RewardCode::class => RewardCodePolicy::class,
         RewardCodeRedemption::class => RewardCodeRedemptionPolicy::class,
+        PoolMatch::class => PoolPolicy::class,
         PushNotification::class => PushNotificationPolicy::class,
         SocialMission::class => SocialMissionPolicy::class,
         SocialMissionSubmission::class => SocialMissionSubmissionPolicy::class,

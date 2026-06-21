@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\RankingController as AdminRankingController;
 use App\Http\Controllers\Admin\RewardCodeController as AdminRewardCodeController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\ShareCardController as AdminShareCardController;
+use App\Http\Controllers\Admin\PoolController as AdminPoolController;
 use App\Http\Controllers\Admin\PushNotificationController as AdminPushNotificationController;
 use App\Http\Controllers\Admin\SocialMissionController as AdminSocialMissionController;
 use App\Http\Controllers\Admin\SocialMissionSubmissionController as AdminSocialMissionSubmissionController;
@@ -33,6 +34,8 @@ use App\Http\Controllers\RankingController;
 use App\Http\Controllers\RewardCodeRedemptionController;
 use App\Http\Controllers\SelfCheckinController;
 use App\Http\Controllers\ShareCardController;
+use App\Http\Controllers\PoolController;
+use App\Http\Controllers\PoolPredictionController;
 use App\Http\Controllers\SocialMissionController;
 use App\Http\Controllers\SocialMissionSubmissionController;
 use App\Http\Controllers\StickerPackController;
@@ -184,6 +187,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/share-cards/{shareCard}', [ShareCardController::class, 'show'])
         ->middleware(['approved', 'permission:shareCards.viewOwn'])
         ->name('share-cards.show');
+
+    Route::get('/pool', [PoolController::class, 'index'])
+        ->middleware(['approved', 'permission:pool.predict'])
+        ->name('pool.index');
+
+    Route::post('/pool/predictions', [PoolPredictionController::class, 'store'])
+        ->middleware(['approved', 'permission:pool.predict'])
+        ->name('pool.predictions.store');
 
     Route::prefix('/admin')->name('admin.')->middleware('approved')->group(function () {
         Route::get('/rankings', [AdminRankingController::class, 'index'])
@@ -537,6 +548,18 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/push-notifications', [AdminPushNotificationController::class, 'store'])
             ->middleware('permission:pushNotifications.send')
             ->name('push-notifications.store');
+
+        Route::get('/pool', [AdminPoolController::class, 'index'])
+            ->middleware('permission:pool.manage')
+            ->name('pool.index');
+
+        Route::post('/pool/settings', [AdminPoolController::class, 'updateSettings'])
+            ->middleware('permission:pool.manage')
+            ->name('pool.settings.update');
+
+        Route::post('/pool/matches/{poolMatch}/score', [AdminPoolController::class, 'setScore'])
+            ->middleware('permission:pool.manage')
+            ->name('pool.matches.score');
     });
 });
 

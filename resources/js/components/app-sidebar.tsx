@@ -116,6 +116,12 @@ export function AppSidebar() {
         icon: Sticker,
     });
 
+    pushIf(permissions.includes('pool.predict'), {
+        title: 'Bolão Copa',
+        href: '/pool',
+        icon: Trophy,
+    });
+
     pushIf(permissions.includes('users.viewAny'), {
         title: 'Usuários',
         href: '/admin/users',
@@ -210,6 +216,12 @@ export function AppSidebar() {
         title: 'Notificações',
         href: '/admin/push-notifications',
         icon: Bell,
+    });
+
+    pushIf(permissions.includes('pool.manage'), {
+        title: 'Bolão (Admin)',
+        href: '/admin/pool',
+        icon: Trophy,
     });
 
     return (

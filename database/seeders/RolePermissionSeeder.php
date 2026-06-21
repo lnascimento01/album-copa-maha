@@ -106,6 +106,9 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'View own album collection', 'slug' => 'albumCollection.viewOwn', 'group' => 'albumCollection'],
             ['name' => 'List push notifications', 'slug' => 'pushNotifications.viewAny', 'group' => 'pushNotifications'],
             ['name' => 'Send push notification', 'slug' => 'pushNotifications.send', 'group' => 'pushNotifications'],
+            ['name' => 'View pool (admin)', 'slug' => 'pool.viewAny', 'group' => 'pool'],
+            ['name' => 'Manage pool (admin)', 'slug' => 'pool.manage', 'group' => 'pool'],
+            ['name' => 'Make pool predictions', 'slug' => 'pool.predict', 'group' => 'pool'],
         ];
 
         foreach ($permissions as $permission) {
@@ -150,6 +153,7 @@ class RolePermissionSeeder extends Seeder
                     'achievements.viewOwn',
                     'shareCards.viewOwn',
                     'shareCards.createOwn',
+                    'pool.predict',
                 ])
                 ->pluck('id')
                 ->all(),
