@@ -1,6 +1,7 @@
 import { usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
 import { OnboardingTour } from '@/components/onboarding-tour';
+import { useOneSignal } from '@/hooks/use-onesignal';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import type { AppVariant } from '@/types';
 
@@ -11,6 +12,7 @@ type Props = {
 
 export function AppShell({ children, variant = 'sidebar' }: Props) {
     const isOpen = usePage().props.sidebarOpen;
+    useOneSignal();
 
     if (variant === 'header') {
         return (

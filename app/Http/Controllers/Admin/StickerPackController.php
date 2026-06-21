@@ -11,6 +11,7 @@ use App\Models\AuditLog;
 use App\Models\StickerPack;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
+use App\Services\Push\OneSignalService;
 use App\Services\Stickers\RevokePackService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,6 +25,7 @@ class StickerPackController extends Controller
     public function __construct(
         private readonly AuditLogger $auditLogger,
         private readonly RevokePackService $revokePackService,
+        private readonly OneSignalService $push,
     ) {}
 
     public function index(Request $request): Response
@@ -150,6 +152,14 @@ class StickerPackController extends Controller
             } catch (Throwable $exception) {
                 report($exception);
             }
+        }
+
+        if ($targetUser !== null) {
+            $this->push->notifyUser(
+                $targetUser->id,
+                '🎁 Você recebeu pacotes de figurinhas!',
+                "Você ganhou {$quantity} pacote(s) de {$size} figurinhas. Abra agora no app!",
+            );
         }
 
         return redirect()->route('admin.sticker-packs.index')
