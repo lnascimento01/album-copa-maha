@@ -1,13 +1,14 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { fmtDateTimeBr } from '@/lib/date';
 import { PromptDialog } from '@/components/ui/action-dialog';
+import { fmtDateTimeBr } from '@/lib/date';
 
 type Submission = {
     id: number;
     status: string;
     evidence_text: string | null;
     evidence_url: string | null;
+    evidence_image_urls: string[];
     submitted_at: string | null;
     reviewed_at: string | null;
     rejection_reason: string | null;
@@ -57,6 +58,18 @@ export default function AdminSocialMissionSubmissionShow({ submission, auditLogs
                     <div className="mt-2 space-y-2 text-sm">
                         <div><span className="text-muted-foreground">Texto:</span> {submission.evidence_text ?? '-'}</div>
                         <div><span className="text-muted-foreground">URL:</span> {submission.evidence_url ? <a className="underline" href={submission.evidence_url} target="_blank" rel="noreferrer">{submission.evidence_url}</a> : '-'}</div>
+                        {submission.evidence_image_urls.length > 0 ? (
+                            <div>
+                                <span className="text-muted-foreground">Imagens:</span>
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                    {submission.evidence_image_urls.map((url, index) => (
+                                        <a key={index} href={url} target="_blank" rel="noreferrer">
+                                            <img src={url} alt={`evidência ${index + 1}`} className="h-28 w-28 rounded-sm border object-cover" />
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : null}
                     </div>
                 </div>
 

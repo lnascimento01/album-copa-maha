@@ -8,12 +8,15 @@ use App\Models\SocialMissionSubmission;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use App\Services\SocialMissions\Exceptions\SocialMissionException;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class SubmitSocialMissionService
 {
     public function __construct(private readonly AuditLogger $auditLogger) {}
 
-    public function submit(SocialMission $mission, User $actor, ?string $evidenceText, ?string $evidenceUrl): SocialMissionSubmission
+    /** @param  array<int, UploadedFile>|null  $evidenceImages */
+    public function submit(SocialMission $mission, User $actor, ?string $evidenceText, ?string $evidenceUrl, ?array $evidenceImages = null): SocialMissionSubmission
     {
         $mission->loadMissing('album');
 
@@ -85,12 +88,18 @@ class SubmitSocialMissionService
             }
         }
 
+        $imagePaths = [];
+        foreach ($evidenceImages ?? [] as $file) {
+            $imagePaths[] = $file->store('social-missions/evidence', 'public');
+        }
+
         $submission = SocialMissionSubmission::query()->create([
             'social_mission_id' => $mission->id,
             'user_id' => $actor->id,
             'status' => SocialMissionSubmission::STATUS_PENDING,
             'evidence_text' => $evidenceText,
             'evidence_url' => $evidenceUrl,
+            'evidence_images' => $imagePaths ?: null,
             'submitted_at' => now(),
             'metadata' => [
                 'mission_title' => $mission->title,

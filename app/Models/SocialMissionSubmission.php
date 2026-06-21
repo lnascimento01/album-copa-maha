@@ -32,6 +32,7 @@ class SocialMissionSubmission extends Model
         'status',
         'evidence_text',
         'evidence_url',
+        'evidence_images',
         'submitted_at',
         'reviewed_by',
         'reviewed_at',
@@ -45,6 +46,7 @@ class SocialMissionSubmission extends Model
             'submitted_at' => 'datetime',
             'reviewed_at' => 'datetime',
             'metadata' => 'array',
+            'evidence_images' => 'array',
         ];
     }
 
