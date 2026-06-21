@@ -13,9 +13,8 @@ export function useOneSignal(): { permissionStatus: PushPermission } {
     const auth = usePage<{ auth: { user: { id: number } | null } }>().props.auth;
     const userId = auth?.user?.id;
 
-    // When APP_ID is absent stay 'default' so no banner ever shows.
     const [permissionStatus, setPermissionStatus] = useState<PushPermission>(
-        APP_ID ? 'loading' : 'default',
+        APP_ID ? 'loading' : 'granted', // 'granted' hides banner when no APP_ID
     );
 
     useEffect(() => {
@@ -43,19 +42,15 @@ export function useOneSignal(): { permissionStatus: PushPermission } {
                     OneSignal.login(String(userId)).catch(() => {});
                 }
 
+                // Read current permission — never call requestPermission() here.
+                // Browsers (Chrome 80+) require a user gesture; calling it from
+                // an effect would be silently ignored. The banner button handles it.
                 const native = OneSignal.Notifications.permissionNative;
-
-                if (native === 'default') {
-                    await OneSignal.Notifications.requestPermission().catch(() => {});
-                    const afterNative = OneSignal.Notifications.permissionNative;
-                    if (!cancelled) {
-                        setPermissionStatus(
-                            afterNative === 'granted' ? 'granted' :
-                            afterNative === 'denied'  ? 'denied'  : 'default',
-                        );
-                    }
-                } else if (!cancelled) {
-                    setPermissionStatus(native === 'granted' ? 'granted' : native === 'denied' ? 'denied' : 'default');
+                if (!cancelled) {
+                    setPermissionStatus(
+                        native === 'granted' ? 'granted' :
+                        native === 'denied'  ? 'denied'  : 'default',
+                    );
                 }
 
                 const onPermChange = (granted: boolean) => {
@@ -64,7 +59,7 @@ export function useOneSignal(): { permissionStatus: PushPermission } {
                 OneSignal.Notifications.addEventListener('permissionChange', onPermChange);
                 removeListener = () => OneSignal.Notifications.removeEventListener('permissionChange', onPermChange);
             } catch {
-                if (!cancelled) setPermissionStatus('default');
+                if (!cancelled) setPermissionStatus('granted'); // hide banner on error
             }
         })();
 

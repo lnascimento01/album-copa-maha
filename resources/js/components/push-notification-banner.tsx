@@ -12,9 +12,15 @@ export function PushNotificationBanner() {
     );
     const [showHint, setShowHint] = useState(false);
 
-    if (permissionStatus !== 'denied' || dismissed) return null;
+    // Show only when permission hasn't been decided yet ('default') or was denied.
+    // 'loading' and 'granted' hide the banner.
+    const shouldShow = (permissionStatus === 'default' || permissionStatus === 'denied') && !dismissed;
+    if (!shouldShow) return null;
+
+    const isDenied = permissionStatus === 'denied';
 
     const handleEnable = async () => {
+        // This runs from a click event — a user gesture — so the browser allows it.
         const granted = await OneSignal.Notifications.requestPermission().catch(() => false);
         if (!granted) setShowHint(true);
     };
@@ -30,7 +36,9 @@ export function PushNotificationBanner() {
                 <div className="flex min-w-0 items-center gap-2">
                     <Bell className="h-4 w-4 shrink-0" />
                     <span className="min-w-0">
-                        Ative as notificações para saber quando suas missões forem avaliadas e quando ganhar figurinhas.
+                        {isDenied
+                            ? 'Notificações bloqueadas. Ative para saber quando suas missões forem avaliadas e quando ganhar figurinhas.'
+                            : 'Ative as notificações para saber quando suas missões forem avaliadas e quando ganhar figurinhas.'}
                     </span>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
