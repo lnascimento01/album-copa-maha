@@ -38,7 +38,9 @@ if [[ -z "${DEPLOY_REEXEC:-}" ]]; then
 fi
 
 COMPOSE_FILE="deploy/docker-compose.staging.yml"
-COMPOSE="docker compose -f ${COMPOSE_FILE}"
+# --env-file is needed because Docker Compose v2 looks for .env in the
+# compose file's directory (deploy/) rather than the repo root where .env lives.
+COMPOSE="docker compose -f ${COMPOSE_FILE} --env-file .env"
 
 if ! docker rollout --help >/dev/null 2>&1; then
     echo "[deploy] ERROR: the 'docker rollout' plugin is not installed." >&2
