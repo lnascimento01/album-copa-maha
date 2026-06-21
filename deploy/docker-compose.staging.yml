@@ -8,6 +8,7 @@ services:
       args:
         WWWUSER: "${WWWUSER:-1000}"
         WWWGROUP: "${WWWGROUP:-1000}"
+        VITE_ONESIGNAL_APP_ID: "${VITE_ONESIGNAL_APP_ID}"
     restart: unless-stopped
     env_file:
       - ../.env
