@@ -90,7 +90,7 @@ class SocialMissionSubmissionController extends Controller
                 mission: $socialMission,
                 actor: $user,
                 evidenceText: $request->validated('evidence_text'),
-                evidenceUrl: $request->validated('evidence_url'),
+                evidenceUrl: null,
                 evidenceImages: $request->file('evidence_images') ?? [],
             );
 
