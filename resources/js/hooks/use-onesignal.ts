@@ -32,6 +32,20 @@ export function useOneSignal(): { permissionStatus: PushPermission } {
                         serviceWorkerParam: { scope: '/' },
                         notifyButton: { enable: false },
                         welcomeNotification: { disable: true },
+                        promptOptions: {
+                            slidedown: {
+                                prompts: [{
+                                    type: 'push',
+                                    autoPrompt: false,
+                                    delay: {},
+                                    text: {
+                                        actionMessage: 'Receba notificações sobre missões, figurinhas e novidades do Álbum AAPH!',
+                                        acceptButton: 'Ativar',
+                                        cancelButton: 'Agora não',
+                                    },
+                                }],
+                            },
+                        },
                     });
                 }
 

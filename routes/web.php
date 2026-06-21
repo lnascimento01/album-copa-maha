@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\RankingController as AdminRankingController;
 use App\Http\Controllers\Admin\RewardCodeController as AdminRewardCodeController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\ShareCardController as AdminShareCardController;
+use App\Http\Controllers\Admin\PushNotificationController as AdminPushNotificationController;
 use App\Http\Controllers\Admin\SocialMissionController as AdminSocialMissionController;
 use App\Http\Controllers\Admin\SocialMissionSubmissionController as AdminSocialMissionSubmissionController;
 use App\Http\Controllers\Admin\StickerController;
@@ -524,6 +525,18 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/audit-logs', [AuditLogController::class, 'index'])
             ->middleware('permission:audit.viewAny')
             ->name('audit-logs.index');
+
+        Route::get('/push-notifications', [AdminPushNotificationController::class, 'index'])
+            ->middleware('permission:pushNotifications.viewAny')
+            ->name('push-notifications.index');
+
+        Route::get('/push-notifications/create', [AdminPushNotificationController::class, 'create'])
+            ->middleware('permission:pushNotifications.send')
+            ->name('push-notifications.create');
+
+        Route::post('/push-notifications', [AdminPushNotificationController::class, 'store'])
+            ->middleware('permission:pushNotifications.send')
+            ->name('push-notifications.store');
     });
 });
 

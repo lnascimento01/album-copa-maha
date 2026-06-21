@@ -9,6 +9,7 @@ use App\Models\ActivityCheckinSession;
 use App\Models\Album;
 use App\Models\AuditLog;
 use App\Models\Player;
+use App\Models\PushNotification;
 use App\Models\RewardCode;
 use App\Models\RewardCodeRedemption;
 use App\Models\Role;
@@ -28,6 +29,7 @@ use App\Policies\ActivityPolicy;
 use App\Policies\AlbumPolicy;
 use App\Policies\AuditLogPolicy;
 use App\Policies\PlayerPolicy;
+use App\Policies\PushNotificationPolicy;
 use App\Policies\RewardCodePolicy;
 use App\Policies\RewardCodeRedemptionPolicy;
 use App\Policies\RolePolicy;
@@ -64,6 +66,7 @@ class AuthServiceProvider extends ServiceProvider
         ActivityCheckinSession::class => ActivityCheckinSessionPolicy::class,
         RewardCode::class => RewardCodePolicy::class,
         RewardCodeRedemption::class => RewardCodeRedemptionPolicy::class,
+        PushNotification::class => PushNotificationPolicy::class,
         SocialMission::class => SocialMissionPolicy::class,
         SocialMissionSubmission::class => SocialMissionSubmissionPolicy::class,
         Achievement::class => AchievementPolicy::class,

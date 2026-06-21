@@ -104,6 +104,8 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'View own share cards', 'slug' => 'shareCards.viewOwn', 'group' => 'shareCards'],
             ['name' => 'Create own share card', 'slug' => 'shareCards.createOwn', 'group' => 'shareCards'],
             ['name' => 'View own album collection', 'slug' => 'albumCollection.viewOwn', 'group' => 'albumCollection'],
+            ['name' => 'List push notifications', 'slug' => 'pushNotifications.viewAny', 'group' => 'pushNotifications'],
+            ['name' => 'Send push notification', 'slug' => 'pushNotifications.send', 'group' => 'pushNotifications'],
         ];
 
         foreach ($permissions as $permission) {

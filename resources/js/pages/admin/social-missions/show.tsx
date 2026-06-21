@@ -66,9 +66,15 @@ export default function AdminSocialMissionShow({ mission, shareText, auditLogs }
                         {mission.status === 'draft' && (
                             <Link href={`/admin/social-missions/${mission.id}/edit`} className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent">Editar</Link>
                         )}
-                        <button type="button" onClick={activate} className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent">Ativar</button>
-                        <button type="button" onClick={closeMission} className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent">Fechar</button>
-                        <button type="button" onClick={cancel} className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent">Cancelar</button>
+                        {mission.status === 'draft' && (
+                            <button type="button" onClick={activate} className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent">Ativar</button>
+                        )}
+                        {mission.status === 'active' && (
+                            <button type="button" onClick={closeMission} className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent">Fechar</button>
+                        )}
+                        {(mission.status === 'draft' || mission.status === 'active') && (
+                            <button type="button" onClick={cancel} className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent">Cancelar</button>
+                        )}
                     </div>
                 </div>
 

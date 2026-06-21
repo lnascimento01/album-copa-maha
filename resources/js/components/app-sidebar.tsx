@@ -3,6 +3,7 @@ import {
     Album,
     BadgeCheck,
     BarChart3,
+    Bell,
     ClipboardCheck,
     Flag,
     LayoutGrid,
@@ -203,6 +204,12 @@ export function AppSidebar() {
         title: 'Auditoria',
         href: '/admin/audit-logs',
         icon: ScrollText,
+    });
+
+    pushIf(permissions.includes('pushNotifications.viewAny'), {
+        title: 'Notificações',
+        href: '/admin/push-notifications',
+        icon: Bell,
     });
 
     return (
