@@ -1,11 +1,11 @@
 import { Head, Link } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
-import { fmtDateTimeBr } from '@/lib/date';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { MetricCard } from '@/components/ui/metric-card';
 import { PageHeader } from '@/components/ui/page-header';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { fmtDateTimeBr } from '@/lib/date';
 import { dashboard } from '@/routes';
 
 type AuditActor = {

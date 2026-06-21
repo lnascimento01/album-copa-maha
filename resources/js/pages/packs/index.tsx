@@ -1,5 +1,4 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { fmtDateTimeBr } from '@/lib/date';
 import type { DriveStep } from 'driver.js';
 import { PageTour, TourReplayButton } from '@/components/page-tour';
 import ShareExportPanel from '@/components/share-export-panel';
@@ -19,6 +18,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { ResponsiveDataList } from '@/components/ui/responsive-data-list';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { fmtDateTimeBr } from '@/lib/date';
 
 const TOUR_STEPS: DriveStep[] = [
     {

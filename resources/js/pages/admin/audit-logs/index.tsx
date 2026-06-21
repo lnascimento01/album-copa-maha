@@ -1,11 +1,11 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { fmtDateTimeBr } from '@/lib/date';
 import { DataTableShell } from '@/components/ui/data-table-shell';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
 import { ResponsiveDataList } from '@/components/ui/responsive-data-list';
+import { fmtDateTimeBr } from '@/lib/date';
 
 type UserOption = {
     id: number;

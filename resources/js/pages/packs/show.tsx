@@ -3,8 +3,8 @@ import type { DriveStep } from 'driver.js';
 import { Sparkles, Star } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { PackRevealCinema } from '@/components/packs/pack-reveal-cinema';
-import ShareExportPanel from '@/components/share-export-panel';
 import { PageTour } from '@/components/page-tour';
+import ShareExportPanel from '@/components/share-export-panel';
 import { EmptyState } from '@/components/ui/empty-state';
 import { OriginBadge } from '@/components/ui/origin-badge';
 import { PageHeader } from '@/components/ui/page-header';
@@ -103,7 +103,10 @@ export default function PackShow({ pack }: { pack: Pack }) {
 
     // Curtain transition state — picks up _doReveal flag on remount
     const [curtain, setCurtain] = useState<'idle' | 'closing' | 'revealing'>(() => {
-        if (_doReveal) { _doReveal = false; return 'revealing'; }
+        if (_doReveal) {
+            _doReveal = false;
+            return 'revealing';
+        }
         return 'idle';
     });
 
@@ -116,6 +119,7 @@ export default function PackShow({ pack }: { pack: Pack }) {
 
     if (revealedIds.length !== prevRevealedCount) {
         setPrevRevealedCount(revealedIds.length);
+
         // A reveal arrived via flash → surface the cinema (still dismissable).
         if (revealedIds.length > 0) {
             setShowCinema(true);
@@ -124,6 +128,7 @@ export default function PackShow({ pack }: { pack: Pack }) {
 
     if (pack.status !== prevStatus) {
         setPrevStatus(pack.status);
+
         // Pack opened while curtains are still closing → advance to reveal.
         if (pack.status === 'opened' && curtain === 'closing') {
             setCurtain('revealing');
@@ -137,14 +142,20 @@ export default function PackShow({ pack }: { pack: Pack }) {
 
     // Auto-clear the "revealing" phase once the curtain has opened
     useEffect(() => {
-        if (curtain !== 'revealing') return;
+        if (curtain !== 'revealing') {
+            return;
+        }
+
         const t = setTimeout(() => setCurtain('idle'), 800);
+
         return () => clearTimeout(t);
     }, [curtain]);
 
     // Order items by the reveal sequence from flash
     const cinemaItems = useMemo(() => {
-        if (!revealedIds.length) return [];
+        if (!revealedIds.length) {
+            return [];
+        }
 
         const order = new Map(revealedIds.map((id, i) => [id, i]));
 
@@ -166,11 +177,15 @@ export default function PackShow({ pack }: { pack: Pack }) {
     const shareCopy = `Abri um pacote no Álbum da Copa AAPH e consegui ${pack.items.length} figurinha${pack.items.length !== 1 ? 's' : ''}! #CopaAAPH`;
 
     const openPack = () => {
-        if (isOpening) return;
+        if (isOpening) {
+            return;
+        }
+
         setIsOpening(true);
 
         if (reducedMotion) {
             router.post(`/packs/${pack.id}/open`, {}, { preserveScroll: true });
+
             return;
         }
 

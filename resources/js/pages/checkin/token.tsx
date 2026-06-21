@@ -1,6 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { fmtDateTimeBr } from '@/lib/date';
 import { PageHeader } from '@/components/ui/page-header';
+import { fmtDateTimeBr } from '@/lib/date';
 
 type Flash = {
     success?: string;

@@ -1,5 +1,4 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { fmtDateTimeBr } from '@/lib/date';
 import type { DriveStep } from 'driver.js';
 import type { FormEvent } from 'react';
 import { PageTour, TourReplayButton } from '@/components/page-tour';
@@ -10,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PageHeader } from '@/components/ui/page-header';
 import { ResponsiveDataList } from '@/components/ui/responsive-data-list';
+import { fmtDateTimeBr } from '@/lib/date';
 
 const TOUR_STEPS: DriveStep[] = [
     {

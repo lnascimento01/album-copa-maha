@@ -1,7 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { fmtDateTimeBr } from '@/lib/date';
 import { PromptDialog } from '@/components/ui/action-dialog';
+import { fmtDateTimeBr } from '@/lib/date';
 
 type Sticker = { id: number; code: string; title: string; type: string; rarity: string };
 

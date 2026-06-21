@@ -1,10 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
-import { fmtDateTimeBr } from '@/lib/date';
 import { DataTableShell } from '@/components/ui/data-table-shell';
 import { EmptyState } from '@/components/ui/empty-state';
 import { OriginBadge } from '@/components/ui/origin-badge';
 import { PageHeader } from '@/components/ui/page-header';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { fmtDateTimeBr } from '@/lib/date';
 
 type Pack = {
     id: number;

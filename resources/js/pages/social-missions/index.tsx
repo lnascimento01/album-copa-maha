@@ -1,11 +1,11 @@
 import { Head, Link } from '@inertiajs/react';
-import { fmtDateTimeBr } from '@/lib/date';
 import type { DriveStep } from 'driver.js';
 import { PageTour, TourReplayButton } from '@/components/page-tour';
 import { EmptyState } from '@/components/ui/empty-state';
 import { OriginBadge } from '@/components/ui/origin-badge';
 import { PageHeader } from '@/components/ui/page-header';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { fmtDateTimeBr } from '@/lib/date';
 
 const TOUR_STEPS: DriveStep[] = [
     {

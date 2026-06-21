@@ -1,8 +1,8 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { lazy, Suspense, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
-import { fmtDateTimeBr } from '@/lib/date';
 import { PromptDialog } from '@/components/ui/action-dialog';
+import { fmtDateTimeBr } from '@/lib/date';
 
 type UserRef = { id: number; name: string; email: string };
 
@@ -385,6 +385,7 @@ export default function AdminActivityShow({ activity, checkins, checkinSessions,
                 onConfirm={(reason) => {
                     const id = revokeCheckinTarget;
                     setRevokeCheckinTarget(null);
+
                     if (id !== null) {
                         router.patch(`/admin/activity-checkins/${id}/revoke`, { revoke_reason: reason });
                     }
@@ -402,6 +403,7 @@ export default function AdminActivityShow({ activity, checkins, checkinSessions,
                 onConfirm={(reason) => {
                     const id = revokeSessionTarget;
                     setRevokeSessionTarget(null);
+
                     if (id !== null) {
                         router.patch(`/admin/activity-checkin-sessions/${id}/revoke`, { revoke_reason: reason });
                     }

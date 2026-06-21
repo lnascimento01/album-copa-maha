@@ -1,7 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { fmtDateTimeBr } from '@/lib/date';
 import { ConfirmDialog, PromptDialog } from '@/components/ui/action-dialog';
+import { fmtDateTimeBr } from '@/lib/date';
 
 type Role = {
     id: number;

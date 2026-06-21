@@ -313,6 +313,7 @@ export default function AdminUsersIndex({ users, filters }: Props) {
                 onConfirm={(reason) => {
                     const id = rejectTarget;
                     setRejectTarget(null);
+
                     if (id !== null) {
                         router.patch(`/admin/users/${id}/reject`, { rejection_reason: reason }, {
                             preserveScroll: true,
@@ -332,6 +333,7 @@ export default function AdminUsersIndex({ users, filters }: Props) {
                 onConfirm={() => {
                     const id = suspendTarget;
                     setSuspendTarget(null);
+
                     if (id !== null) {
                         router.patch(`/admin/users/${id}/suspend`, {}, {
                             preserveScroll: true,
