@@ -1,5 +1,6 @@
 <?php
 
+use App\Mail\StickerPackGrantedMail;
 use App\Models\Album;
 use App\Models\AuditLog;
 use App\Models\Role;
@@ -7,11 +8,13 @@ use App\Models\StickerPack;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
     $this->seed(DatabaseSeeder::class);
+    Mail::fake();
 });
 
 function makePackAdmin(): User
@@ -142,6 +145,12 @@ it('granting packs writes sticker pack granted audit log', function (): void {
     expect($log?->actor_user_id)->toBe($admin->id);
     expect($log?->target_user_id)->toBe($participant->id);
     expect($log?->metadata['quantity'])->toBe(2);
+
+    Mail::assertSent(StickerPackGrantedMail::class, function (StickerPackGrantedMail $mail) use ($participant): bool {
+        return $mail->recipient->id === $participant->id
+            && $mail->quantity === 2
+            && $mail->size === 3;
+    });
 });
 
 it('admin cancels pending pack and writes audit', function (): void {

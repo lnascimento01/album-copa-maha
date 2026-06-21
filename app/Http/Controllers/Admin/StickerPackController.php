@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CancelStickerPackRequest;
 use App\Http\Requests\StoreStickerPackRequest;
+use App\Mail\StickerPackGrantedMail;
 use App\Models\Album;
 use App\Models\AuditLog;
 use App\Models\StickerPack;
@@ -13,8 +14,10 @@ use App\Services\Audit\AuditLogger;
 use App\Services\Stickers\RevokePackService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class StickerPackController extends Controller
 {
@@ -134,6 +137,20 @@ class StickerPackController extends Controller
                 'pack_ids' => $packIds,
             ],
         );
+
+        if ($targetUser !== null && filled($targetUser->email)) {
+            try {
+                Mail::to($targetUser->email, $targetUser->name)
+                    ->send(new StickerPackGrantedMail(
+                        recipient: $targetUser,
+                        quantity: $quantity,
+                        size: $size,
+                        note: $note,
+                    ));
+            } catch (Throwable $exception) {
+                report($exception);
+            }
+        }
 
         return redirect()->route('admin.sticker-packs.index')
             ->with('success', 'Pacotes concedidos com sucesso.');
