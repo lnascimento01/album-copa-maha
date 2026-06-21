@@ -13,13 +13,13 @@ export function useOneSignal(): { permissionStatus: PushPermission } {
     const auth = usePage<{ auth: { user: { id: number } | null } }>().props.auth;
     const userId = auth?.user?.id;
 
-    const [permissionStatus, setPermissionStatus] = useState<PushPermission>('loading');
+    // When APP_ID is absent stay 'default' so no banner ever shows.
+    const [permissionStatus, setPermissionStatus] = useState<PushPermission>(
+        APP_ID ? 'loading' : 'default',
+    );
 
     useEffect(() => {
-        if (!APP_ID) {
-            setPermissionStatus('default');
-            return;
-        }
+        if (!APP_ID) return;
 
         let cancelled = false;
         let removeListener: (() => void) | null = null;
@@ -46,7 +46,6 @@ export function useOneSignal(): { permissionStatus: PushPermission } {
                 const native = OneSignal.Notifications.permissionNative;
 
                 if (native === 'default') {
-                    // First visit: request permission immediately
                     await OneSignal.Notifications.requestPermission().catch(() => {});
                     const afterNative = OneSignal.Notifications.permissionNative;
                     if (!cancelled) {
@@ -55,8 +54,8 @@ export function useOneSignal(): { permissionStatus: PushPermission } {
                             afterNative === 'denied'  ? 'denied'  : 'default',
                         );
                     }
-                } else {
-                    if (!cancelled) setPermissionStatus(native === 'granted' ? 'granted' : native === 'denied' ? 'denied' : 'default');
+                } else if (!cancelled) {
+                    setPermissionStatus(native === 'granted' ? 'granted' : native === 'denied' ? 'denied' : 'default');
                 }
 
                 const onPermChange = (granted: boolean) => {
