@@ -90,9 +90,20 @@ export function useOneSignal(): { permissionStatus: PushPermission } {
                 await initPromise;
                 if (cancelled) return;
 
-                if (userId) {
-                    OneSignal.login(String(userId)).catch(() => {});
-                }
+                // Tie every push subscription to the app user id — OneSignal
+                // stores it as `external_id`, which is how the backend targets
+                // sends (include_aliases.external_id). This MUST be re-asserted
+                // when the subscription is actually created/changed: calling
+                // login() only once at init races with the opt-in, so a user
+                // who enables push before login() settles ends up as an
+                // ANONYMOUS subscription that no user-targeted send can reach.
+                const identify = () => {
+                    if (userId) {
+                        OneSignal.login(String(userId)).catch(() => {});
+                    }
+                };
+
+                identify();
 
                 // Read from the native API — not OneSignal's internal cache —
                 // so that clearing site permissions in the browser is reflected
@@ -101,9 +112,31 @@ export function useOneSignal(): { permissionStatus: PushPermission } {
 
                 const onPermChange = (granted: boolean) => {
                     setPermissionStatus(granted ? 'granted' : 'denied');
+                    // The subscription is created the moment permission is
+                    // granted — re-assert the external_id right then.
+                    if (granted) {
+                        identify();
+                    }
                 };
                 OneSignal.Notifications.addEventListener('permissionChange', onPermChange);
-                removeListener = () => OneSignal.Notifications.removeEventListener('permissionChange', onPermChange);
+
+                // Also re-identify whenever the push subscription itself changes
+                // (e.g. a brand-new subscription id is assigned), covering the
+                // case where login() at init ran before the subscription loaded.
+                let removeSubListener: (() => void) | null = null;
+                try {
+                    const onSubChange = () => identify();
+                    OneSignal.User.PushSubscription.addEventListener('change', onSubChange);
+                    removeSubListener = () => OneSignal.User.PushSubscription.removeEventListener('change', onSubChange);
+                } catch {
+                    // Older SDK without PushSubscription change events — the
+                    // permissionChange handler above still re-identifies on opt-in.
+                }
+
+                removeListener = () => {
+                    OneSignal.Notifications.removeEventListener('permissionChange', onPermChange);
+                    removeSubListener?.();
+                };
             } catch {
                 if (!cancelled) setPermissionStatus('granted');
             }
