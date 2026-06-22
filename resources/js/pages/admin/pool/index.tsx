@@ -1,6 +1,15 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import ShareExportPanel from '@/components/share-export-panel';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import { fmtDateTimeBr } from '@/lib/date';
 
 type PoolMatch = {
@@ -124,6 +133,32 @@ function SetScoreModal({
     );
 }
 
+function PoolShareButton() {
+    const payload = {
+        type: 'pool_active',
+        title: 'Bolão Copa 2026 está no ar!',
+        subtitle: 'Faça seus palpites, acerte o placar e ganhe figurinhas.',
+        album_name: 'Álbum da Copa MAHA 2026',
+        date: new Date().toISOString(),
+    };
+    const shareCopy = '⚽ O Bolão da Copa 2026 está no ar! Faça seus palpites pelo app, acerte o placar e ganhe figurinhas para o seu álbum. #CopaAAPH #BolãoMaHa';
+
+    return (
+        <Dialog>
+            <DialogTrigger className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent">
+                Compartilhar Bolão
+            </DialogTrigger>
+            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Compartilhar bolão</DialogTitle>
+                    <DialogDescription>Gere uma imagem pronta para divulgar que o bolão está no ar.</DialogDescription>
+                </DialogHeader>
+                <ShareExportPanel payload={payload} shareCopy={shareCopy} fileBase="bolao-copa-2026" />
+            </DialogContent>
+        </Dialog>
+    );
+}
+
 export default function AdminPoolIndex({ matches, settings, albums }: Props) {
     const [isActive, setIsActive] = useState(settings.is_active);
     const [albumId, setAlbumId] = useState(settings.album_id ? String(settings.album_id) : '');
@@ -157,7 +192,10 @@ export default function AdminPoolIndex({ matches, settings, albums }: Props) {
         <>
             <Head title="Bolao (Admin)" />
             <div className="space-y-6 p-4">
-                <h1 className="text-xl font-semibold tracking-tight">Bolao Copa 2026</h1>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h1 className="text-xl font-semibold tracking-tight">Bolao Copa 2026</h1>
+                    <PoolShareButton />
+                </div>
 
                 <form onSubmit={saveSettings} className="rounded-sm border p-4">
                     <div className="mb-3 text-sm font-medium">Configuracoes</div>

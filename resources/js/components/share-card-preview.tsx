@@ -1,4 +1,4 @@
-import { Award, BarChart3, Megaphone, Package, Sparkles, Sticker, Trophy } from 'lucide-react';
+import { Award, BarChart3, Megaphone, Package, Sparkles, Star, Sticker, Trophy } from 'lucide-react';
 import { forwardRef   } from 'react';
 import type {ComponentType, ReactNode} from 'react';
 
@@ -42,6 +42,7 @@ const ACCENTS: Record<string, Accent> = {
     achievement_unlocked: { label: 'Conquista desbloqueada', color: '#fcd34d', Icon: Award },
     social_mission_approved: { label: 'Missão aprovada', color: '#34d399', Icon: Trophy },
     social_mission: { label: 'Missão social', color: '#f59e0b', Icon: Megaphone },
+    pool_active: { label: 'Bolão Copa 2026', color: '#f97316', Icon: Star },
 };
 
 const DEFAULT_ACCENT: Accent = { label: 'Álbum da Copa AAPH', color: '#8aa842', Icon: Sparkles };
@@ -64,6 +65,7 @@ const ShareCardPreview = forwardRef<HTMLDivElement, Props>(function ShareCardPre
     const seasonLabel = date ? `Temporada ${new Date(date).getFullYear()}` : 'Temporada AAPH';
     const stickerImageUrl = type === 'sticker_unlocked' && payload.image_url ? String(payload.image_url) : null;
     const isMission = type === 'social_mission';
+    const isPool = type === 'pool_active';
 
     const styles = FORMAT_STYLES[format];
     const accent = ACCENTS[type] ?? DEFAULT_ACCENT;
@@ -206,6 +208,12 @@ const ShareCardPreview = forwardRef<HTMLDivElement, Props>(function ShareCardPre
                                 <div>
                                     <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/50">Como participar</div>
                                     <div className="text-lg font-bold leading-tight text-white">Envie sua evidência no app</div>
+                                    <div className="text-[11px] text-white/55">{albumName}</div>
+                                </div>
+                            ) : isPool ? (
+                                <div>
+                                    <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/50">Como participar</div>
+                                    <div className="text-lg font-bold leading-tight text-white">Acesse o app e faça seus palpites</div>
                                     <div className="text-[11px] text-white/55">{albumName}</div>
                                 </div>
                             ) : (
