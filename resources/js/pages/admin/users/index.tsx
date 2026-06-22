@@ -1,5 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Ban, Check, Eye, MoreVertical, XCircle } from 'lucide-react';
+import { PaginationLinks } from '@/components/ui/pagination-links';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { ConfirmDialog, PromptDialog } from '@/components/ui/action-dialog';
@@ -284,23 +285,7 @@ export default function AdminUsersIndex({ users, filters }: Props) {
                     </table>
                 </DataTableShell>
 
-                <div className="flex flex-wrap gap-2">
-                    {users.links.map((link, index) => (
-                        <button
-                            key={`${link.label}-${index}`}
-                            type="button"
-                            onClick={() => {
-                                if (link.url) {
-                                    router.visit(link.url);
-                                }
-                            }}
-                            disabled={!link.url}
-                            className={`cursor-pointer rounded-sm border px-2.5 py-1.5 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50 ${link.active ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-dim hover:bg-accent'}`}
-                        >
-                            <span dangerouslySetInnerHTML={{ __html: link.label }} />
-                        </button>
-                    ))}
-                </div>
+                <PaginationLinks links={users.links} preserveState />
             </div>
 
             <PromptDialog

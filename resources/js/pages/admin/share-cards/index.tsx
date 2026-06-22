@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { PaginationLinks } from '@/components/ui/pagination-links';
 import { fmtDateTimeBr } from '@/lib/date';
 
 type RefItem = { id: number; name: string; email?: string };
@@ -104,19 +105,7 @@ export default function AdminShareCardsIndex({ cards, filters, types, users, alb
                     </table>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
-                    {cards.links.map((link, index) => (
-                        <button
-                            key={`${link.label}-${index}`}
-                            type="button"
-                            onClick={() => link.url && router.visit(link.url)}
-                            disabled={!link.url}
-                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-primary text-primary-foreground' : ''}`}
-                        >
-                            <span dangerouslySetInnerHTML={{ __html: link.label }} />
-                        </button>
-                    ))}
-                </div>
+                <PaginationLinks links={cards.links} preserveState />
             </div>
         </>
     );

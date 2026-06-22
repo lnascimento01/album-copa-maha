@@ -1,4 +1,5 @@
-import { Head, router } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
+import { PaginationLinks } from '@/components/ui/pagination-links';
 import { fmtDateTimeBr } from '@/lib/date';
 
 type Redemption = {
@@ -51,13 +52,7 @@ export default function RewardCodeHistory({ redemptions }: { redemptions: { data
                     </table>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
-                    {redemptions.links.map((link, index) => (
-                        <button key={`${link.label}-${index}`} type="button" onClick={() => link.url && router.visit(link.url)} disabled={!link.url} className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-primary text-primary-foreground' : ''}`}>
-                            <span dangerouslySetInnerHTML={{ __html: link.label }} />
-                        </button>
-                    ))}
-                </div>
+                <PaginationLinks links={redemptions.links} />
             </div>
         </>
     );

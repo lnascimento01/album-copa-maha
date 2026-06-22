@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import { PaginationLinks } from '@/components/ui/pagination-links';
 import { fmtDateTimeBr } from '@/lib/date';
 
 type Notification = {
@@ -70,16 +71,7 @@ export default function AdminPushNotificationsIndex({ notifications }: Props) {
                     </table>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
-                    {notifications.links.map((link, index) => (
-                        <a
-                            key={`${link.label}-${index}`}
-                            href={link.url ?? '#'}
-                            className={`rounded-sm border px-2 py-1 text-xs ${link.active ? 'bg-primary text-primary-foreground' : ''} ${!link.url ? 'pointer-events-none opacity-40' : ''}`}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                        />
-                    ))}
-                </div>
+                <PaginationLinks links={notifications.links} />
             </div>
         </>
     );

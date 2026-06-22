@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { PaginationLinks } from '@/components/ui/pagination-links';
 import { DataTableShell } from '@/components/ui/data-table-shell';
 import { EmptyState } from '@/components/ui/empty-state';
 import { MetricCard } from '@/components/ui/metric-card';
@@ -181,19 +182,7 @@ export default function AdminRewardCodesIndex({ rewardCodes, filters, statuses, 
                     </table>
                 </DataTableShell>
 
-                <div className="flex flex-wrap gap-2">
-                    {rewardCodes.links.map((link, index) => (
-                        <button
-                            key={`${link.label}-${index}`}
-                            type="button"
-                            onClick={() => link.url && router.visit(link.url)}
-                            disabled={!link.url}
-                            className={`rounded-sm border px-2 py-1 text-xs font-semibold ${link.active ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-foreground'}`}
-                        >
-                            <span dangerouslySetInnerHTML={{ __html: link.label }} />
-                        </button>
-                    ))}
-                </div>
+                <PaginationLinks links={rewardCodes.links} preserveState />
             </div>
         </>
     );

@@ -1,4 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import { PaginationLinks } from '@/components/ui/pagination-links';
 import type { DriveStep } from 'driver.js';
 import { PageTour, TourReplayButton } from '@/components/page-tour';
 import ShareExportPanel from '@/components/share-export-panel';
@@ -288,6 +289,7 @@ export default function PacksIndex({ pendingPacks, historyPacks, stats, can }: P
                         </tbody>
                     </table>
                 </DataTableShell>
+                <PaginationLinks links={historyPacks.links} />
             </div>
 
             <PageTour tourKey="packs-index" steps={TOUR_STEPS} />
