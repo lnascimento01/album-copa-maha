@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\PoolMatch;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\CarbonImmutable;
 
 class PoolMatchSeeder extends Seeder
 {
@@ -12,7 +13,15 @@ class PoolMatchSeeder extends Seeder
      */
     public function run(): void
     {
-        $matches = [
+        $matches = array_map(static function (array $match): array {
+            $match['starts_at'] = CarbonImmutable::createFromFormat(
+                'Y-m-d H:i:s',
+                $match['starts_at'],
+                'America/Sao_Paulo',
+            )->subHours(3);
+
+            return $match;
+        }, [
             // GRUPO H - Matchday 2 (Jun 21)
             ['match_number' => 37, 'stage' => 'group', 'group_name' => 'H', 'home_team' => 'Spain', 'away_team' => 'Saudi Arabia', 'starts_at' => '2026-06-21 16:00:00', 'venue' => 'Mercedes-Benz Stadium', 'city' => 'Atlanta'],
             ['match_number' => 38, 'stage' => 'group', 'group_name' => 'G', 'home_team' => 'Belgium', 'away_team' => 'Iran', 'starts_at' => '2026-06-21 19:00:00', 'venue' => 'SoFi Stadium', 'city' => 'Los Angeles'],
@@ -102,7 +111,7 @@ class PoolMatchSeeder extends Seeder
             ['match_number' => 103, 'stage' => 'third_place', 'group_name' => null, 'home_team' => 'A Definir', 'away_team' => 'A Definir', 'starts_at' => '2026-07-18 22:00:00', 'venue' => null, 'city' => 'Miami'],
             // FINAL
             ['match_number' => 104, 'stage' => 'final', 'group_name' => null, 'home_team' => 'A Definir', 'away_team' => 'A Definir', 'starts_at' => '2026-07-19 23:00:00', 'venue' => 'MetLife Stadium', 'city' => 'New York/NJ'],
-        ];
+        ]);
 
         foreach ($matches as $match) {
             PoolMatch::query()->updateOrCreate(
