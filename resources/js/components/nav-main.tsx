@@ -43,7 +43,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
     const engagementItems = items.filter((item) => {
         const href = toUrl(item.href);
 
-        return ['/ranking', '/achievements', '/social-missions', '/social-submissions'].some((prefix) => href.startsWith(prefix));
+        return ['/ranking', '/achievements', '/social-missions', '/social-submissions', '/pool'].some((prefix) => href.startsWith(prefix));
     });
     const adminItems = items.filter((item) => toUrl(item.href).startsWith('/admin'));
 
