@@ -36,9 +36,15 @@ export default function AdminRolesIndex({ roles, allPermissions }: Props) {
 
     const [selectedByRole, setSelectedByRole] = useState<Record<number, number[]>>(initialSelection);
 
-    useEffect(() => {
+    // Reset the selection when the roles prop changes, adjusting state during
+    // render instead of synchronously inside an effect (react-hooks/
+    // set-state-in-effect). `initialSelection` is a new object whenever `roles`
+    // changes, so the reference comparison is the trigger.
+    const [prevInitialSelection, setPrevInitialSelection] = useState(initialSelection);
+    if (initialSelection !== prevInitialSelection) {
+        setPrevInitialSelection(initialSelection);
         setSelectedByRole(initialSelection);
-    }, [initialSelection]);
+    }
 
     useEffect(() => {
         if (page.props.flash?.success) {

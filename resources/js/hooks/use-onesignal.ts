@@ -32,31 +32,33 @@ function nativePerm(): PushPermission {
     return p === 'granted' ? 'granted' : p === 'denied' ? 'denied' : 'default';
 }
 
+// Environment-derived initial status, computed during render. Doing this here
+// (instead of calling setState synchronously inside the effect) avoids the
+// react-hooks/set-state-in-effect lint error and is the recommended pattern for
+// state that derives from the environment rather than from an external system.
+function computeInitialStatus(): PushPermission {
+    if (!APP_ID) return 'granted';
+    // iOS browsers (all WebKit) only support push when installed as a PWA.
+    if (isIosBrowser() && !isStandalone()) return 'ios-pwa-required';
+    // Browsers without push support (very old / exotic) — hide banner silently.
+    if (typeof Notification === 'undefined' || !('PushManager' in window)) return 'granted';
+    return 'loading';
+}
+
 export function useOneSignal(): { permissionStatus: PushPermission } {
     const auth = usePage<{ auth: { user: { id: number } | null } }>().props.auth;
     const userId = auth?.user?.id;
 
-    const [permissionStatus, setPermissionStatus] = useState<PushPermission>(
-        APP_ID ? 'loading' : 'granted',
-    );
+    const [permissionStatus, setPermissionStatus] = useState<PushPermission>(computeInitialStatus);
 
     useEffect(() => {
         if (!APP_ID) return;
 
-        // iOS browsers (Safari, Chrome, Firefox — all use WebKit) only support
-        // push notifications when the site is installed as a PWA (Add to Home
-        // Screen). In a regular browser tab the Notification API exists on
-        // iOS 16.4+ but requestPermission() always fails silently.
-        if (isIosBrowser() && !isStandalone()) {
-            setPermissionStatus('ios-pwa-required');
-            return;
-        }
-
-        // Browsers without push support (very old / exotic).
-        if (typeof Notification === 'undefined' || !('PushManager' in window)) {
-            setPermissionStatus('granted'); // hide banner silently
-            return;
-        }
+        // iOS-not-PWA and browsers without push support are already reflected by
+        // the initial state computed during render — just stop here (no
+        // synchronous setState inside the effect body).
+        if (isIosBrowser() && !isStandalone()) return;
+        if (typeof Notification === 'undefined' || !('PushManager' in window)) return;
 
         let cancelled = false;
         let removeListener: (() => void) | null = null;

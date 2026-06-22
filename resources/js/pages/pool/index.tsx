@@ -44,7 +44,7 @@ function predictionBadge(prediction: PoolPrediction, match: PoolMatch): string {
     return 'Errou';
 }
 
-function MatchCard({ match, settings }: { match: PoolMatch; settings: Settings }) {
+function MatchCard({ match }: { match: PoolMatch }) {
     const [homeInput, setHomeInput] = useState<string>(
         match.prediction !== null ? String(match.prediction.home_score) : '',
     );
@@ -199,7 +199,7 @@ export default function PoolIndex({ matchesByDate, dates, settings }: Props) {
 
                         <div className="space-y-3">
                             {currentMatches.map((match) => (
-                                <MatchCard key={match.id} match={match} settings={settings} />
+                                <MatchCard key={match.id} match={match} />
                             ))}
                         </div>
 
