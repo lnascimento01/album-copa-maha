@@ -27,6 +27,16 @@ class StickerPackSeeder extends Seeder
             return;
         }
 
+        $alreadySeeded = StickerPack::query()
+            ->where('user_id', $user->id)
+            ->where('album_id', $album->id)
+            ->where('source', StickerPack::SOURCE_SEED)
+            ->exists();
+
+        if ($alreadySeeded) {
+            return;
+        }
+
         for ($index = 0; $index < 2; $index++) {
             StickerPack::query()->create([
                 'user_id' => $user->id,
