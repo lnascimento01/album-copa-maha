@@ -103,6 +103,22 @@ export function useOneSignal(): { permissionStatus: PushPermission } {
                     }
                 };
 
+                // Rescue users who already granted permission but whose
+                // OneSignal subscription was never created or was left
+                // anonymous. The banner is hidden once permission is 'granted',
+                // so this silent re-opt-in is their ONLY way out of limbo —
+                // without it they keep granted permission but never receive.
+                // optIn() does NOT prompt when permission is already granted and
+                // is a no-op when already subscribed, so it is safe every load.
+                if (nativePerm() === 'granted') {
+                    try {
+                        await OneSignal.User.PushSubscription.optIn();
+                    } catch {
+                        // older SDK / transient — identify() below still runs
+                    }
+                    if (cancelled) return;
+                }
+
                 identify();
 
                 // Read from the native API — not OneSignal's internal cache —
