@@ -15,6 +15,19 @@ use Illuminate\Support\Collection;
 class BuildAlbumRankingService
 {
     /**
+     * Human-readable label for each pack source shown in the score breakdown.
+     * Order here is the display order of the breakdown lines.
+     */
+    private const SOURCE_LABELS = [
+        'social_mission' => 'Missão social',
+        'pool' => 'Bolão',
+        'bonus' => 'Bônus de boas-vindas',
+        'reward_code' => 'Código de recompensa',
+        'admin' => 'Concedido pela organização',
+        'seed' => 'Pacote inicial',
+    ];
+
+    /**
      * @return array{album: Album|null, rows: Collection<int, array<string, mixed>>, formula: string}
      */
     public function build(?Album $album = null, bool $includeAdmins = false): array
@@ -37,7 +50,39 @@ class BuildAlbumRankingService
             ->when(! $includeAdmins, fn ($query) => $query->whereDoesntHave('roles', fn ($roleQuery) => $roleQuery->where('slug', 'admin')))
             ->get(['id', 'name', 'email']);
 
-        $rows = $users->map(function (User $user) use ($album, $activeStickerIds, $totalStickers): array {
+        // Pre-aggregated maps so the score breakdown can attribute each point to
+        // the action that earned it, without an extra query per user per source.
+        // Distinct collectible stickers a user owns, grouped by the source of the
+        // pack they came from (no duplicates exist, so each sticker maps to one).
+        $stickersBySource = UserSticker::query()
+            ->join('sticker_packs', 'sticker_packs.id', '=', 'user_stickers.source_id')
+            ->where('user_stickers.source', 'pack')
+            ->where('sticker_packs.album_id', $album->id)
+            ->whereIn('user_stickers.sticker_id', $activeStickerIds)
+            ->selectRaw('user_stickers.user_id as uid, sticker_packs.source as src, COUNT(DISTINCT user_stickers.sticker_id) as figs')
+            ->groupBy('user_stickers.user_id', 'sticker_packs.source')
+            ->get()
+            ->groupBy('uid');
+
+        // Opened packs per user, grouped by source.
+        $packsBySource = StickerPack::query()
+            ->where('album_id', $album->id)
+            ->where('status', StickerPack::STATUS_OPENED)
+            ->selectRaw('user_id as uid, source as src, COUNT(*) as packs')
+            ->groupBy('user_id', 'source')
+            ->get()
+            ->groupBy('uid');
+
+        // Stickers seeded directly (not opened from a pack).
+        $seedStickersByUser = UserSticker::query()
+            ->where('source', 'seed')
+            ->whereIn('sticker_id', $activeStickerIds)
+            ->selectRaw('user_id as uid, COUNT(DISTINCT sticker_id) as figs')
+            ->groupBy('user_id')
+            ->get()
+            ->keyBy('uid');
+
+        $rows = $users->map(function (User $user) use ($album, $activeStickerIds, $totalStickers, $stickersBySource, $packsBySource, $seedStickersByUser): array {
             $stickersUnlockedCount = UserSticker::query()
                 ->where('user_id', $user->id)
                 ->whereIn('sticker_id', $activeStickerIds)
@@ -86,6 +131,16 @@ class BuildAlbumRankingService
                 + ($socialMissionsApprovedCount * 5)
                 + ($achievementsCount * 8);
 
+            $breakdown = $this->buildBreakdown(
+                figsBySource: $stickersBySource->get($user->id, collect())->keyBy('src'),
+                packsBySource: $packsBySource->get($user->id, collect())->keyBy('src'),
+                seedStickers: (int) ($seedStickersByUser->get($user->id)->figs ?? 0),
+                socialMissionsApproved: $socialMissionsApprovedCount,
+                achievements: $achievementsCount,
+                checkins: $checkinsConfirmedCount,
+                rewardCodes: $rewardCodesRedeemedCount,
+            );
+
             return [
                 'user_id' => $user->id,
                 'user_name' => $user->name,
@@ -99,6 +154,7 @@ class BuildAlbumRankingService
                 'social_missions_approved_count' => $socialMissionsApprovedCount,
                 'achievements_count' => $achievementsCount,
                 'score' => $score,
+                'breakdown' => $breakdown,
             ];
         })->sortByDesc('score')->values();
 
@@ -115,6 +171,69 @@ class BuildAlbumRankingService
             'rows' => $ranked,
             'formula' => $this->formula(),
         ];
+    }
+
+    /**
+     * Build the per-action point breakdown. The sum of the line points always
+     * equals the row score, so the UI can show exactly where the points came
+     * from (e.g. "Missão social — 15 figurinhas, 6 pacotes — +183 pts").
+     *
+     * @param  Collection<string, mixed>  $figsBySource
+     * @param  Collection<string, mixed>  $packsBySource
+     * @return array<int, array<string, mixed>>
+     */
+    private function buildBreakdown(
+        Collection $figsBySource,
+        Collection $packsBySource,
+        int $seedStickers,
+        int $socialMissionsApproved,
+        int $achievements,
+        int $checkins,
+        int $rewardCodes,
+    ): array {
+        $sources = collect(array_keys(self::SOURCE_LABELS))
+            ->merge($packsBySource->keys())
+            ->merge($figsBySource->keys())
+            ->unique();
+
+        $lines = [];
+
+        foreach ($sources as $src) {
+            $figs = (int) ($figsBySource->get($src)->figs ?? 0);
+            $packs = (int) ($packsBySource->get($src)->packs ?? 0);
+            $missions = $src === 'social_mission' ? $socialMissionsApproved : 0;
+
+            if ($figs === 0 && $packs === 0 && $missions === 0) {
+                continue;
+            }
+
+            $lines[] = [
+                'key' => $src,
+                'label' => self::SOURCE_LABELS[$src] ?? ucfirst(str_replace('_', ' ', $src)),
+                'stickers' => $figs,
+                'packs' => $packs,
+                'missions' => $missions,
+                'points' => $figs * 10 + $packs * 3 + $missions * 5,
+            ];
+        }
+
+        if ($seedStickers > 0) {
+            $lines[] = ['key' => 'initial', 'label' => 'Figurinhas iniciais', 'stickers' => $seedStickers, 'packs' => 0, 'missions' => 0, 'points' => $seedStickers * 10];
+        }
+
+        if ($achievements > 0) {
+            $lines[] = ['key' => 'achievements', 'label' => 'Conquistas', 'stickers' => 0, 'packs' => 0, 'missions' => 0, 'points' => $achievements * 8];
+        }
+
+        if ($checkins > 0) {
+            $lines[] = ['key' => 'checkins', 'label' => 'Check-ins confirmados', 'stickers' => 0, 'packs' => 0, 'missions' => 0, 'points' => $checkins * 5];
+        }
+
+        if ($rewardCodes > 0) {
+            $lines[] = ['key' => 'reward_codes', 'label' => 'Códigos resgatados', 'stickers' => 0, 'packs' => 0, 'missions' => 0, 'points' => $rewardCodes * 2];
+        }
+
+        return $lines;
     }
 
     private function formula(): string

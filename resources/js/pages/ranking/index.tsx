@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
-import { Award, CheckCircle2, Crown, Medal, Package, QrCode, Sticker, Target, Trophy } from 'lucide-react';
+import { Award, CheckCircle2, ChevronDown, Crown, Medal, Package, QrCode, Sticker, Target, Trophy } from 'lucide-react';
+import { Fragment, useState } from 'react';
 import { DataTableShell } from '@/components/ui/data-table-shell';
 import { EmptyState } from '@/components/ui/empty-state';
 import { MetricCard } from '@/components/ui/metric-card';
@@ -16,6 +17,29 @@ const SCORE_FACTORS = [
     { label: 'Conquista',              Icon: Award,        pts: 8,  color: '#fcd34d' },
 ] as const;
 
+// Color dot per breakdown source, so each action reads at a glance.
+const BREAKDOWN_COLORS: Record<string, string> = {
+    social_mission: '#f97316',
+    pool: '#fb7185',
+    bonus: '#34d399',
+    reward_code: '#60a5fa',
+    admin: '#fbbf24',
+    seed: '#94a3b8',
+    initial: '#94a3b8',
+    achievements: '#fcd34d',
+    checkins: '#34d399',
+    reward_codes: '#60a5fa',
+};
+
+type BreakdownLine = {
+    key: string;
+    label: string;
+    stickers: number;
+    packs: number;
+    missions: number;
+    points: number;
+};
+
 type RankingRow = {
     position: number;
     user_id: number;
@@ -29,6 +53,7 @@ type RankingRow = {
     social_missions_approved_count: number;
     achievements_count: number;
     score: number;
+    breakdown?: BreakdownLine[];
 };
 
 type Props = {
@@ -53,7 +78,60 @@ function podiumIcon(position: number) {
     return null;
 }
 
+function plural(count: number, singular: string, plural_: string): string {
+    return `${count} ${count === 1 ? singular : plural_}`;
+}
+
+function breakdownDetail(line: BreakdownLine): string {
+    const parts: string[] = [];
+    if (line.stickers > 0) {
+        parts.push(plural(line.stickers, 'figurinha', 'figurinhas'));
+    }
+    if (line.packs > 0) {
+        parts.push(`${plural(line.packs, 'pacote', 'pacotes')} ${line.packs === 1 ? 'aberto' : 'abertos'}`);
+    }
+    if (line.missions > 0) {
+        parts.push(`${plural(line.missions, 'missão aprovada', 'missões aprovadas')}`);
+    }
+    return parts.join(' · ');
+}
+
+function BreakdownPanel({ row }: { row: RankingRow }) {
+    const lines = row.breakdown ?? [];
+
+    if (lines.length === 0) {
+        return <p className="px-1 py-2 text-xs text-dim">Ainda sem pontos registrados.</p>;
+    }
+
+    return (
+        <div className="space-y-2">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                Como somou os {row.score} pontos
+            </p>
+            <div className="space-y-1.5">
+                {lines.map((line) => (
+                    <div
+                        key={line.key}
+                        className="flex items-center justify-between gap-3 rounded-md border border-border bg-card px-3 py-2"
+                    >
+                        <div className="flex min-w-0 items-center gap-2">
+                            <span className="size-2 shrink-0 rounded-full" style={{ background: BREAKDOWN_COLORS[line.key] ?? '#94a3b8' }} />
+                            <span className="shrink-0 text-xs font-semibold text-foreground">{line.label}</span>
+                            <span className="truncate text-[11px] text-dim">{breakdownDetail(line)}</span>
+                        </div>
+                        <span className="shrink-0 text-xs font-bold text-emerald-400">+{line.points} pts</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
 export default function RankingIndex({ album, top, me }: Props) {
+    const [openId, setOpenId] = useState<number | null>(null);
+
+    const toggle = (userId: number) => setOpenId((current) => (current === userId ? null : userId));
+
     return (
         <>
             <Head title="Ranking" />
@@ -122,23 +200,36 @@ export default function RankingIndex({ album, top, me }: Props) {
                     </section>
                 ) : null}
 
-                <DataTableShell title="Top participantes" subtitle="Ranking motivacional por progresso, presença e participação no álbum.">
+                <DataTableShell title="Top participantes" subtitle="Toque num participante para ver de onde vieram os pontos.">
                     <ResponsiveDataList
                         items={top}
                         getKey={(row) => row.user_id}
                         empty={<EmptyState title="Nenhum participante elegível no ranking." />}
-                        renderItem={(row) => (
-                            <div className="space-y-2">
-                                <div className="flex items-start justify-between gap-3">
-                                    <div>
-                                        <p className="text-sm font-semibold text-foreground">#{row.position} {row.user_name}</p>
-                                        <p className="mt-1 text-xs text-dim">{row.stickers_unlocked_count}/{row.total_stickers} figurinhas</p>
-                                    </div>
-                                    <p className="text-base font-semibold text-foreground">{row.score}</p>
+                        renderItem={(row) => {
+                            const isOpen = openId === row.user_id;
+
+                            return (
+                                <div className="space-y-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => toggle(row.user_id)}
+                                        aria-expanded={isOpen}
+                                        className="flex w-full items-start justify-between gap-3 text-left"
+                                    >
+                                        <div>
+                                            <p className="text-sm font-semibold text-foreground">#{row.position} {row.user_name}</p>
+                                            <p className="mt-1 text-xs text-dim">{row.stickers_unlocked_count}/{row.total_stickers} figurinhas</p>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-base font-semibold text-foreground">{row.score}</p>
+                                            <ChevronDown className={`size-4 text-dim transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                                        </div>
+                                    </button>
+                                    <ProgressBar value={row.album_progress_percent} label={`${row.album_progress_percent}%`} />
+                                    {isOpen ? <BreakdownPanel row={row} /> : null}
                                 </div>
-                                <ProgressBar value={row.album_progress_percent} label={`${row.album_progress_percent}%`} />
-                            </div>
-                        )}
+                            );
+                        }}
                     />
                     <table className="hidden min-w-full text-sm md:table">
                         <thead>
@@ -148,25 +239,54 @@ export default function RankingIndex({ album, top, me }: Props) {
                                 <th className="px-4 py-2">Progresso</th>
                                 <th className="px-4 py-2">Figurinhas</th>
                                 <th className="px-4 py-2">Score</th>
+                                <th className="w-8 px-4 py-2" aria-label="Detalhes" />
                             </tr>
                         </thead>
                         <tbody>
                             {top.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-4 py-8">
+                                    <td colSpan={6} className="px-4 py-8">
                                         <EmptyState title="Nenhum participante elegível no ranking." />
                                     </td>
                                 </tr>
                             ) : (
-                                top.map((row) => (
-                                    <tr key={row.user_id} className="admin-table-row">
-                                        <td className="px-4 py-2 font-semibold text-foreground">#{row.position}</td>
-                                        <td className="px-4 py-2 text-foreground">{row.user_name}</td>
-                                        <td className="px-4 py-2 text-dim">{row.album_progress_percent}%</td>
-                                        <td className="px-4 py-2 text-dim">{row.stickers_unlocked_count}/{row.total_stickers}</td>
-                                        <td className="px-4 py-2 font-semibold text-foreground">{row.score}</td>
-                                    </tr>
-                                ))
+                                top.map((row) => {
+                                    const isOpen = openId === row.user_id;
+
+                                    return (
+                                        <Fragment key={row.user_id}>
+                                            <tr
+                                                role="button"
+                                                tabIndex={0}
+                                                aria-expanded={isOpen}
+                                                onClick={() => toggle(row.user_id)}
+                                                onKeyDown={(event) => {
+                                                    if (event.key === 'Enter' || event.key === ' ') {
+                                                        event.preventDefault();
+                                                        toggle(row.user_id);
+                                                    }
+                                                }}
+                                                className="admin-table-row cursor-pointer"
+                                            >
+                                                <td className="px-4 py-2 font-semibold text-foreground">#{row.position}</td>
+                                                <td className="px-4 py-2 text-foreground">{row.user_name}</td>
+                                                <td className="px-4 py-2 text-dim">{row.album_progress_percent}%</td>
+                                                <td className="px-4 py-2 text-dim">{row.stickers_unlocked_count}/{row.total_stickers}</td>
+                                                <td className="px-4 py-2 font-semibold text-foreground">{row.score}</td>
+                                                <td className="px-4 py-2 text-right">
+                                                    <ChevronDown className={`inline size-4 text-dim transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                                                </td>
+                                            </tr>
+                                            {isOpen ? (
+                                                <tr className="border-b border-border">
+                                                    <td colSpan={6} className="bg-card/40 px-4 py-3">
+                                                        <BreakdownPanel row={row} />
+                                                    </td>
+                                                </tr>
+                                            ) : null}
+                                        </Fragment>
+                                    );
+                                })
                             )}
                         </tbody>
                     </table>
