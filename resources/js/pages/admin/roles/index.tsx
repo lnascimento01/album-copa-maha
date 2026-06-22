@@ -1,5 +1,6 @@
-import { Head, router } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { Head, router, usePage } from '@inertiajs/react';
+import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 type Permission = {
     id: number;
@@ -23,17 +24,30 @@ type Props = {
 };
 
 export default function AdminRolesIndex({ roles, allPermissions }: Props) {
+    const page = usePage<{ flash?: { success?: string; error?: string } }>();
+
     const initialSelection = useMemo(() => {
         const map: Record<number, number[]> = {};
-
         roles.forEach((role) => {
             map[role.id] = role.permissions.map((permission) => permission.id);
         });
-
         return map;
     }, [roles]);
 
     const [selectedByRole, setSelectedByRole] = useState<Record<number, number[]>>(initialSelection);
+
+    useEffect(() => {
+        setSelectedByRole(initialSelection);
+    }, [initialSelection]);
+
+    useEffect(() => {
+        if (page.props.flash?.success) {
+            toast.success(page.props.flash.success);
+        }
+        if (page.props.flash?.error) {
+            toast.error(page.props.flash.error);
+        }
+    }, [page.props.flash]);
 
     const toggle = (roleId: number, permissionId: number) => {
         setSelectedByRole((current) => {
@@ -50,9 +64,14 @@ export default function AdminRolesIndex({ roles, allPermissions }: Props) {
     };
 
     const save = (roleId: number) => {
-        router.patch(`/admin/roles/${roleId}/permissions`, {
-            permission_ids: selectedByRole[roleId] ?? [],
-        });
+        const ids = selectedByRole[roleId] ?? [];
+        router.patch(
+            `/admin/roles/${roleId}/permissions`,
+            { permission_ids: ids },
+            {
+                onError: () => toast.error('Erro ao salvar permissões.'),
+            },
+        );
     };
 
     return (
