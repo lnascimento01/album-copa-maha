@@ -8,14 +8,16 @@ services:
       args:
         WWWUSER: "${WWWUSER:-1000}"
         WWWGROUP: "${WWWGROUP:-1000}"
-        VITE_ONESIGNAL_APP_ID: "${VITE_ONESIGNAL_APP_ID}"
+        VITE_ONESIGNAL_APP_ID: "${VITE_ONESIGNAL_APP_ID:-}"
     restart: unless-stopped
     env_file:
       - ../.env
     environment:
       APP_ENV: "${APP_ENV:-staging}"
       APP_DEBUG: "${APP_DEBUG:-false}"
+      APP_TIMEZONE: "${APP_TIMEZONE:-America/Sao_Paulo}"
       PHP_OPCACHE_VALIDATE_TIMESTAMPS: 0
+      TZ: "${TZ:-America/Sao_Paulo}"
     working_dir: /var/www/html
     # No source bind-mount: the code is baked into the image so the running
     # release is immutable. Only persistent state and the shared public
@@ -73,6 +75,7 @@ services:
       MYSQL_DATABASE: "${DB_DATABASE:-maha_copa_album}"
       MYSQL_USER: "${DB_USERNAME:-maha_user}"
       MYSQL_PASSWORD: "${DB_PASSWORD:-change_me}"
+      TZ: "${TZ:-America/Sao_Paulo}"
     ports:
       - "3310:3306"
     volumes:
@@ -89,6 +92,8 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes"]
+    environment:
+      TZ: "${TZ:-America/Sao_Paulo}"
     volumes:
       - staging_redis_data:/data
     healthcheck:
