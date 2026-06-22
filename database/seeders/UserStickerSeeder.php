@@ -24,18 +24,21 @@ class UserStickerSeeder extends Seeder
         $stickerIds = Sticker::query()->where('is_active', true)->orderBy('id')->limit(3)->pluck('id');
 
         foreach ($stickerIds as $stickerId) {
-            UserSticker::query()->updateOrCreate(
-                [
-                    'user_id' => $master->id,
-                    'sticker_id' => $stickerId,
-                ],
-                [
-                    'source' => 'seed',
-                    'source_id' => null,
-                    'unlocked_at' => now(),
-                    'created_at' => now(),
-                ],
-            );
+            UserSticker::query()
+                ->withTrashed()
+                ->updateOrCreate(
+                    [
+                        'user_id' => $master->id,
+                        'sticker_id' => $stickerId,
+                    ],
+                    [
+                        'source' => 'seed',
+                        'source_id' => null,
+                        'unlocked_at' => now(),
+                        'created_at' => now(),
+                        'deleted_at' => null,
+                    ],
+                );
         }
     }
 }
