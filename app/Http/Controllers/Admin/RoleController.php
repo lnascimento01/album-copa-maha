@@ -48,9 +48,9 @@ class RoleController extends Controller
     {
         $this->authorize('update', $role);
 
-        if ($role->is_system && in_array($role->slug, ['admin', 'participant'], true)) {
+        if ($role->slug === 'admin') {
             return back()->withErrors([
-                'permissions' => 'Roles de sistema críticos não podem ser alterados nesta etapa.',
+                'permissions' => 'As permissões do role admin não podem ser alteradas.',
             ]);
         }
 

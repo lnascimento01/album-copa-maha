@@ -76,7 +76,7 @@ export default function AdminRolesIndex({ roles, allPermissions }: Props) {
                         <div className="grid gap-2 md:grid-cols-2">
                             {allPermissions.map((permission) => {
                                 const checked = (selectedByRole[role.id] ?? []).includes(permission.id);
-                                const isLocked = role.is_system && ['admin', 'participant'].includes(role.slug);
+                                const isLocked = role.slug === 'admin';
 
                                 return (
                                     <label key={permission.id} className="flex items-start gap-2 rounded-sm border p-2 text-sm">
@@ -97,9 +97,9 @@ export default function AdminRolesIndex({ roles, allPermissions }: Props) {
                             })}
                         </div>
 
-                        {role.is_system && ['admin', 'participant'].includes(role.slug) ? (
+                        {role.slug === 'admin' ? (
                             <p className="mt-3 text-xs text-muted-foreground">
-                                Role de sistema crítico não editável nesta etapa.
+                                As permissões do role admin não podem ser alteradas.
                             </p>
                         ) : (
                             <button
