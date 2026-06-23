@@ -1,5 +1,7 @@
 import { Head, router } from '@inertiajs/react';
+import type { DriveStep } from 'driver.js';
 import { useState } from 'react';
+import { PageTour, TourReplayButton } from '@/components/page-tour';
 import { fmtDateTimeBr } from '@/lib/date';
 
 type PoolPrediction = {
@@ -37,6 +39,49 @@ type Props = {
     settings: Settings;
 };
 
+// Announces that the old "guess Brazil's score" social mission now lives in the
+// pool, then walks through how to play. Centered intro/outro steps always run
+// (even with no fixtures yet); the anchored steps are skipped automatically
+// when there are no matches on screen.
+const TOUR_STEPS: DriveStep[] = [
+    {
+        popover: {
+            title: 'O palpite do Brasil agora é aqui! 🇧🇷',
+            description:
+                'A antiga missão de acertar o placar do Brasil virou parte do Bolão da Copa. Agora você palpita o placar de todos os jogos por aqui — e ganha figurinhas pelos acertos. Bora ver como funciona.',
+        },
+    },
+    {
+        element: '[data-tour="pool-dates"]',
+        popover: {
+            title: 'Escolha o dia',
+            description: 'Navegue pelas datas para ver os jogos de cada rodada. Toque numa data para carregar as partidas daquele dia.',
+        },
+    },
+    {
+        element: '[data-tour="pool-prediction"]',
+        popover: {
+            title: 'Dê seu palpite',
+            description:
+                'Digite quantos gols cada time faz e toque em “Salvar”. Dá pra alterar quantas vezes quiser até o jogo começar — no apito inicial o palpite é bloqueado.',
+        },
+    },
+    {
+        element: '[data-tour="pool-rules"]',
+        popover: {
+            title: 'Como você ganha figurinhas',
+            description:
+                'Acertar o placar exato vale mais; acertar só os gols do time vencedor também premia. Os pacotes caem automaticamente assim que o placar oficial é confirmado.',
+        },
+    },
+    {
+        popover: {
+            title: 'Tá valendo! 🏆',
+            description: 'Faça seus palpites antes de cada jogo e acompanhe os acertos. Quer rever este tour? É só tocar em “Rever tour” aqui no topo.',
+        },
+    },
+];
+
 function predictionBadge(prediction: PoolPrediction, match: PoolMatch): string {
     if (match.home_score === null) return '';
     if (prediction.exact_score_rewarded) return 'Acertou exato';
@@ -44,7 +89,7 @@ function predictionBadge(prediction: PoolPrediction, match: PoolMatch): string {
     return 'Errou';
 }
 
-function MatchCard({ match }: { match: PoolMatch }) {
+function MatchCard({ match, dataTour }: { match: PoolMatch; dataTour?: string }) {
     const [homeInput, setHomeInput] = useState<string>(
         match.prediction !== null ? String(match.prediction.home_score) : '',
     );
@@ -70,7 +115,7 @@ function MatchCard({ match }: { match: PoolMatch }) {
         : null;
 
     return (
-        <div className="rounded-sm border p-4">
+        <div data-tour={dataTour} className="rounded-sm border p-4">
             <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
                 <span>#{match.match_number} {match.group_name ? `Grupo ${match.group_name}` : match.stage}</span>
                 <span>{fmtDateTimeBr(match.starts_at)}</span>
@@ -176,7 +221,10 @@ export default function PoolIndex({ matchesByDate, dates, settings }: Props) {
         <>
             <Head title="Bolao Copa 2026" />
             <div className="space-y-4 p-4">
-                <h1 className="text-xl font-semibold tracking-tight">Bolao Copa 2026</h1>
+                <div className="flex items-center justify-between gap-3">
+                    <h1 className="text-xl font-semibold tracking-tight">Bolao Copa 2026</h1>
+                    <TourReplayButton tourKey="pool-intro" />
+                </div>
 
                 {dates.length === 0 ? (
                     <div className="rounded-sm border p-8 text-center text-sm text-muted-foreground">
@@ -184,7 +232,7 @@ export default function PoolIndex({ matchesByDate, dates, settings }: Props) {
                     </div>
                 ) : (
                     <>
-                        <div className="flex gap-2 overflow-x-auto pb-2">
+                        <div data-tour="pool-dates" className="flex gap-2 overflow-x-auto pb-2">
                             {dates.map((date) => (
                                 <button
                                     key={date}
@@ -198,12 +246,12 @@ export default function PoolIndex({ matchesByDate, dates, settings }: Props) {
                         </div>
 
                         <div className="space-y-3">
-                            {currentMatches.map((match) => (
-                                <MatchCard key={match.id} match={match} />
+                            {currentMatches.map((match, index) => (
+                                <MatchCard key={match.id} match={match} dataTour={index === 0 ? 'pool-prediction' : undefined} />
                             ))}
                         </div>
 
-                        <div className="rounded-sm border p-4 text-sm">
+                        <div data-tour="pool-rules" className="rounded-sm border p-4 text-sm">
                             <div className="mb-2 text-xs font-semibold uppercase text-muted-foreground">Regras de premiacao</div>
                             <ul className="space-y-1 text-sm">
                                 <li>Acerto exato (placar correto): <strong>{settings.exact_score_pack_size} figurinhas</strong></li>
@@ -215,6 +263,8 @@ export default function PoolIndex({ matchesByDate, dates, settings }: Props) {
                     </>
                 )}
             </div>
+
+            <PageTour tourKey="pool-intro" steps={TOUR_STEPS} />
         </>
     );
 }

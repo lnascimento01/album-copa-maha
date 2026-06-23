@@ -19,6 +19,18 @@ it('marks the main-menu tour as completed for the authenticated user', function 
     expect($user->fresh()->hasCompletedTour('main-menu'))->toBeTrue();
 });
 
+it('marks the pool-intro tour as completed for the authenticated user', function (): void {
+    $user = User::factory()->create();
+
+    expect($user->hasCompletedTour('pool-intro'))->toBeFalse();
+
+    $this->actingAs($user)
+        ->post('/onboarding/tour/pool-intro/complete')
+        ->assertRedirect();
+
+    expect($user->fresh()->hasCompletedTour('pool-intro'))->toBeTrue();
+});
+
 it('rejects unknown tours', function (): void {
     $user = User::factory()->create();
 
