@@ -39,16 +39,17 @@ type Props = {
     settings: Settings;
 };
 
-// Announces that the old "guess Brazil's score" social mission now lives in the
-// pool, then walks through how to play. Centered intro/outro steps always run
-// (even with no fixtures yet); the anchored steps are skipped automatically
-// when there are no matches on screen.
+// Walks through how to play the pool. Reached either as the continuation of the
+// home-screen step (PoolIntroHomeStep) or on a direct visit. The "Brazil score
+// mission moved here" announcement lives in the home step; this short intro
+// keeps direct visitors oriented. Centered intro/outro steps always run (even
+// with no fixtures yet); anchored steps are skipped when there are no matches.
 const TOUR_STEPS: DriveStep[] = [
     {
         popover: {
-            title: 'O palpite do Brasil agora é aqui! 🇧🇷',
+            title: 'Bolão da Copa ⚽',
             description:
-                'A antiga missão de acertar o placar do Brasil virou parte do Bolão da Copa. Agora você palpita o placar de todos os jogos por aqui — e ganha figurinhas pelos acertos. Bora ver como funciona.',
+                'Aqui você palpita o placar de todos os jogos e ganha figurinhas pelos acertos. Bora ver como funciona.',
         },
     },
     {
