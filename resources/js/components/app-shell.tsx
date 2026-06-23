@@ -1,6 +1,7 @@
 import { usePage } from '@inertiajs/react';
 import { createContext, useContext, type ReactNode } from 'react';
 import { OnboardingTour } from '@/components/onboarding-tour';
+import { PoolIntroHomeStep } from '@/components/pool-intro-home-step';
 import { useOneSignal, type PushPermission } from '@/hooks/use-onesignal';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import type { AppVariant } from '@/types';
@@ -33,6 +34,7 @@ export function AppShell({ children, variant = 'sidebar' }: Props) {
             <SidebarProvider defaultOpen={isOpen}>
                 {children}
                 <OnboardingTour />
+                <PoolIntroHomeStep />
             </SidebarProvider>
         </PushPermissionContext.Provider>
     );
