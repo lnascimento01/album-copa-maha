@@ -89,6 +89,19 @@ class User extends Authenticatable implements PasskeyUser
         $this->save();
     }
 
+    /**
+     * Clear the completion flag for the given onboarding tour so it can run
+     * again on the next eligible visit.
+     */
+    public function resetTour(string $tour): void
+    {
+        $preferences = $this->preferences ?? [];
+        unset($preferences['tours'][$tour]);
+
+        $this->preferences = $preferences;
+        $this->save();
+    }
+
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'user_role');
