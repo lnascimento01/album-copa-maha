@@ -7,8 +7,10 @@ use App\Http\Requests\SetPoolMatchScoreRequest;
 use App\Http\Requests\UpdatePoolSettingsRequest;
 use App\Models\Album;
 use App\Models\PoolMatch;
+use App\Models\PoolPrediction;
 use App\Models\PoolSetting;
 use App\Services\Pool\GradePoolMatchService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -100,5 +102,31 @@ class PoolController extends Controller
                 $result['winner_goals_count'],
             ),
         );
+    }
+
+    public function predictions(PoolMatch $poolMatch): JsonResponse
+    {
+        $this->authorize('manage', PoolMatch::class);
+
+        $predictions = $poolMatch->predictions()
+            ->with('user:id,name,email')
+            ->orderByDesc('exact_score_rewarded')
+            ->orderByDesc('winner_goals_rewarded')
+            ->orderBy('id')
+            ->get()
+            ->map(fn (PoolPrediction $prediction): array => [
+                'id' => $prediction->id,
+                'user_name' => $prediction->user?->name ?? '—',
+                'user_email' => $prediction->user?->email,
+                'home_score' => $prediction->home_score,
+                'away_score' => $prediction->away_score,
+                'exact_score_rewarded' => $prediction->exact_score_rewarded,
+                'winner_goals_rewarded' => $prediction->winner_goals_rewarded,
+                'created_at' => optional($prediction->created_at)?->toDateTimeString(),
+            ])
+            ->values()
+            ->all();
+
+        return response()->json(['predictions' => $predictions]);
     }
 }

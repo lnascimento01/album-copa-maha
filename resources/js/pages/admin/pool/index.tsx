@@ -1,7 +1,8 @@
 import { Head, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import type { FormEvent } from 'react';
 import ShareExportPanel from '@/components/share-export-panel';
+import { Spinner } from '@/components/ui/spinner';
 import {
     Dialog,
     DialogContent,
@@ -26,6 +27,17 @@ type PoolMatch = {
     score_locked_at: string | null;
     predictions_count: number;
     can_set_score: boolean;
+};
+
+type Prediction = {
+    id: number;
+    user_name: string;
+    user_email: string | null;
+    home_score: number;
+    away_score: number;
+    exact_score_rewarded: boolean;
+    winner_goals_rewarded: boolean;
+    created_at: string | null;
 };
 
 type Settings = {
@@ -165,6 +177,42 @@ export default function AdminPoolIndex({ matches, settings, albums }: Props) {
     const [exactSize, setExactSize] = useState(String(settings.exact_score_pack_size));
     const [winnerSize, setWinnerSize] = useState(String(settings.winner_goals_pack_size));
     const [scoreModal, setScoreModal] = useState<PoolMatch | null>(null);
+    const [expanded, setExpanded] = useState<Set<number>>(new Set());
+    const [predictions, setPredictions] = useState<Record<number, Prediction[] | 'loading' | 'error'>>({});
+
+    const loadPredictions = (matchId: number) => {
+        setPredictions((prev) => ({ ...prev, [matchId]: 'loading' }));
+        fetch(`/admin/pool/matches/${matchId}/predictions`, {
+            headers: { Accept: 'application/json' },
+            credentials: 'same-origin',
+        })
+            .then((response) => {
+                if (!response.ok) throw new Error('request failed');
+                return response.json();
+            })
+            .then((data: { predictions: Prediction[] }) => {
+                setPredictions((prev) => ({ ...prev, [matchId]: data.predictions }));
+            })
+            .catch(() => {
+                setPredictions((prev) => ({ ...prev, [matchId]: 'error' }));
+            });
+    };
+
+    const togglePredictions = (matchId: number) => {
+        setExpanded((prev) => {
+            const next = new Set(prev);
+            if (next.has(matchId)) {
+                next.delete(matchId);
+            } else {
+                next.add(matchId);
+            }
+            return next;
+        });
+
+        if (predictions[matchId] === undefined) {
+            loadPredictions(matchId);
+        }
+    };
 
     const saveSettings = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -277,38 +325,133 @@ export default function AdminPoolIndex({ matches, settings, albums }: Props) {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {stageMatches.map((match) => (
-                                            <tr key={match.id} className="border-b">
-                                                <td className="px-4 py-2 text-muted-foreground">{match.match_number}</td>
-                                                <td className="px-4 py-2 font-medium">
-                                                    {match.home_team} x {match.away_team}
-                                                    {match.group_name && (
-                                                        <span className="ml-2 text-xs text-muted-foreground">Gr. {match.group_name}</span>
+                                        {stageMatches.map((match) => {
+                                            const isOpen = expanded.has(match.id);
+                                            const rows = predictions[match.id];
+
+                                            return (
+                                                <Fragment key={match.id}>
+                                                    <tr className={isOpen ? 'border-b bg-muted/40' : 'border-b'}>
+                                                        <td className="px-4 py-2 text-muted-foreground">{match.match_number}</td>
+                                                        <td className="px-4 py-2 font-medium">
+                                                            {match.home_team} x {match.away_team}
+                                                            {match.group_name && (
+                                                                <span className="ml-2 text-xs text-muted-foreground">Gr. {match.group_name}</span>
+                                                            )}
+                                                        </td>
+                                                        <td className="px-4 py-2 text-xs">{fmtDateTimeBr(match.starts_at)}</td>
+                                                        <td className="px-4 py-2 text-xs">{match.city ?? '-'}</td>
+                                                        <td className="px-4 py-2">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => togglePredictions(match.id)}
+                                                                disabled={match.predictions_count === 0}
+                                                                aria-expanded={isOpen}
+                                                                className="inline-flex items-center gap-1 rounded-sm px-1.5 py-1 text-xs transition-colors hover:bg-accent disabled:cursor-default disabled:opacity-50 disabled:hover:bg-transparent"
+                                                            >
+                                                                <span
+                                                                    className={`transition-transform ${isOpen ? 'rotate-90' : ''} ${match.predictions_count === 0 ? 'invisible' : ''}`}
+                                                                    aria-hidden
+                                                                >
+                                                                    ›
+                                                                </span>
+                                                                <span className="font-medium">{match.predictions_count}</span>
+                                                                <span className="text-muted-foreground">{match.predictions_count === 1 ? 'palpite' : 'palpites'}</span>
+                                                            </button>
+                                                        </td>
+                                                        <td className="px-4 py-2">
+                                                            {match.home_score !== null ? (
+                                                                <span className="font-semibold">{match.home_score} x {match.away_score}</span>
+                                                            ) : (
+                                                                <span className="text-muted-foreground">-</span>
+                                                            )}
+                                                        </td>
+                                                        <td className="px-4 py-2">
+                                                            {match.can_set_score && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setScoreModal(match)}
+                                                                    className="cursor-pointer rounded-sm border px-2 py-1 text-xs hover:bg-accent"
+                                                                >
+                                                                    Definir Placar
+                                                                </button>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                    {isOpen && (
+                                                        <tr className="border-b bg-muted/20">
+                                                            <td colSpan={7} className="px-4 py-3">
+                                                                {rows === 'loading' && (
+                                                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                                        <Spinner className="size-4" /> Carregando palpites...
+                                                                    </div>
+                                                                )}
+                                                                {rows === 'error' && (
+                                                                    <div className="flex items-center justify-between gap-2 text-xs text-destructive">
+                                                                        <span>Nao foi possivel carregar os palpites.</span>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => loadPredictions(match.id)}
+                                                                            className="cursor-pointer rounded-sm border px-2 py-1 hover:bg-accent"
+                                                                        >
+                                                                            Tentar novamente
+                                                                        </button>
+                                                                    </div>
+                                                                )}
+                                                                {Array.isArray(rows) && rows.length === 0 && (
+                                                                    <p className="text-xs text-muted-foreground">Nenhum palpite registrado para este jogo.</p>
+                                                                )}
+                                                                {Array.isArray(rows) && rows.length > 0 && (
+                                                                    <div className="overflow-x-auto">
+                                                                        <table className="min-w-full text-xs">
+                                                                            <thead>
+                                                                                <tr className="text-left text-muted-foreground">
+                                                                                    <th className="py-1 pr-4 font-medium">Usuario</th>
+                                                                                    <th className="py-1 pr-4 font-medium">Palpite</th>
+                                                                                    <th className="py-1 pr-4 font-medium">Enviado em</th>
+                                                                                    <th className="py-1 pr-4 font-medium">Premiacao</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                {rows.map((prediction) => (
+                                                                                    <tr key={prediction.id} className="border-t border-border/50">
+                                                                                        <td className="py-1.5 pr-4">
+                                                                                            <span className="font-medium">{prediction.user_name}</span>
+                                                                                            {prediction.user_email && (
+                                                                                                <span className="ml-1 text-muted-foreground">{prediction.user_email}</span>
+                                                                                            )}
+                                                                                        </td>
+                                                                                        <td className="py-1.5 pr-4 font-semibold">
+                                                                                            {prediction.home_score} x {prediction.away_score}
+                                                                                        </td>
+                                                                                        <td className="py-1.5 pr-4 text-muted-foreground">
+                                                                                            {prediction.created_at ? fmtDateTimeBr(prediction.created_at) : '-'}
+                                                                                        </td>
+                                                                                        <td className="py-1.5 pr-4">
+                                                                                            <div className="flex flex-wrap gap-1">
+                                                                                                {prediction.exact_score_rewarded && (
+                                                                                                    <span className="rounded-sm bg-green-100 px-1.5 py-0.5 text-[10px] font-medium text-green-800">Placar exato</span>
+                                                                                                )}
+                                                                                                {prediction.winner_goals_rewarded && (
+                                                                                                    <span className="rounded-sm bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-800">Gols vencedor</span>
+                                                                                                )}
+                                                                                                {!prediction.exact_score_rewarded && !prediction.winner_goals_rewarded && (
+                                                                                                    <span className="text-muted-foreground">-</span>
+                                                                                                )}
+                                                                                            </div>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                ))}
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                )}
+                                                            </td>
+                                                        </tr>
                                                     )}
-                                                </td>
-                                                <td className="px-4 py-2 text-xs">{fmtDateTimeBr(match.starts_at)}</td>
-                                                <td className="px-4 py-2 text-xs">{match.city ?? '-'}</td>
-                                                <td className="px-4 py-2">{match.predictions_count}</td>
-                                                <td className="px-4 py-2">
-                                                    {match.home_score !== null ? (
-                                                        <span className="font-semibold">{match.home_score} x {match.away_score}</span>
-                                                    ) : (
-                                                        <span className="text-muted-foreground">-</span>
-                                                    )}
-                                                </td>
-                                                <td className="px-4 py-2">
-                                                    {match.can_set_score && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setScoreModal(match)}
-                                                            className="cursor-pointer rounded-sm border px-2 py-1 text-xs hover:bg-accent"
-                                                        >
-                                                            Definir Placar
-                                                        </button>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))}
+                                                </Fragment>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </div>

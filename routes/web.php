@@ -560,6 +560,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/pool/matches/{poolMatch}/score', [AdminPoolController::class, 'setScore'])
             ->middleware('permission:pool.manage')
             ->name('pool.matches.score');
+
+        Route::get('/pool/matches/{poolMatch}/predictions', [AdminPoolController::class, 'predictions'])
+            ->middleware('permission:pool.manage')
+            ->name('pool.matches.predictions');
     });
 });
 
