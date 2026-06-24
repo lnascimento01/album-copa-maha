@@ -29,7 +29,13 @@ class PoolController extends Controller
         $settings = PoolSetting::current();
 
         $matches = PoolMatch::query()
-            ->withCount('predictions')
+            ->withCount([
+                'predictions',
+                // Predictions that won any prize (exact score OR winner goals).
+                'predictions as winners_count' => fn ($query) => $query
+                    ->where('exact_score_rewarded', true)
+                    ->orWhere('winner_goals_rewarded', true),
+            ])
             ->orderBy('starts_at')
             ->get()
             ->map(fn (PoolMatch $match): array => [
@@ -45,6 +51,7 @@ class PoolController extends Controller
                 'away_score' => $match->away_score,
                 'score_locked_at' => optional($match->score_locked_at)?->toDateTimeString(),
                 'predictions_count' => $match->predictions_count,
+                'winners_count' => $match->winners_count,
                 'can_set_score' => $match->canSetScore(),
             ])
             ->values()
