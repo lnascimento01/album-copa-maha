@@ -81,7 +81,11 @@ class GradePoolMatchService
                     $exactCount++;
                 }
 
-                if (! $isDraw && ! $prediction->winner_goals_rewarded) {
+                // The winner-goals prize and the exact-score prize are mutually exclusive:
+                // an exact score already implies the winner's goals were guessed, so it would
+                // otherwise grant both packs. Exact score takes precedence; the winner-goals
+                // prize is only awarded when the exact score was NOT hit.
+                if (! $isExactScore && ! $isDraw && ! $prediction->winner_goals_rewarded) {
                     $predHomeWins = $prediction->home_score > $prediction->away_score;
                     $predAwayWins = $prediction->away_score > $prediction->home_score;
 
