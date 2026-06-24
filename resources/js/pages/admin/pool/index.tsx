@@ -26,6 +26,7 @@ type PoolMatch = {
     away_score: number | null;
     score_locked_at: string | null;
     predictions_count: number;
+    winners_count: number;
     can_set_score: boolean;
 };
 
@@ -361,7 +362,17 @@ export default function AdminPoolIndex({ matches, settings, albums }: Props) {
                                                         </td>
                                                         <td className="px-4 py-2">
                                                             {match.home_score !== null ? (
-                                                                <span className="font-semibold">{match.home_score} x {match.away_score}</span>
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="font-semibold">{match.home_score} x {match.away_score}</span>
+                                                                    {match.winners_count > 0 && (
+                                                                        <span
+                                                                            className="inline-flex items-center gap-1 rounded-sm bg-green-100 px-1.5 py-0.5 text-[10px] font-medium text-green-800"
+                                                                            title={`${match.winners_count} ${match.winners_count === 1 ? 'palpite premiado' : 'palpites premiados'} neste jogo`}
+                                                                        >
+                                                                            🏆 {match.winners_count} {match.winners_count === 1 ? 'vencedor' : 'vencedores'}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
                                                             ) : (
                                                                 <span className="text-muted-foreground">-</span>
                                                             )}
@@ -429,13 +440,12 @@ export default function AdminPoolIndex({ matches, settings, albums }: Props) {
                                                                                         </td>
                                                                                         <td className="py-1.5 pr-4">
                                                                                             <div className="flex flex-wrap gap-1">
-                                                                                                {prediction.exact_score_rewarded && (
+                                                                                                {/* Prizes are mutually exclusive: exact score takes precedence over winner goals. */}
+                                                                                                {prediction.exact_score_rewarded ? (
                                                                                                     <span className="rounded-sm bg-green-100 px-1.5 py-0.5 text-[10px] font-medium text-green-800">Placar exato</span>
-                                                                                                )}
-                                                                                                {prediction.winner_goals_rewarded && (
+                                                                                                ) : prediction.winner_goals_rewarded ? (
                                                                                                     <span className="rounded-sm bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-800">Gols vencedor</span>
-                                                                                                )}
-                                                                                                {!prediction.exact_score_rewarded && !prediction.winner_goals_rewarded && (
+                                                                                                ) : (
                                                                                                     <span className="text-muted-foreground">-</span>
                                                                                                 )}
                                                                                             </div>
