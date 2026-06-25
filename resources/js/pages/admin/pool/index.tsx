@@ -39,6 +39,7 @@ type Prediction = {
     exact_score_rewarded: boolean;
     winner_goals_rewarded: boolean;
     created_at: string | null;
+    updated_at: string | null;
 };
 
 type Settings = {
@@ -419,7 +420,7 @@ export default function AdminPoolIndex({ matches, settings, albums }: Props) {
                                                                                 <tr className="text-left text-muted-foreground">
                                                                                     <th className="py-1 pr-4 font-medium">Usuario</th>
                                                                                     <th className="py-1 pr-4 font-medium">Palpite</th>
-                                                                                    <th className="py-1 pr-4 font-medium">Enviado em</th>
+                                                                                    <th className="py-1 pr-4 font-medium">Última atualização</th>
                                                                                     <th className="py-1 pr-4 font-medium">Premiacao</th>
                                                                                 </tr>
                                                                             </thead>
@@ -436,7 +437,7 @@ export default function AdminPoolIndex({ matches, settings, albums }: Props) {
                                                                                             {prediction.home_score} x {prediction.away_score}
                                                                                         </td>
                                                                                         <td className="py-1.5 pr-4 text-muted-foreground">
-                                                                                            {prediction.created_at ? fmtDateTimeBr(prediction.created_at) : '-'}
+                                                                                            {prediction.updated_at ? fmtDateTimeBr(prediction.updated_at) : '-'}
                                                                                         </td>
                                                                                         <td className="py-1.5 pr-4">
                                                                                             <div className="flex flex-wrap gap-1">

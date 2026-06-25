@@ -130,6 +130,7 @@ class PoolController extends Controller
                 'exact_score_rewarded' => $prediction->exact_score_rewarded,
                 'winner_goals_rewarded' => $prediction->winner_goals_rewarded,
                 'created_at' => optional($prediction->created_at)?->toDateTimeString(),
+                'updated_at' => optional($prediction->updated_at)?->toDateTimeString(),
             ])
             ->values()
             ->all();
