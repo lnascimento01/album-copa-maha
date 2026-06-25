@@ -59,7 +59,9 @@ class PoolMatch extends Model
 
     public function isLocked(): bool
     {
-        return $this->starts_at->lte(now());
+        // Comparar via Unix timestamp evita ambiguidade de timezone entre
+        // o valor UTC armazenado no DB e o timezone da aplicação (America/Sao_Paulo).
+        return $this->starts_at->getTimestamp() <= now()->getTimestamp();
     }
 
     public function hasScore(): bool
@@ -69,6 +71,6 @@ class PoolMatch extends Model
 
     public function canSetScore(): bool
     {
-        return ! $this->hasScore() && $this->starts_at->lte(now()->subHours(2));
+        return ! $this->hasScore() && $this->starts_at->getTimestamp() <= now()->subHours(2)->getTimestamp();
     }
 }
