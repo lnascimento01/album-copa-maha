@@ -49,6 +49,7 @@ class PoolController extends Controller
                 'city' => $match->city,
                 'home_score' => $match->home_score,
                 'away_score' => $match->away_score,
+                'penalty_winner' => $match->penalty_winner,
                 'score_locked_at' => optional($match->score_locked_at)?->toDateTimeString(),
                 'predictions_count' => $match->predictions_count,
                 'winners_count' => $match->winners_count,
@@ -95,6 +96,7 @@ class PoolController extends Controller
                 $request->validated('home_score'),
                 $request->validated('away_score'),
                 $request->user(),
+                $request->validated('penalty_winner'),
             );
         } catch (RuntimeException $exception) {
             return back()->withErrors(['score' => $exception->getMessage()]);

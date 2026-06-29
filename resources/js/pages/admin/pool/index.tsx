@@ -24,6 +24,7 @@ type PoolMatch = {
     city: string | null;
     home_score: number | null;
     away_score: number | null;
+    penalty_winner: string | null;
     score_locked_at: string | null;
     predictions_count: number;
     winners_count: number;
@@ -79,14 +80,23 @@ function SetScoreModal({
 }) {
     const [homeScore, setHomeScore] = useState('');
     const [awayScore, setAwayScore] = useState('');
+    const [penaltyWinner, setPenaltyWinner] = useState<string | null>(null);
+
+    const isKnockout = match.stage !== 'group';
+    const homeVal = parseInt(homeScore, 10);
+    const awayVal = parseInt(awayScore, 10);
+    const isDraw = homeScore !== '' && awayScore !== '' && !isNaN(homeVal) && !isNaN(awayVal) && homeVal === awayVal;
+    const needsPenalty = isKnockout && isDraw;
 
     const submit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        if (needsPenalty && penaltyWinner === null) return;
         router.post(
             `/admin/pool/matches/${match.id}/score`,
             {
-                home_score: parseInt(homeScore, 10),
-                away_score: parseInt(awayScore, 10),
+                home_score: homeVal,
+                away_score: awayVal,
+                ...(needsPenalty && penaltyWinner ? { penalty_winner: penaltyWinner } : {}),
             },
             {
                 preserveScroll: true,
@@ -103,7 +113,7 @@ function SetScoreModal({
                     {match.home_team} x {match.away_team}
                 </p>
                 <div className="mb-4 rounded-sm border border-yellow-300 bg-yellow-50 p-3 text-xs text-yellow-800">
-                    Esta acao e irreversivel. Os pacotes serao concedidos automaticamente.
+                    Esta ação é irreversível. Os pacotes serão concedidos automaticamente e o próximo jogo será atualizado.
                 </div>
                 <form onSubmit={submit} className="space-y-4">
                     <div className="flex items-center gap-4">
@@ -115,7 +125,7 @@ function SetScoreModal({
                                 max={20}
                                 required
                                 value={homeScore}
-                                onChange={(event) => setHomeScore(event.target.value)}
+                                onChange={(e) => { setHomeScore(e.target.value); setPenaltyWinner(null); }}
                                 className="w-full rounded-sm border px-2 py-2 text-center text-sm"
                             />
                         </div>
@@ -128,16 +138,43 @@ function SetScoreModal({
                                 max={20}
                                 required
                                 value={awayScore}
-                                onChange={(event) => setAwayScore(event.target.value)}
+                                onChange={(e) => { setAwayScore(e.target.value); setPenaltyWinner(null); }}
                                 className="w-full rounded-sm border px-2 py-2 text-center text-sm"
                             />
                         </div>
                     </div>
+
+                    {needsPenalty && (
+                        <div className="rounded-sm border border-blue-200 bg-blue-50 p-3">
+                            <p className="mb-2 text-xs font-medium text-blue-800">Empate — quem avançou nos pênaltis?</p>
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setPenaltyWinner(match.home_team)}
+                                    className={`flex-1 rounded-sm border px-2 py-2 text-xs transition-colors ${penaltyWinner === match.home_team ? 'border-blue-500 bg-blue-500 text-white' : 'hover:bg-accent'}`}
+                                >
+                                    {match.home_team}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setPenaltyWinner(match.away_team)}
+                                    className={`flex-1 rounded-sm border px-2 py-2 text-xs transition-colors ${penaltyWinner === match.away_team ? 'border-blue-500 bg-blue-500 text-white' : 'hover:bg-accent'}`}
+                                >
+                                    {match.away_team}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="flex justify-end gap-2">
                         <button type="button" onClick={onClose} className="cursor-pointer rounded-sm border px-3 py-2 text-xs hover:bg-accent">
                             Cancelar
                         </button>
-                        <button type="submit" className="cursor-pointer rounded-sm border bg-primary px-3 py-2 text-xs text-primary-foreground transition-all hover:brightness-110">
+                        <button
+                            type="submit"
+                            disabled={needsPenalty && penaltyWinner === null}
+                            className="cursor-pointer rounded-sm border bg-primary px-3 py-2 text-xs text-primary-foreground transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
                             Confirmar Placar
                         </button>
                     </div>
@@ -363,8 +400,13 @@ export default function AdminPoolIndex({ matches, settings, albums }: Props) {
                                                         </td>
                                                         <td className="px-4 py-2">
                                                             {match.home_score !== null ? (
-                                                                <div className="flex items-center gap-2">
+                                                                <div className="flex flex-wrap items-center gap-2">
                                                                     <span className="font-semibold">{match.home_score} x {match.away_score}</span>
+                                                                    {match.penalty_winner && (
+                                                                        <span className="inline-flex items-center gap-1 rounded-sm bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-800">
+                                                                            🥅 {match.penalty_winner} (pen.)
+                                                                        </span>
+                                                                    )}
                                                                     {match.winners_count > 0 && (
                                                                         <span
                                                                             className="inline-flex items-center gap-1 rounded-sm bg-green-100 px-1.5 py-0.5 text-[10px] font-medium text-green-800"

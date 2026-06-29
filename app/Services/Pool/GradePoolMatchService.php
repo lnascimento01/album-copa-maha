@@ -10,15 +10,20 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
+use App\Services\Pool\BracketProgressionService;
 
 class GradePoolMatchService
 {
+    public function __construct(
+        private readonly BracketProgressionService $bracketProgression,
+    ) {}
+
     /**
      * @return array{exact_count: int, winner_goals_count: int, total_packs_granted: int}
      */
-    public function grade(PoolMatch $match, int $homeScore, int $awayScore, User $actor): array
+    public function grade(PoolMatch $match, int $homeScore, int $awayScore, User $actor, ?string $penaltyWinner = null): array
     {
-        return DB::transaction(function () use ($match, $homeScore, $awayScore, $actor): array {
+        return DB::transaction(function () use ($match, $homeScore, $awayScore, $actor, $penaltyWinner): array {
             if (! $match->canSetScore()) {
                 throw new RuntimeException('Este jogo ainda não pode ter o placar definido.');
             }
@@ -27,10 +32,21 @@ class GradePoolMatchService
                 throw new RuntimeException('Este jogo já possui placar definido.');
             }
 
+            $isDraw = $homeScore === $awayScore;
+
+            if ($isDraw && $match->isKnockout() && $penaltyWinner === null) {
+                throw new RuntimeException('Empate em fase eliminatória: informe quem avançou nos pênaltis.');
+            }
+
+            if ($penaltyWinner !== null && $penaltyWinner !== $match->home_team && $penaltyWinner !== $match->away_team) {
+                throw new RuntimeException('O vencedor nos pênaltis deve ser um dos times da partida.');
+            }
+
             $match->forceFill([
-                'home_score' => $homeScore,
-                'away_score' => $awayScore,
-                'score_set_by' => $actor->id,
+                'home_score'     => $homeScore,
+                'away_score'     => $awayScore,
+                'penalty_winner' => $isDraw ? $penaltyWinner : null,
+                'score_set_by'   => $actor->id,
                 'score_locked_at' => now(),
             ])->save();
 
@@ -115,6 +131,14 @@ class GradePoolMatchService
                         $winnerGoalsCount++;
                     }
                 }
+            }
+
+            if ($match->isKnockout()) {
+                $finalHomeWins = $homeScore > $awayScore;
+                $winner = $finalHomeWins ? $match->home_team : ($isDraw ? $penaltyWinner : $match->away_team);
+                $loser  = $winner === $match->home_team ? $match->away_team : $match->home_team;
+
+                $this->bracketProgression->advance($match, $winner, $loser);
             }
 
             return [

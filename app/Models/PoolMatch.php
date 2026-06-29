@@ -33,6 +33,7 @@ class PoolMatch extends Model
         'city',
         'home_score',
         'away_score',
+        'penalty_winner',
         'score_set_by',
         'score_locked_at',
     ];
@@ -72,5 +73,10 @@ class PoolMatch extends Model
     public function canSetScore(): bool
     {
         return ! $this->hasScore() && $this->starts_at->getTimestamp() <= now()->subHours(2)->getTimestamp();
+    }
+
+    public function isKnockout(): bool
+    {
+        return $this->stage !== self::STAGE_GROUP;
     }
 }
