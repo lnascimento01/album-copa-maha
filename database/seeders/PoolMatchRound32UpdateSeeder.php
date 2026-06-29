@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\PoolMatch;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\CarbonImmutable;
+use Carbon\CarbonImmutable;
 
 class PoolMatchRound32UpdateSeeder extends Seeder
 {
