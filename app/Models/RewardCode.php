@@ -44,6 +44,7 @@ class RewardCode extends Model
     protected $fillable = [
         'album_id',
         'team_id',
+        'activity_id',
         'code',
         'title',
         'description',
@@ -81,6 +82,11 @@ class RewardCode extends Model
     public function album(): BelongsTo
     {
         return $this->belongsTo(Album::class);
+    }
+
+    public function activity(): BelongsTo
+    {
+        return $this->belongsTo(Activity::class);
     }
 
     public function team(): BelongsTo

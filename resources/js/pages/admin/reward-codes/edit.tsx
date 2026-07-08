@@ -2,9 +2,11 @@ import { Head } from '@inertiajs/react';
 import RewardCodeForm from './form';
 
 type Album = { id: number; name: string; team_id?: number };
+type Activity = { id: number; album_id: number; title: string; type: string; status: string; starts_at: string | null };
 type RewardCode = {
     id: number;
     album_id: number;
+    activity_id: number | null;
     code: string;
     title: string;
     description: string | null;
@@ -18,7 +20,7 @@ type RewardCode = {
     max_redemptions_per_user: number;
 };
 
-export default function AdminRewardCodeEdit({ rewardCode, albums, statuses, channels }: { rewardCode: RewardCode; albums: Album[]; statuses: string[]; channels: string[] }) {
+export default function AdminRewardCodeEdit({ rewardCode, albums, activities, statuses, channels }: { rewardCode: RewardCode; albums: Album[]; activities: Activity[]; statuses: string[]; channels: string[] }) {
     return (
         <>
             <Head title={`Editar Código - ${rewardCode.code}`} />
@@ -27,6 +29,7 @@ export default function AdminRewardCodeEdit({ rewardCode, albums, statuses, chan
                 <RewardCodeForm
                     initialValues={{
                         album_id: rewardCode.album_id,
+                        activity_id: rewardCode.activity_id ?? '',
                         code: rewardCode.code,
                         title: rewardCode.title,
                         description: rewardCode.description ?? '',
@@ -40,6 +43,7 @@ export default function AdminRewardCodeEdit({ rewardCode, albums, statuses, chan
                         max_redemptions_per_user: rewardCode.max_redemptions_per_user,
                     }}
                     albums={albums}
+                    activities={activities}
                     statuses={statuses}
                     channels={channels}
                     method="patch"

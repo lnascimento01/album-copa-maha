@@ -2,9 +2,11 @@ import { useForm } from '@inertiajs/react';
 import type { FormEvent } from 'react';
 
 type Album = { id: number; name: string; team_id?: number };
+type Activity = { id: number; album_id: number; title: string; type: string; status: string; starts_at: string | null };
 
 type FormValues = {
     album_id: number | '';
+    activity_id: number | '';
     code: string;
     title: string;
     description: string;
@@ -21,6 +23,7 @@ type FormValues = {
 type Props = {
     initialValues: FormValues;
     albums: Album[];
+    activities: Activity[];
     statuses: string[];
     channels: string[];
     method: 'post' | 'patch';
@@ -31,6 +34,7 @@ type Props = {
 export default function RewardCodeForm({
     initialValues,
     albums,
+    activities,
     statuses,
     channels,
     method,
@@ -53,12 +57,23 @@ export default function RewardCodeForm({
         form.patch(submitUrl);
     };
 
+    const albumActivities = form.data.album_id
+        ? activities.filter((a) => a.album_id === Number(form.data.album_id))
+        : [];
+
     return (
         <form onSubmit={submit} className="album-paper space-y-4 p-4">
             <div className="grid gap-3 md:grid-cols-2">
                 <div>
                     <label className="admin-filter-label">Álbum</label>
-                    <select className="mt-1 w-full rounded-sm border border-border bg-card px-2 py-2 text-sm" value={form.data.album_id} onChange={(event) => form.setData('album_id', Number(event.target.value))}>
+                    <select
+                        className="mt-1 w-full rounded-sm border border-border bg-card px-2 py-2 text-sm"
+                        value={form.data.album_id}
+                        onChange={(event) => {
+                            form.setData('album_id', Number(event.target.value));
+                            form.setData('activity_id', '');
+                        }}
+                    >
                         <option value="">Selecione</option>
                         {albums.map((album) => (
                             <option key={album.id} value={album.id}>{album.name}</option>
@@ -134,6 +149,30 @@ export default function RewardCodeForm({
                     <input type="number" min={1} max={10} className="mt-1 w-full rounded-sm border border-border bg-card px-2 py-2 text-sm" value={form.data.max_redemptions_per_user} onChange={(event) => form.setData('max_redemptions_per_user', Number(event.target.value))} />
                     {form.errors.max_redemptions_per_user ? <div className="mt-1 text-xs text-red-700">{form.errors.max_redemptions_per_user}</div> : null}
                 </div>
+            </div>
+
+            <div>
+                <label className="admin-filter-label">Restringir ao treino (opcional)</label>
+                <select
+                    className="mt-1 w-full rounded-sm border border-border bg-card px-2 py-2 text-sm"
+                    value={form.data.activity_id}
+                    onChange={(event) => form.setData('activity_id', event.target.value === '' ? '' : Number(event.target.value))}
+                    disabled={!form.data.album_id}
+                >
+                    <option value="">Sem restrição de treino</option>
+                    {albumActivities.map((activity) => (
+                        <option key={activity.id} value={activity.id}>
+                            [{activity.type}] {activity.title}{activity.starts_at ? ` — ${new Date(activity.starts_at).toLocaleDateString('pt-BR')}` : ''}
+                        </option>
+                    ))}
+                </select>
+                {form.errors.activity_id ? <div className="mt-1 text-xs text-red-700">{form.errors.activity_id}</div> : null}
+                {form.data.activity_id ? (
+                    <p className="mt-1 text-xs text-amber-600">Somente usuarios com checkin confirmado neste treino poderao resgatar este codigo.</p>
+                ) : null}
+                {form.data.album_id && albumActivities.length === 0 ? (
+                    <p className="mt-1 text-xs text-dim">Nenhuma atividade encontrada para este album.</p>
+                ) : null}
             </div>
 
             <div>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\RevokeRewardCodeRequest;
 use App\Http\Requests\StoreRewardCodeRequest;
 use App\Http\Requests\UpdateRewardCodeRequest;
+use App\Models\Activity;
 use App\Models\Album;
 use App\Models\AuditLog;
 use App\Models\RewardCode;
@@ -76,6 +77,10 @@ class RewardCodeController extends Controller
 
         return Inertia::render('admin/reward-codes/create', [
             'albums' => Album::query()->where('status', Album::STATUS_ACTIVE)->orderBy('name')->get(['id', 'name', 'team_id']),
+            'activities' => Activity::query()
+                ->whereNotIn('status', [Activity::STATUS_CANCELLED])
+                ->orderByDesc('starts_at')
+                ->get(['id', 'album_id', 'title', 'type', 'status', 'starts_at']),
             'statuses' => RewardCode::STATUSES,
             'channels' => RewardCode::CHANNELS,
         ]);
@@ -91,6 +96,7 @@ class RewardCodeController extends Controller
         $rewardCode = RewardCode::query()->create([
             ...$validated,
             'team_id' => (int) ($validated['team_id'] ?? $album->team_id),
+            'activity_id' => isset($validated['activity_id']) ? (int) $validated['activity_id'] : null,
             'status' => RewardCode::STATUS_DRAFT,
             'created_by' => $request->user()?->id,
             'redeemed_count' => 0,
@@ -118,6 +124,7 @@ class RewardCodeController extends Controller
 
         $rewardCode->load([
             'album:id,name,slug,status',
+            'activity:id,title,type,status,starts_at',
             'creator:id,name,email',
             'revokedBy:id,name,email',
             'redemptions' => fn ($query) => $query->with(['user:id,name,email'])->orderByDesc('id')->limit(50),
@@ -159,6 +166,13 @@ class RewardCodeController extends Controller
                 'revoked_at' => optional($rewardCode->revoked_at)?->toDateTimeString(),
                 'revoke_reason' => $rewardCode->revoke_reason,
                 'album' => $rewardCode->album,
+                'activity' => $rewardCode->activity ? [
+                    'id' => $rewardCode->activity->id,
+                    'title' => $rewardCode->activity->title,
+                    'type' => $rewardCode->activity->type,
+                    'status' => $rewardCode->activity->status,
+                    'starts_at' => optional($rewardCode->activity->starts_at)?->toDateTimeString(),
+                ] : null,
                 'creator' => $rewardCode->creator,
                 'revoked_by' => $rewardCode->revokedBy,
                 'redemptions' => $rewardCode->redemptions->map(fn ($redemption): array => [
@@ -191,6 +205,7 @@ class RewardCodeController extends Controller
             'rewardCode' => [
                 'id' => $rewardCode->id,
                 'album_id' => $rewardCode->album_id,
+                'activity_id' => $rewardCode->activity_id,
                 'code' => $rewardCode->code,
                 'title' => $rewardCode->title,
                 'description' => $rewardCode->description,
@@ -204,6 +219,10 @@ class RewardCodeController extends Controller
                 'max_redemptions_per_user' => $rewardCode->max_redemptions_per_user,
             ],
             'albums' => Album::query()->orderBy('name')->get(['id', 'name', 'team_id']),
+            'activities' => Activity::query()
+                ->whereNotIn('status', [Activity::STATUS_CANCELLED])
+                ->orderByDesc('starts_at')
+                ->get(['id', 'album_id', 'title', 'type', 'status', 'starts_at']),
             'statuses' => RewardCode::STATUSES,
             'channels' => RewardCode::CHANNELS,
         ]);

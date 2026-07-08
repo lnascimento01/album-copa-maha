@@ -20,6 +20,7 @@ type RewardCode = {
     revoked_at: string | null;
     revoke_reason: string | null;
     album: { id: number; name: string; status: string };
+    activity: { id: number; title: string; type: string; status: string; starts_at: string | null } | null;
     redemptions: { id: number; redeemed_at: string | null; user: { id: number; email: string } }[];
     sticker_packs: { id: number; status: string; created_at: string | null; user: { id: number; email: string } }[];
 };
@@ -57,6 +58,16 @@ export default function AdminRewardCodeShow({ rewardCode, shareText, auditLogs }
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Álbum:</span> {rewardCode.album.name}</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Recompensa:</span> {rewardCode.reward_pack_quantity} pacote(s) de {rewardCode.reward_pack_size}</div>
                     <div className="rounded-sm border p-4 text-sm"><span className="text-muted-foreground">Resgates:</span> {rewardCode.redeemed_count}{rewardCode.max_total_redemptions ? `/${rewardCode.max_total_redemptions}` : ''}</div>
+                    {rewardCode.activity ? (
+                        <div className="rounded-sm border border-amber-300 bg-amber-50 p-4 text-sm dark:border-amber-700 dark:bg-amber-950/30">
+                            <span className="font-medium text-amber-700 dark:text-amber-400">Restrito ao treino:</span>{' '}
+                            <span>{rewardCode.activity.title}</span>
+                            {rewardCode.activity.starts_at ? (
+                                <span className="ml-1 text-muted-foreground">({fmtDateTimeBr(rewardCode.activity.starts_at)})</span>
+                            ) : null}
+                            <div className="mt-1 text-xs text-muted-foreground">Somente usuários com checkin confirmado neste treino podem resgatar.</div>
+                        </div>
+                    ) : null}
                 </div>
 
                 <div className="rounded-sm border p-4">
