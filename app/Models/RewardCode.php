@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class RewardCode extends Model
@@ -112,5 +113,17 @@ class RewardCode extends Model
     public function stickerPacks(): HasMany
     {
         return $this->hasMany(StickerPack::class);
+    }
+
+    public function allowedUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'reward_code_allowed_users')
+            ->withPivot('added_at')
+            ->orderBy('name');
+    }
+
+    public function hasUserRestriction(): bool
+    {
+        return $this->allowedUsers()->exists();
     }
 }

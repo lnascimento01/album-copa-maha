@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\AlbumController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\PlayerController;
 use App\Http\Controllers\Admin\RankingController as AdminRankingController;
+use App\Http\Controllers\Admin\RewardCodeAllowedUserController as AdminRewardCodeAllowedUserController;
 use App\Http\Controllers\Admin\RewardCodeController as AdminRewardCodeController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\ShareCardController as AdminShareCardController;
@@ -320,6 +321,18 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/reward-codes/{rewardCode}/revoke', [AdminRewardCodeController::class, 'revoke'])
             ->middleware('permission:rewardCodes.revoke')
             ->name('reward-codes.revoke');
+
+        Route::get('/reward-codes/{rewardCode}/allowed-users', [AdminRewardCodeAllowedUserController::class, 'index'])
+            ->middleware('permission:rewardCodes.update')
+            ->name('reward-codes.allowed-users.index');
+
+        Route::post('/reward-codes/{rewardCode}/allowed-users', [AdminRewardCodeAllowedUserController::class, 'store'])
+            ->middleware('permission:rewardCodes.update')
+            ->name('reward-codes.allowed-users.store');
+
+        Route::delete('/reward-codes/{rewardCode}/allowed-users/{user}', [AdminRewardCodeAllowedUserController::class, 'destroy'])
+            ->middleware('permission:rewardCodes.update')
+            ->name('reward-codes.allowed-users.destroy');
 
         Route::get('/social-missions', [AdminSocialMissionController::class, 'index'])
             ->middleware('permission:socialMissions.viewAny')

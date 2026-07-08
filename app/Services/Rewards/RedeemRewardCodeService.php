@@ -2,8 +2,6 @@
 
 namespace App\Services\Rewards;
 
-use App\Models\Activity;
-use App\Models\ActivityCheckin;
 use App\Models\Album;
 use App\Models\RewardCode;
 use App\Models\RewardCodeRedemption;
@@ -212,25 +210,18 @@ class RedeemRewardCodeService
             ]);
         }
 
-        if ($rewardCode->activity_id !== null) {
-            $attended = ActivityCheckin::query()
-                ->where('activity_id', $rewardCode->activity_id)
-                ->where('user_id', $actor->id)
-                ->where('status', ActivityCheckin::STATUS_CONFIRMED)
-                ->exists();
+        $allowedUserIds = $rewardCode->allowedUsers()->pluck('users.id');
 
-            if (! $attended) {
-                throw new RewardCodeRedeemException(
-                    'Este código é exclusivo para quem participou do treino vinculado.',
-                    'activity_not_attended',
-                    [
-                        'reward_code_id' => $rewardCode->id,
-                        'code' => $rewardCode->code,
-                        'user_id' => $actor->id,
-                        'activity_id' => $rewardCode->activity_id,
-                    ],
-                );
-            }
+        if ($allowedUserIds->isNotEmpty() && ! $allowedUserIds->contains($actor->id)) {
+            throw new RewardCodeRedeemException(
+                'Este código não está disponível para o seu usuário.',
+                'user_not_allowed',
+                [
+                    'reward_code_id' => $rewardCode->id,
+                    'code' => $rewardCode->code,
+                    'user_id' => $actor->id,
+                ],
+            );
         }
 
         if ($rewardCode->reward_pack_quantity < 0 || $rewardCode->reward_pack_quantity > 10) {

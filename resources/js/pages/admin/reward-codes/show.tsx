@@ -46,6 +46,7 @@ export default function AdminRewardCodeShow({ rewardCode, shareText, auditLogs }
                     <h1 className="text-xl font-semibold tracking-tight">Código {rewardCode.code}</h1>
                     <div className="flex gap-2">
                         <Link href={`/admin/reward-codes/${rewardCode.id}/edit`} className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent">Editar</Link>
+                        <Link href={`/admin/reward-codes/${rewardCode.id}/allowed-users`} className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent">Usuários autorizados</Link>
                         <button type="button" onClick={activate} className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent">Ativar</button>
                         <button type="button" onClick={revoke} className="cursor-pointer rounded-sm border px-3 py-2 text-xs transition-colors hover:bg-accent">Revogar</button>
                     </div>
