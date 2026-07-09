@@ -123,6 +123,7 @@ class RewardCodeRedemptionController extends Controller
             'max_per_user_reached' => 'Você já atingiu o limite de resgates deste código.',
             'user_not_approved' => 'Sua conta ainda não está liberada para participar.',
             'wrong_album' => 'Este código não está disponível para o álbum ativo.',
+            'user_not_allowed' => 'Você não está na lista de usuários autorizados para este código.',
             default => 'Código inválido ou indisponível.',
         };
     }
